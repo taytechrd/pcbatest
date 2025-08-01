@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="tr">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>TayTech - Yeni Test Senaryosu Ekle</title>
+    <meta
+      content="width=device-width, initial-scale=1.0, shrink-to-fit=no"
+      name="viewport"
+    />
+    <link rel="icon" href="assets/img/tay.png" type="image/png" />
+
+    <!-- Fonts and icons -->
+    <script src="assets/js/plugin/webfont/webfont.min.js"></script>
+    <script>
+      WebFont.load({
+        google: { families: ["Public Sans:300,400,500,600,700"] },
+        custom: {
+          families: [
+            "Font Awesome 5 Solid",
+            "Font Awesome 5 Regular",
+            "Font Awesome 5 Brands",
+            "simple-line-icons",
+          ],
+          urls: ["assets/css/fonts.min.css"],
+        },
+        active: function () {
+          sessionStorage.fonts = true;
+        },
+      });
+    </script>
+
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="assets/css/plugins.min.css" />
+    <link rel="stylesheet" href="assets/css/kaiadmin.min.css" />
+
+    <!-- CSS Just for demo purpose, don't include it in your project -->
+    <link rel="stylesheet" href="assets/css/demo.css" />
+  </head>
+  <body>
+    <div class="wrapper">
+      <!-- Sidebar -->
+      <div class="sidebar" data-background-color="dark">
+        <div class="sidebar-logo">
+          <!-- Logo Header -->
+          <div class="logo-header" data-background-color="dark">
+            <a href="/" class="logo">
+              <img
+                src="assets/img/tay.png"
+                alt="TayTech Logo"
+                class="navbar-brand"
+                height="35"
+              />
+            </a>
+            <div class="nav-toggle">
+              <button class="btn btn-toggle toggle-sidebar">
+                <i class="gg-menu-right"></i>
+              </button>
+              <button class="btn btn-toggle sidenav-toggler">
+                <i class="gg-menu-left"></i>
+              </button>
+            </div>
+            <button class="topbar-toggler more">
+              <i class="gg-more-vertical-alt"></i>
+            </button>
+          </div>
+          <!-- End Logo Header -->
+        </div>
+        <div class="sidebar-wrapper scrollbar scrollbar-inner">
+          <div class="sidebar-content">
+            <ul class="nav nav-secondary">
+              <li class="nav-item">
+                <a href="/" class="collapsed" aria-expanded="false">
+                  <i class="fas fa-home"></i>
+                  <p>Dashboard</p>
+                </a>
+              </li>
+              <li class="nav-section">
+                <span class="sidebar-mini-icon">
+                  <i class="fa fa-ellipsis-h"></i>
+                </span>
+                <h4 class="text-section">Test İşlemleri</h4>
+              </li>
+              <li class="nav-item">
+                <a href="/test-operations">
+                  <i class="fas fa-play-circle"></i>
+                  <p>Test Çalıştır</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="/test-results">
+                  <i class="fas fa-chart-line"></i>
+                  <p>Test Sonuçları</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="/reports">
+                  <i class="fas fa-file-alt"></i>
+                  <p>Raporlar</p>
+                </a>
+              </li>
+              <li class="nav-section">
+                <span class="sidebar-mini-icon">
+                  <i class="fa fa-ellipsis-h"></i>
+                </span>
+                <h4 class="text-section">Yönetim</h4>
+              </li>
+              <li class="nav-item">
+                <a data-bs-toggle="collapse" href="#userManagement">
+                  <i class="fas fa-users"></i>
+                  <p>Kullanıcı Yönetimi</p>
+                  <span class="caret"></span>
+                </a>
+                <div class="collapse" id="userManagement">
+                  <ul class="nav nav-collapse">
+                    <li>
+                      <a href="/users">
+                        <span class="sub-item">Kullanıcı Listesi</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="/add-user">
+                        <span class="sub-item">Yeni Kullanıcı</span>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </li>
+              <li class="nav-item">
+                <a data-bs-toggle="collapse" href="#testManagement">
+                  <i class="fas fa-cogs"></i>
+                  <p>Test Yönetimi</p>
+                  <span class="caret"></span>
+                </a>
+                <div class="collapse show" id="testManagement">
+                  <ul class="nav nav-collapse">
+                    <li>
+                      <a href="/test-types">
+                        <span class="sub-item">Test Tipleri</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="/test-scenarios" class="active">
+                        <span class="sub-item">Test Senaryoları</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="/pcba-models">
+                        <span class="sub-item">PCBA Modelleri</span>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </li>
+              <li class="nav-section">
+                <span class="sidebar-mini-icon">
+                  <i class="fa fa-ellipsis-h"></i>
+                </span>
+                <h4 class="text-section">Ayarlar</h4>
+              </li>
+              <li class="nav-item">
+                <a data-bs-toggle="collapse" href="#submenu">
+                  <i class="fas fa-cog"></i>
+                  <p>Settings</p>
+                  <span class="caret"></span>
+                </a>
+                <div class="collapse" id="submenu">
+                  <ul class="nav nav-collapse">
+                    <li>
+                      <a href="/user-settings">
+                        <span class="sub-item">User Settings</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="/system-settings">
+                        <span class="sub-item">System Settings</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="/test-parameters">
+                        <span class="sub-item">Test Parameters</span>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <!-- End Sidebar -->
+
+      <div class="main-panel">
+        <div class="main-header">
+          <div class="main-header-logo">
+            <!-- Logo Header -->
+            <div class="logo-header" data-background-color="dark">
+              <a href="/" class="logo">
+                <img
+                  src="assets/img/tay.png"
+                  alt="TayTech Logo"
+                  class="navbar-brand"
+                  height="35"
+                />
+              </a>
+              <div class="nav-toggle">
+                <button class="btn btn-toggle toggle-sidebar">
+                  <i class="gg-menu-right"></i>
+                </button>
+                <button class="btn btn-toggle sidenav-toggler">
+                  <i class="gg-menu-left"></i>
+                </button>
+              </div>
+              <button class="topbar-toggler more">
+                <i class="gg-more-vertical-alt"></i>
+              </button>
+            </div>
+            <!-- End Logo Header -->
+          </div>
+          <!-- Navbar Header -->
+          <nav
+            class="navbar navbar-header navbar-header-transparent navbar-expand-lg border-bottom"
+          >
+            <div class="container-fluid">
+              <nav
+                class="navbar navbar-header-left navbar-expand-lg navbar-form nav-search p-0 d-none d-lg-flex"
+              >
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <button type="submit" class="btn btn-search pe-1">
+                      <i class="fa fa-search search-icon"></i>
+                    </button>
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Arama..."
+                    class="form-control"
+                  />
+                </div>
+              </nav>
+
+              <ul class="navbar-nav topbar-nav ms-md-auto align-items-center">
+                <li class="nav-item topbar-user dropdown hidden-caret">
+                  <a
+                    class="dropdown-toggle profile-pic"
+                    data-bs-toggle="dropdown"
+                    href="#"
+                    aria-expanded="false"
+                  >
+                    <div class="avatar-sm">
+                      <img
+                        src="assets/img/profile2.jpg"
+                        alt="..."
+                        class="avatar-img rounded-circle"
+                      />
+                    </div>
+                    <span class="profile-username">
+                      <span class="op-7">Merhaba,</span>
+                      <span class="fw-bold">{{ current_user.username if current_user else 'Kullanıcı' }}</span>
+                    </span>
+                  </a>
+                  <ul class="dropdown-menu dropdown-user animated fadeIn">
+                    <div class="dropdown-user-scroll scrollbar-outer">
+                      <li>
+                        <div class="user-box">
+                          <div class="avatar-lg">
+                            <img
+                              src="assets/img/profile2.jpg"
+                              alt="image profile"
+                              class="avatar-img rounded"
+                            />
+                          </div>
+                          <div class="u-text">
+                            <h4>{{ current_user.username if current_user else 'Kullanıcı' }}</h4>
+                            <p class="text-muted">{{ current_user.email if current_user else 'email@example.com' }}</p>
+                            <p class="text-muted">Rol: {{ current_user.role.title() if current_user else 'Operator' }}</p>
+                          </div>
+                        </div>
+                      </li>
+                      <li>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="/user-settings">Profilim</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="/logout">Çıkış</a>
+                      </li>
+                    </div>
+                  </ul>
+                </li>
+              </ul>
+            </div>
+          </nav>
+          <!-- End Navbar -->
+        </div>
+
+        <div class="container">
+          <div class="page-inner">
+            <div
+              class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4"
+            >
+              <div>
+                <h3 class="fw-bold mb-3">Yeni Test Senaryosu Ekle</h3>
+                <h6 class="op-7 mb-2">Sisteme yeni bir test senaryosu ve parametrelerini ekleyin</h6>
+              </div>
+              <div class="ms-md-auto py-2 py-md-0">
+                <a href="/test-scenarios" class="btn btn-secondary btn-round">
+                  <i class="fa fa-arrow-left"></i> Geri Dön
+                </a>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-8">
+                <div class="card">
+                  <div class="card-header">
+                    <div class="card-title">
+                      <i class="fas fa-plus me-2"></i>Test Senaryosu Bilgileri
+                    </div>
+                  </div>
+                  <div class="card-body">
+                    <form id="addTestScenarioForm" method="POST" action="/add-test-scenario">
+                      <div class="form-group">
+                        <label for="scenario_name">Senaryo Adı <span class="text-danger">*</span></label>
+                        <input
+                          type="text"
+                          class="form-control"
+                          id="scenario_name"
+                          name="scenario_name"
+                          placeholder="Örn: Standart Gerilim Testi, Yüksek Frekans Analizi"
+                          required
+                          maxlength="100"
+                        />
+                        <small class="form-text text-muted">Test senaryosunun açıklayıcı adı</small>
+                      </div>
+                      
+                      <div class="form-group">
+                        <label for="description">Açıklama</label>
+                        <textarea
+                          class="form-control"
+                          id="description"
+                          name="description"
+                          rows="3"
+                          placeholder="Test senaryosu hakkında detaylı açıklama..."
+                        ></textarea>
+                        <small class="form-text text-muted">İsteğe bağlı - Test senaryosunun ne yaptığını açıklayın</small>
+                      </div>
+
+                      <div class="form-group">
+                        <div class="form-check">
+                          <input
+                            class="form-check-input"
+                            type="checkbox"
+                            id="is_active"
+                            name="is_active"
+                            checked
+                          />
+                          <label class="form-check-label" for="is_active">
+                            Test senaryosu aktif olsun
+                          </label>
+                          <small class="form-text text-muted d-block">Pasif senaryolar PCBA modellerinde görünmez</small>
+                        </div>
+                      </div>
+
+                      <hr class="my-4">
+
+                      <h5 class="mb-3"><i class="fas fa-cogs me-2"></i>Test Parametreleri</h5>
+                      <p class="text-muted mb-3">Bu senaryo için geçerli olacak test parametrelerini tanımlayın.</p>
+
+                      <div id="parametersContainer">
+                        <!-- Voltage Parameters -->
+                        <div class="card mb-3">
+                          <div class="card-header">
+                            <div class="d-flex justify-content-between align-items-center">
+                              <h6 class="mb-0"><i class="fas fa-bolt text-warning me-2"></i>Gerilim (Voltage) Parametreleri</h6>
+                              <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="enable_voltage" name="enable_voltage">
+                                <label class="form-check-label" for="enable_voltage">Etkinleştir</label>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="card-body" id="voltageParams" style="display: none;">
+                            <div class="row">
+                              <div class="col-md-4">
+                                <div class="form-group">
+                                  <label for="voltage_min">Min. Gerilim (V)</label>
+                                  <input type="number" class="form-control" id="voltage_min" name="voltage_min" step="0.1" placeholder="3.0">
+                                </div>
+                              </div>
+                              <div class="col-md-4">
+                                <div class="form-group">
+                                  <label for="voltage_max">Max. Gerilim (V)</label>
+                                  <input type="number" class="form-control" id="voltage_max" name="voltage_max" step="0.1" placeholder="5.0">
+                                </div>
+                              </div>
+                              <div class="col-md-4">
+                                <div class="form-group">
+                                  <label for="voltage_expected">Beklenen (V)</label>
+                                  <input type="number" class="form-control" id="voltage_expected" name="voltage_expected" step="0.1" placeholder="3.3">
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- Current Parameters -->
+                        <div class="card mb-3">
+                          <div class="card-header">
+                            <div class="d-flex justify-content-between align-items-center">
+                              <h6 class="mb-0"><i class="fas fa-wave-square text-info me-2"></i>Akım (Current) Parametreleri</h6>
+                              <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="enable_current" name="enable_current">
+                                <label class="form-check-label" for="enable_current">Etkinleştir</label>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="card-body" id="currentParams" style="display: none;">
+                            <div class="row">
+                              <div class="col-md-4">
+                                <div class="form-group">
+                                  <label for="current_min">Min. Akım (A)</label>
+                                  <input type="number" class="form-control" id="current_min" name="current_min" step="0.001" placeholder="0.100">
+                                </div>
+                              </div>
+                              <div class="col-md-4">
+                                <div class="form-group">
+                                  <label for="current_max">Max. Akım (A)</label>
+                                  <input type="number" class="form-control" id="current_max" name="current_max" step="0.001" placeholder="0.500">
+                                </div>
+                              </div>
+                              <div class="col-md-4">
+                                <div class="form-group">
+                                  <label for="current_expected">Beklenen (A)</label>
+                                  <input type="number" class="form-control" id="current_expected" name="current_expected" step="0.001" placeholder="0.250">
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- Frequency Parameters -->
+                        <div class="card mb-3">
+                          <div class="card-header">
+                            <div class="d-flex justify-content-between align-items-center">
+                              <h6 class="mb-0"><i class="fas fa-broadcast-tower text-success me-2"></i>Frekans (Frequency) Parametreleri</h6>
+                              <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="enable_frequency" name="enable_frequency">
+                                <label class="form-check-label" for="enable_frequency">Etkinleştir</label>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="card-body" id="frequencyParams" style="display: none;">
+                            <div class="row">
+                              <div class="col-md-4">
+                                <div class="form-group">
+                                  <label for="frequency_expected">Beklenen Frekans (Hz)</label>
+                                  <input type="number" class="form-control" id="frequency_expected" name="frequency_expected" step="1" placeholder="1000">
+                                </div>
+                              </div>
+                              <div class="col-md-4">
+                                <div class="form-group">
+                                  <label for="frequency_tolerance">Tolerans (Hz)</label>
+                                  <input type="number" class="form-control" id="frequency_tolerance" name="frequency_tolerance" step="1" placeholder="50">
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="card-action">
+                        <button type="submit" class="btn btn-primary">
+                          <i class="fa fa-save me-2"></i>Kaydet
+                        </button>
+                        <a href="/test-scenarios" class="btn btn-secondary">
+                          İptal
+                        </a>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-4">
+                <div class="card card-info">
+                  <div class="card-header">
+                    <div class="card-title">
+                      <i class="fas fa-info-circle me-2"></i>Bilgi
+                    </div>
+                  </div>
+                  <div class="card-body">
+                    <h6><strong>Test Senaryosu Nedir?</strong></h6>
+                    <p class="text-muted small">
+                      Test senaryoları, PCBA testlerinde kullanılacak parametreleri ve beklenen değerleri tanımlar. Her PCBA modeli bir test senaryosuna bağlanır.
+                    </p>
+                    
+                    <h6><strong>Parametre Türleri:</strong></h6>
+                    <ul class="list-unstyled small">
+                      <li><i class="fas fa-bolt text-warning me-1"></i> <strong>Gerilim:</strong> Min/Max aralık kontrolü</li>
+                      <li><i class="fas fa-wave-square text-info me-1"></i> <strong>Akım:</strong> Min/Max aralık kontrolü</li>
+                      <li><i class="fas fa-broadcast-tower text-success me-1"></i> <strong>Frekans:</strong> Beklenen değer ± tolerans</li>
+                    </ul>
+
+                    <div class="alert alert-info mt-3">
+                      <h6><i class="fas fa-lightbulb me-1"></i>İpucu</h6>
+                      <small>Sadece ihtiyacınız olan parametreleri etkinleştirin. Boş bırakılan parametreler test sırasında atlanır.</small>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="card card-secondary">
+                  <div class="card-header">
+                    <div class="card-title">
+                      <i class="fas fa-list me-2"></i>Örnek Senaryolar
+                    </div>
+                  </div>
+                  <div class="card-body">
+                    <div class="mb-3">
+                      <h6 class="text-primary">Standart Güç Testi</h6>
+                      <small class="text-muted">Gerilim: 3.0-5.0V, Akım: 0.1-0.5A</small>
+                    </div>
+                    <div class="mb-3">
+                      <h6 class="text-success">Frekans Analizi</h6>
+                      <small class="text-muted">Frekans: 1000Hz ±50Hz</small>
+                    </div>
+                    <div class="mb-3">
+                      <h6 class="text-warning">Tam Karakterizasyon</h6>
+                      <small class="text-muted">Tüm parametreler aktif</small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <footer class="footer">
+          <div class="container-fluid d-flex justify-content-between">
+            <div class="copyright">
+              2024, TayTech PCBA Test Sistemi
+            </div>
+          </div>
+        </footer>
+      </div>
+    </div>
+
+    <!--   Core JS Files   -->
+    <script src="assets/js/core/jquery-3.7.1.min.js"></script>
+    <script src="assets/js/core/popper.min.js"></script>
+    <script src="assets/js/core/bootstrap.min.js"></script>
+
+    <!-- jQuery Scrollbar -->
+    <script src="assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js"></script>
+
+    <!-- Sweet Alert -->
+    <script src="assets/js/plugin/sweetalert/sweetalert.min.js"></script>
+
+    <!-- Kaiadmin JS -->
+    <script src="assets/js/kaiadmin.min.js"></script>
+
+    <script>
+      $(document).ready(function () {
+        // Parameter toggle handlers
+        $('#enable_voltage').change(function() {
+          if (this.checked) {
+            $('#voltageParams').slideDown();
+          } else {
+            $('#voltageParams').slideUp();
+          }
+        });
+
+        $('#enable_current').change(function() {
+          if (this.checked) {
+            $('#currentParams').slideDown();
+          } else {
+            $('#currentParams').slideUp();
+          }
+        });
+
+        $('#enable_frequency').change(function() {
+          if (this.checked) {
+            $('#frequencyParams').slideDown();
+          } else {
+            $('#frequencyParams').slideUp();
+          }
+        });
+
+        // Form validation
+        $('#addTestScenarioForm').on('submit', function(e) {
+          const scenarioName = $('#scenario_name').val().trim();
+          
+          if (!scenarioName) {
+            e.preventDefault();
+            swal("Hata!", "Senaryo adı boş olamaz.", "error");
+            $('#scenario_name').focus();
+            return false;
+          }
+
+          // En az bir parametre grubu seçilmiş mi kontrol et
+          const voltageEnabled = $('#enable_voltage').is(':checked');
+          const currentEnabled = $('#enable_current').is(':checked');
+          const frequencyEnabled = $('#enable_frequency').is(':checked');
+
+          if (!voltageEnabled && !currentEnabled && !frequencyEnabled) {
+            e.preventDefault();
+            swal("Hata!", "En az bir parametre grubu etkinleştirilmelidir.", "error");
+            return false;
+          }
+
+          // Aktif parametreler için değer kontrolü
+          if (voltageEnabled) {
+            const vMin = parseFloat($('#voltage_min').val());
+            const vMax = parseFloat($('#voltage_max').val());
+            const vExp = parseFloat($('#voltage_expected').val());
+
+            if (isNaN(vMin) || isNaN(vMax) || isNaN(vExp)) {
+              e.preventDefault();
+              swal("Hata!", "Gerilim parametreleri tam olarak doldurulmalıdır.", "error");
+              return false;
+            }
+
+            if (vMin >= vMax) {
+              e.preventDefault();
+              swal("Hata!", "Minimum gerilim, maksimum gerilimden küçük olmalıdır.", "error");
+              return false;
+            }
+
+            if (vExp < vMin || vExp > vMax) {
+              e.preventDefault();
+              swal("Hata!", "Beklenen gerilim, min-max aralığında olmalıdır.", "error");
+              return false;
+            }
+          }
+
+          if (currentEnabled) {
+            const cMin = parseFloat($('#current_min').val());
+            const cMax = parseFloat($('#current_max').val());
+            const cExp = parseFloat($('#current_expected').val());
+
+            if (isNaN(cMin) || isNaN(cMax) || isNaN(cExp)) {
+              e.preventDefault();
+              swal("Hata!", "Akım parametreleri tam olarak doldurulmalıdır.", "error");
+              return false;
+            }
+
+            if (cMin >= cMax) {
+              e.preventDefault();
+              swal("Hata!", "Minimum akım, maksimum akımdan küçük olmalıdır.", "error");
+              return false;
+            }
+
+            if (cExp < cMin || cExp > cMax) {
+              e.preventDefault();
+              swal("Hata!", "Beklenen akım, min-max aralığında olmalıdır.", "error");
+              return false;
+            }
+          }
+
+          if (frequencyEnabled) {
+            const fExp = parseFloat($('#frequency_expected').val());
+            const fTol = parseFloat($('#frequency_tolerance').val());
+
+            if (isNaN(fExp) || isNaN(fTol)) {
+              e.preventDefault();
+              swal("Hata!", "Frekans parametreleri tam olarak doldurulmalıdır.", "error");
+              return false;
+            }
+
+            if (fExp <= 0 || fTol <= 0) {
+              e.preventDefault();
+              swal("Hata!", "Frekans ve tolerans değerleri pozitif olmalıdır.", "error");
+              return false;
+            }
+          }
+        });
+
+        // Flash mesajları göster
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              {% if category == 'success' %}
+                swal("Başarılı!", "{{ message }}", "success").then(() => {
+                  window.location.href = "/test-scenarios";
+                });
+              {% elif category == 'error' %}
+                swal("Hata!", "{{ message }}", "error");
+              {% endif %}
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+      });
+    </script>
+  </body>
+</html>

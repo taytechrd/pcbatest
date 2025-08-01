@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="tr">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>TayTech - Test Sonuçları</title>
+    <meta
+      content="width=device-width, initial-scale=1.0, shrink-to-fit=no"
+      name="viewport"
+    />
+    <link rel="icon" href="assets/img/tay.png" type="image/png" />
+
+    <!-- Fonts and icons -->
+    <script src="assets/js/plugin/webfont/webfont.min.js"></script>
+    <script>
+      WebFont.load({
+        google: { families: ["Public Sans:300,400,500,600,700"] },
+        custom: {
+          families: [
+            "Font Awesome 5 Solid",
+            "Font Awesome 5 Regular",
+            "Font Awesome 5 Brands",
+            "simple-line-icons",
+          ],
+          urls: ["assets/css/fonts.min.css"],
+        },
+        active: function () {
+          sessionStorage.fonts = true;
+        },
+      });
+    </script>
+
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="assets/css/plugins.min.css" />
+    <link rel="stylesheet" href="assets/css/kaiadmin.min.css" />
+
+    <!-- CSS Just for demo purpose, don't include it in your project -->
+    <link rel="stylesheet" href="assets/css/demo.css" />
+  </head>
+  <body>
+    <div class="wrapper">
+      <!-- Sidebar -->
+      <div class="sidebar" data-background-color="dark">
+        <div class="sidebar-logo">
+          <!-- Logo Header -->
+          <div class="logo-header" data-background-color="dark">
+            <a href="/" class="logo">
+              <img
+                src="assets/img/tay.png"
+                alt="TayTech Logo"
+                class="navbar-brand"
+                height="35"
+              />
+            </a>
+            <div class="nav-toggle">
+              <button class="btn btn-toggle toggle-sidebar">
+                <i class="gg-menu-right"></i>
+              </button>
+              <button class="btn btn-toggle sidenav-toggler">
+                <i class="gg-menu-left"></i>
+              </button>
+            </div>
+            <button class="topbar-toggler more">
+              <i class="gg-more-vertical-alt"></i>
+            </button>
+          </div>
+          <!-- End Logo Header -->
+        </div>
+        <div class="sidebar-wrapper scrollbar scrollbar-inner">
+          <div class="sidebar-content">
+            <ul class="nav nav-secondary">
+              <li class="nav-item">
+                <a href="/" class="collapsed" aria-expanded="false">
+                  <i class="fas fa-home"></i>
+                  <p>Dashboard</p>
+                </a>
+              </li>
+              <li class="nav-section">
+                <span class="sidebar-mini-icon">
+                  <i class="fa fa-ellipsis-h"></i>
+                </span>
+                <h4 class="text-section">Test İşlemleri</h4>
+              </li>
+              <li class="nav-item">
+                <a href="/test-operations">
+                  <i class="fas fa-play-circle"></i>
+                  <p>Test Çalıştır</p>
+                </a>
+              </li>
+              <li class="nav-item active">
+                <a href="/test-results">
+                  <i class="fas fa-chart-line"></i>
+                  <p>Test Sonuçları</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="/reports">
+                  <i class="fas fa-file-alt"></i>
+                  <p>Raporlar</p>
+                </a>
+              </li>
+              <li class="nav-section">
+                <span class="sidebar-mini-icon">
+                  <i class="fa fa-ellipsis-h"></i>
+                </span>
+                <h4 class="text-section">Yönetim</h4>
+              </li>
+              <li class="nav-item">
+                <a data-bs-toggle="collapse" href="#userManagement">
+                  <i class="fas fa-users"></i>
+                  <p>Kullanıcı Yönetimi</p>
+                  <span class="caret"></span>
+                </a>
+                <div class="collapse" id="userManagement">
+                  <ul class="nav nav-collapse">
+                    <li>
+                      <a href="/users">
+                        <span class="sub-item">Kullanıcı Listesi</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="/add-user">
+                        <span class="sub-item">Yeni Kullanıcı</span>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </li>
+              <li class="nav-section">
+                <span class="sidebar-mini-icon">
+                  <i class="fa fa-ellipsis-h"></i>
+                </span>
+                <h4 class="text-section">Ayarlar</h4>
+              </li>
+              <li class="nav-item">
+                <a data-bs-toggle="collapse" href="#submenu">
+                  <i class="fas fa-cog"></i>
+                  <p>Settings</p>
+                  <span class="caret"></span>
+                </a>
+                <div class="collapse" id="submenu">
+                  <ul class="nav nav-collapse">
+                    <li>
+                      <a href="/user-settings">
+                        <span class="sub-item">User Settings</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="/system-settings">
+                        <span class="sub-item">System Settings</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="/test-parameters">
+                        <span class="sub-item">Test Parameters</span>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <!-- End Sidebar -->
+
+      <div class="main-panel">
+        <div class="main-header">
+          <div class="main-header-logo">
+            <!-- Logo Header -->
+            <div class="logo-header" data-background-color="dark">
+              <a href="/" class="logo">
+                <img
+                  src="assets/img/tay.png"
+                  alt="TayTech Logo"
+                  class="navbar-brand"
+                  height="35"
+                />
+              </a>
+              <div class="nav-toggle">
+                <button class="btn btn-toggle toggle-sidebar">
+                  <i class="gg-menu-right"></i>
+                </button>
+                <button class="btn btn-toggle sidenav-toggler">
+                  <i class="gg-menu-left"></i>
+                </button>
+              </div>
+              <button class="topbar-toggler more">
+                <i class="gg-more-vertical-alt"></i>
+              </button>
+            </div>
+            <!-- End Logo Header -->
+          </div>
+          <!-- Navbar Header -->
+          <nav
+            class="navbar navbar-header navbar-header-transparent navbar-expand-lg border-bottom"
+          >
+            <div class="container-fluid">
+              <nav
+                class="navbar navbar-header-left navbar-expand-lg navbar-form nav-search p-0 d-none d-lg-flex"
+              >
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <button type="submit" class="btn btn-search pe-1">
+                      <i class="fa fa-search search-icon"></i>
+                    </button>
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Seri numarası ara..."
+                    class="form-control"
+                    id="searchInput"
+                  />
+                </div>
+              </nav>
+
+              <ul class="navbar-nav topbar-nav ms-md-auto align-items-center">
+                <li class="nav-item topbar-user dropdown hidden-caret">
+                  <a
+                    class="dropdown-toggle profile-pic"
+                    data-bs-toggle="dropdown"
+                    href="#"
+                    aria-expanded="false"
+                  >
+                    <div class="avatar-sm">
+                      <img
+                        src="assets/img/profile2.jpg"
+                        alt="..."
+                        class="avatar-img rounded-circle"
+                      />
+                    </div>
+                    <span class="profile-username">
+                      <span class="op-7">Merhaba,</span>
+                      <span class="fw-bold">{{ current_user.username if current_user else 'Kullanıcı' }}</span>
+                    </span>
+                  </a>
+                  <ul class="dropdown-menu dropdown-user animated fadeIn">
+                    <div class="dropdown-user-scroll scrollbar-outer">
+                      <li>
+                        <div class="user-box">
+                          <div class="avatar-lg">
+                            <img
+                              src="assets/img/profile2.jpg"
+                              alt="image profile"
+                              class="avatar-img rounded"
+                            />
+                          </div>
+                          <div class="u-text">
+                            <h4>{{ current_user.username if current_user else 'Kullanıcı' }}</h4>
+                            <p class="text-muted">{{ current_user.email if current_user else 'email@example.com' }}</p>
+                            <p class="text-muted">Rol: {{ current_user.role.title() if current_user else 'Operator' }}</p>
+                          </div>
+                        </div>
+                      </li>
+                      <li>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="/user-settings">Profilim</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="/logout">Çıkış</a>
+                      </li>
+                    </div>
+                  </ul>
+                </li>
+              </ul>
+            </div>
+          </nav>
+          <!-- End Navbar -->
+        </div>
+
+        <div class="container">
+          <div class="page-inner">
+            <div
+              class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4"
+            >
+              <div>
+                <h3 class="fw-bold mb-3">Test Sonuçları</h3>
+                <h6 class="op-7 mb-2">Tüm PCBA test sonuçlarını görüntüleyin ve analiz edin</h6>
+              </div>
+              <div class="ms-md-auto py-2 py-md-0">
+                <a href="/test-operations" class="btn btn-primary btn-round">
+                  <i class="fa fa-plus"></i> Yeni Test
+                </a>
+                <a href="/reports" class="btn btn-secondary btn-round">
+                  <i class="fa fa-chart-bar"></i> Raporlar
+                </a>
+              </div>
+            </div>
+
+            <!-- İstatistik Kartları -->
+            <div class="row">
+              <div class="col-sm-6 col-md-3">
+                <div class="card card-stats card-round">
+                  <div class="card-body">
+                    <div class="row align-items-center">
+                      <div class="col-icon">
+                        <div class="icon-big text-center icon-primary bubble-shadow-small">
+                          <i class="fas fa-vial"></i>
+                        </div>
+                      </div>
+                      <div class="col col-stats ms-3 ms-sm-0">
+                        <div class="numbers">
+                          <p class="card-category">Toplam Test</p>
+                          <h4 class="card-title">{{ total_tests }}</h4>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-6 col-md-3">
+                <div class="card card-stats card-round">
+                  <div class="card-body">
+                    <div class="row align-items-center">
+                      <div class="col-icon">
+                        <div class="icon-big text-center icon-success bubble-shadow-small">
+                          <i class="fas fa-check-circle"></i>
+                        </div>
+                      </div>
+                      <div class="col col-stats ms-3 ms-sm-0">
+                        <div class="numbers">
+                          <p class="card-category">Başarılı</p>
+                          <h4 class="card-title">{{ passed_tests }}</h4>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-6 col-md-3">
+                <div class="card card-stats card-round">
+                  <div class="card-body">
+                    <div class="row align-items-center">
+                      <div class="col-icon">
+                        <div class="icon-big text-center icon-danger bubble-shadow-small">
+                          <i class="fas fa-times-circle"></i>
+                        </div>
+                      </div>
+                      <div class="col col-stats ms-3 ms-sm-0">
+                        <div class="numbers">
+                          <p class="card-category">Başarısız</p>
+                          <h4 class="card-title">{{ failed_tests }}</h4>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-6 col-md-3">
+                <div class="card card-stats card-round">
+                  <div class="card-body">
+                    <div class="row align-items-center">
+                      <div class="col-icon">
+                        <div class="icon-big text-center icon-secondary bubble-shadow-small">
+                          <i class="fas fa-percentage"></i>
+                        </div>
+                      </div>
+                      <div class="col col-stats ms-3 ms-sm-0">
+                        <div class="numbers">
+                          <p class="card-category">Başarı Oranı</p>
+                          <h4 class="card-title">%{{ "%.1f"|format(success_rate) }}</h4>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Test Sonuçları Tablosu -->
+            <div class="row">
+              <div class="col-md-12">
+                <div class="card">
+                  <div class="card-header">
+                    <div class="d-flex align-items-center">
+                      <h4 class="card-title">Test Sonuçları Listesi</h4>
+                      <div class="ms-auto">
+                        <div class="btn-group" role="group">
+                          <button type="button" class="btn btn-outline-primary btn-sm active" id="filterAll">
+                            Tümü
+                          </button>
+                          <button type="button" class="btn btn-outline-success btn-sm" id="filterPass">
+                            PASS
+                          </button>
+                          <button type="button" class="btn btn-outline-danger btn-sm" id="filterFail">
+                            FAIL
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="card-body">
+                    <div class="table-responsive">
+                      <table
+                        id="testResultsTable"
+                        class="display table table-striped table-hover"
+                      >
+                        <thead>
+                          <tr>
+                            <th>ID</th>
+                            <th>Seri No</th>
+                            <th>Model</th>
+                            <th>Test Tipi</th>
+                            <th>Durum</th>
+                            <th>Süre (s)</th>
+                            <th>Operatör</th>
+                            <th>Tarih</th>
+                            <th>İşlemler</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {% for test in tests.items %}
+                          <tr>
+                            <td>{{ test.id }}</td>
+                            <td>
+                              <span class="fw-bold">{{ test.serial_number }}</span>
+                            </td>
+                            <td>
+                              <div>
+                                <div class="fw-bold">{{ test.pcba_model.model_name }}</div>
+                                <small class="text-muted">{{ test.pcba_model.part_number }}</small>
+                              </div>
+                            </td>
+                            <td>
+                              <span class="badge badge-info">{{ test.test_type.type_code }}</span>
+                            </td>
+                            <td>
+                              {% if test.test_status == 'PASS' %}
+                                <span class="badge badge-success">
+                                  <i class="fa fa-check me-1"></i>PASS
+                                </span>
+                              {% else %}
+                                <span class="badge badge-danger">
+                                  <i class="fa fa-times me-1"></i>FAIL
+                                </span>
+                              {% endif %}
+                            </td>
+                            <td>{{ test.test_duration }}s</td>
+                            <td>
+                              <div class="d-flex align-items-center">
+                                <div class="avatar avatar-xs me-2">
+                                  <img src="assets/img/profile2.jpg" alt="..." class="avatar-img rounded-circle">
+                                </div>
+                                {{ test.operator.username }}
+                              </div>
+                            </td>
+                            <td>{{ test.test_date.strftime('%d.%m.%Y %H:%M') }}</td>
+                            <td>
+                              <div class="form-button-action">
+                                <button type="button" 
+                                        class="btn btn-link btn-primary btn-lg" 
+                                        data-bs-toggle="tooltip" 
+                                        title="Detayları Göster"
+                                        onclick="showTestDetails({{ test.id }})">
+                                  <i class="fa fa-eye"></i>
+                                </button>
+                                <button type="button" 
+                                        class="btn btn-link btn-info btn-lg" 
+                                        data-bs-toggle="tooltip" 
+                                        title="PDF Raporu"
+                                        onclick="generatePDFReport({{ test.id }})">
+                                  <i class="fa fa-file-pdf"></i>
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                          {% endfor %}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    <!-- Sayfalama -->
+                    {% if tests.pages > 1 %}
+                    <nav aria-label="Test sonuçları sayfalama">
+                      <ul class="pagination justify-content-center">
+                        {% if tests.has_prev %}
+                          <li class="page-item">
+                            <a class="page-link" href="{{ url_for('test_results', page=tests.prev_num) }}">Önceki</a>
+                          </li>
+                        {% endif %}
+                        
+                        {% for page_num in tests.iter_pages() %}
+                          {% if page_num %}
+                            {% if page_num != tests.page %}
+                              <li class="page-item">
+                                <a class="page-link" href="{{ url_for('test_results', page=page_num) }}">{{ page_num }}</a>
+                              </li>
+                            {% else %}
+                              <li class="page-item active">
+                                <span class="page-link">{{ page_num }}</span>
+                              </li>
+                            {% endif %}
+                          {% else %}
+                            <li class="page-item disabled">
+                              <span class="page-link">…</span>
+                            </li>
+                          {% endif %}
+                        {% endfor %}
+                        
+                        {% if tests.has_next %}
+                          <li class="page-item">
+                            <a class="page-link" href="{{ url_for('test_results', page=tests.next_num) }}">Sonraki</a>
+                          </li>
+                        {% endif %}
+                      </ul>
+                    </nav>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <footer class="footer">
+          <div class="container-fluid d-flex justify-content-between">
+            <div class="copyright">
+              2024, TayTech PCBA Test Sistemi
+            </div>
+          </div>
+        </footer>
+      </div>
+    </div>
+
+    <!-- Test Detay Modal -->
+    <div class="modal fade" id="testDetailModal" tabindex="-1" role="dialog" aria-hidden="true">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Test Detayları</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body" id="testDetailContent">
+            <!-- Test detayları buraya yüklenecek -->
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+            <button type="button" class="btn btn-primary" id="printTestDetail">
+              <i class="fa fa-print me-2"></i>Yazdır
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!--   Core JS Files   -->
+    <script src="assets/js/core/jquery-3.7.1.min.js"></script>
+    <script src="assets/js/core/popper.min.js"></script>
+    <script src="assets/js/core/bootstrap.min.js"></script>
+
+    <!-- jQuery Scrollbar -->
+    <script src="assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js"></script>
+
+    <!-- DataTables -->
+    <script src="assets/js/plugin/datatables/datatables.min.js"></script>
+
+    <!-- Sweet Alert -->
+    <script src="assets/js/plugin/sweetalert/sweetalert.min.js"></script>
+
+    <!-- Kaiadmin JS -->
+    <script src="assets/js/kaiadmin.min.js"></script>
+
+    <script>
+      $(document).ready(function () {
+        // DataTable başlat
+        var table = $('#testResultsTable').DataTable({
+          "pageLength": 25,
+          "language": {
+            "url": "//cdn.datatables.net/plug-ins/1.13.4/i18n/tr.json"
+          },
+          "columnDefs": [
+            { "orderable": false, "targets": 8 }
+          ],
+          "order": [[ 7, "desc" ]] // Tarihe göre azalan sıralama
+        });
+
+        // Filtre butonları
+        $('#filterAll').click(function() {
+          table.column(4).search('').draw();
+          $('.btn-group .btn').removeClass('active');
+          $(this).addClass('active');
+        });
+
+        $('#filterPass').click(function() {
+          table.column(4).search('PASS').draw();
+          $('.btn-group .btn').removeClass('active');
+          $(this).addClass('active');
+        });
+
+        $('#filterFail').click(function() {
+          table.column(4).search('FAIL').draw();
+          $('.btn-group .btn').removeClass('active');
+          $(this).addClass('active');
+        });
+
+        // Arama inputu
+        $('#searchInput').on('keyup', function() {
+          table.search(this.value).draw();
+        });
+
+        // Tooltip'leri aktif et
+        $('[data-bs-toggle="tooltip"]').tooltip();
+      });
+
+      function showTestDetails(testId) {
+        fetch('/api/test-detail/' + testId)
+          .then(response => response.json())
+          .then(data => {
+            let statusClass = data.test_status === 'PASS' ? 'success' : 'danger';
+            let statusIcon = data.test_status === 'PASS' ? 'fa-check-circle' : 'fa-times-circle';
+            
+            let detailHtml = `
+              <div class="row mb-4">
+                <div class="col-md-6">
+                  <h6><strong>Test Bilgileri</strong></h6>
+                  <table class="table table-sm">
+                    <tr><td><strong>Test ID:</strong></td><td>#${data.id}</td></tr>
+                    <tr><td><strong>Seri No:</strong></td><td>${data.serial_number}</td></tr>
+                    <tr><td><strong>Model:</strong></td><td>${data.model_name}</td></tr>
+                    <tr><td><strong>Part No:</strong></td><td>${data.part_number}</td></tr>
+                    <tr><td><strong>Test Tipi:</strong></td><td><span class="badge badge-info">${data.test_type}</span></td></tr>
+                  </table>
+                </div>
+                <div class="col-md-6">
+                  <h6><strong>Test Sonucu</strong></h6>
+                  <table class="table table-sm">
+                    <tr><td><strong>Durum:</strong></td><td><span class="badge badge-${statusClass}"><i class="fas ${statusIcon} me-1"></i>${data.test_status}</span></td></tr>
+                    <tr><td><strong>Süre:</strong></td><td>${data.test_duration} saniye</td></tr>
+                    <tr><td><strong>Tarih:</strong></td><td>${data.test_date}</td></tr>
+                    <tr><td><strong>Operatör:</strong></td><td>${data.operator}</td></tr>
+                  </table>
+                </div>
+              </div>
+            `;
+            
+            if (data.test_data && Object.keys(data.test_data).length > 0) {
+              detailHtml += '<h6><strong>Ölçüm Sonuçları</strong></h6>';
+              detailHtml += '<div class="row">';
+              
+              Object.keys(data.test_data).forEach(testName => {
+                const result = data.test_data[testName];
+                const cardClass = result.status === 'PASS' ? 'border-success' : 'border-danger';
+                const iconClass = result.status === 'PASS' ? 'fa-check text-success' : 'fa-times text-danger';
+                
+                detailHtml += `
+                  <div class="col-md-4 mb-3">
+                    <div class="card ${cardClass}">
+                      <div class="card-body text-center">
+                        <i class="fas ${iconClass} fa-2x mb-2"></i>
+                        <h6>${testName.toUpperCase()}</h6>
+                        <div class="h4">${result.measured}${getUnit(testName)}</div>
+                        <small class="text-muted">${getExpectedText(result, testName)}</small>
+                      </div>
+                    </div>
+                  </div>
+                `;
+              });
+              
+              detailHtml += '</div>';
+            }
+            
+            if (data.notes && data.notes.trim() !== '') {
+              detailHtml += `
+                <div class="mt-3">
+                  <h6><strong>Notlar</strong></h6>
+                  <p class="text-muted">${data.notes}</p>
+                </div>
+              `;
+            }
+            
+            $('#testDetailContent').html(detailHtml);
+            $('#testDetailModal').modal('show');
+          })
+          .catch(error => {
+            swal("Hata!", "Test detayları yüklenirken hata oluştu.", "error");
+          });
+      }
+
+      function getUnit(testName) {
+        switch(testName) {
+          case 'voltage': return 'V';
+          case 'current': return 'A';
+          case 'frequency': return 'Hz';
+          default: return '';
+        }
+      }
+
+      function getExpectedText(result, testName) {
+        if (testName === 'frequency') {
+          return `Beklenen: ${result.expected}Hz (±${result.tolerance}Hz)`;
+        } else {
+          return `Beklenen: ${result.expected_min} - ${result.expected_max}${getUnit(testName)}`;
+        }
+      }
+
+      function generatePDFReport(testId) {
+        swal("Bilgi", "PDF rapor özelliği yakında eklenecek.", "info");
+      }
+
+      function printTestDetail() {
+        window.print();
+      }
+
+      // Print buton eventi
+      $('#printTestDetail').click(function() {
+        printTestDetail();
+      });
+    </script>
+  </body>
+</html>

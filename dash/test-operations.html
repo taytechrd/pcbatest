@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="tr">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>TayTech - PCBA Test Çalıştır</title>
+    <meta
+      content="width=device-width, initial-scale=1.0, shrink-to-fit=no"
+      name="viewport"
+    />
+    <link rel="icon" href="assets/img/tay.png" type="image/png" />
+
+    <!-- Fonts and icons -->
+    <script src="assets/js/plugin/webfont/webfont.min.js"></script>
+    <script>
+      WebFont.load({
+        google: { families: ["Public Sans:300,400,500,600,700"] },
+        custom: {
+          families: [
+            "Font Awesome 5 Solid",
+            "Font Awesome 5 Regular",
+            "Font Awesome 5 Brands",
+            "simple-line-icons",
+          ],
+          urls: ["assets/css/fonts.min.css"],
+        },
+        active: function () {
+          sessionStorage.fonts = true;
+        },
+      });
+    </script>
+
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="assets/css/plugins.min.css" />
+    <link rel="stylesheet" href="assets/css/kaiadmin.min.css" />
+
+    <!-- CSS Just for demo purpose, don't include it in your project -->
+    <link rel="stylesheet" href="assets/css/demo.css" />
+
+    <style>
+      .test-step {
+        display: none;
+      }
+      .test-step.active {
+        display: block;
+      }
+      .test-progress {
+        margin-bottom: 30px;
+      }
+      .test-result-card {
+        border-left: 4px solid #1a2035;
+        margin-bottom: 15px;
+      }
+      .test-result-card.pass {
+        border-left-color: #31ce36;
+      }
+      .test-result-card.fail {
+        border-left-color: #f25961;
+      }
+      .measurement-display {
+        font-family: 'Courier New', monospace;
+        font-size: 1.2em;
+        font-weight: bold;
+      }
+      .test-running {
+        text-align: center;
+        padding: 40px;
+      }
+      .spinner-border-lg {
+        width: 4rem;
+        height: 4rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrapper">
+      <!-- Sidebar -->
+      <div class="sidebar" data-background-color="dark">
+        <div class="sidebar-logo">
+          <!-- Logo Header -->
+          <div class="logo-header" data-background-color="dark">
+            <a href="/" class="logo">
+              <img
+                src="assets/img/tay.png"
+                alt="TayTech Logo"
+                class="navbar-brand"
+                height="35"
+              />
+            </a>
+            <div class="nav-toggle">
+              <button class="btn btn-toggle toggle-sidebar">
+                <i class="gg-menu-right"></i>
+              </button>
+              <button class="btn btn-toggle sidenav-toggler">
+                <i class="gg-menu-left"></i>
+              </button>
+            </div>
+            <button class="topbar-toggler more">
+              <i class="gg-more-vertical-alt"></i>
+            </button>
+          </div>
+          <!-- End Logo Header -->
+        </div>
+        <div class="sidebar-wrapper scrollbar scrollbar-inner">
+          <div class="sidebar-content">
+            <ul class="nav nav-secondary">
+              <li class="nav-item">
+                <a href="/" class="collapsed" aria-expanded="false">
+                  <i class="fas fa-home"></i>
+                  <p>Dashboard</p>
+                </a>
+              </li>
+              <li class="nav-section">
+                <span class="sidebar-mini-icon">
+                  <i class="fa fa-ellipsis-h"></i>
+                </span>
+                <h4 class="text-section">Test İşlemleri</h4>
+              </li>
+              <li class="nav-item active">
+                <a href="/test-operations">
+                  <i class="fas fa-play-circle"></i>
+                  <p>Test Çalıştır</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="/test-results">
+                  <i class="fas fa-chart-line"></i>
+                  <p>Test Sonuçları</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="/reports">
+                  <i class="fas fa-file-alt"></i>
+                  <p>Raporlar</p>
+                </a>
+              </li>
+              <li class="nav-section">
+                <span class="sidebar-mini-icon">
+                  <i class="fa fa-ellipsis-h"></i>
+                </span>
+                <h4 class="text-section">Yönetim</h4>
+              </li>
+              <li class="nav-item">
+                <a data-bs-toggle="collapse" href="#userManagement">
+                  <i class="fas fa-users"></i>
+                  <p>Kullanıcı Yönetimi</p>
+                  <span class="caret"></span>
+                </a>
+                <div class="collapse" id="userManagement">
+                  <ul class="nav nav-collapse">
+                    <li>
+                      <a href="/users">
+                        <span class="sub-item">Kullanıcı Listesi</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="/add-user">
+                        <span class="sub-item">Yeni Kullanıcı</span>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </li>
+              <li class="nav-section">
+                <span class="sidebar-mini-icon">
+                  <i class="fa fa-ellipsis-h"></i>
+                </span>
+                <h4 class="text-section">Ayarlar</h4>
+              </li>
+              <li class="nav-item">
+                <a data-bs-toggle="collapse" href="#submenu">
+                  <i class="fas fa-cog"></i>
+                  <p>Settings</p>
+                  <span class="caret"></span>
+                </a>
+                <div class="collapse" id="submenu">
+                  <ul class="nav nav-collapse">
+                    <li>
+                      <a href="/user-settings">
+                        <span class="sub-item">User Settings</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="/system-settings">
+                        <span class="sub-item">System Settings</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="/test-parameters">
+                        <span class="sub-item">Test Parameters</span>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <!-- End Sidebar -->
+
+      <div class="main-panel">
+        <div class="main-header">
+          <div class="main-header-logo">
+            <!-- Logo Header -->
+            <div class="logo-header" data-background-color="dark">
+              <a href="/" class="logo">
+                <img
+                  src="assets/img/tay.png"
+                  alt="TayTech Logo"
+                  class="navbar-brand"
+                  height="35"
+                />
+              </a>
+              <div class="nav-toggle">
+                <button class="btn btn-toggle toggle-sidebar">
+                  <i class="gg-menu-right"></i>
+                </button>
+                <button class="btn btn-toggle sidenav-toggler">
+                  <i class="gg-menu-left"></i>
+                </button>
+              </div>
+              <button class="topbar-toggler more">
+                <i class="gg-more-vertical-alt"></i>
+              </button>
+            </div>
+            <!-- End Logo Header -->
+          </div>
+          <!-- Navbar Header -->
+          <nav
+            class="navbar navbar-header navbar-header-transparent navbar-expand-lg border-bottom"
+          >
+            <div class="container-fluid">
+              <nav
+                class="navbar navbar-header-left navbar-expand-lg navbar-form nav-search p-0 d-none d-lg-flex"
+              >
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <button type="submit" class="btn btn-search pe-1">
+                      <i class="fa fa-search search-icon"></i>
+                    </button>
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Arama..."
+                    class="form-control"
+                  />
+                </div>
+              </nav>
+
+              <ul class="navbar-nav topbar-nav ms-md-auto align-items-center">
+                <li class="nav-item topbar-user dropdown hidden-caret">
+                  <a
+                    class="dropdown-toggle profile-pic"
+                    data-bs-toggle="dropdown"
+                    href="#"
+                    aria-expanded="false"
+                  >
+                    <div class="avatar-sm">
+                      <img
+                        src="assets/img/profile2.jpg"
+                        alt="..."
+                        class="avatar-img rounded-circle"
+                      />
+                    </div>
+                    <span class="profile-username">
+                      <span class="op-7">Merhaba,</span>
+                      <span class="fw-bold">{{ current_user.username if current_user else 'Kullanıcı' }}</span>
+                    </span>
+                  </a>
+                  <ul class="dropdown-menu dropdown-user animated fadeIn">
+                    <div class="dropdown-user-scroll scrollbar-outer">
+                      <li>
+                        <div class="user-box">
+                          <div class="avatar-lg">
+                            <img
+                              src="assets/img/profile2.jpg"
+                              alt="image profile"
+                              class="avatar-img rounded"
+                            />
+                          </div>
+                          <div class="u-text">
+                            <h4>{{ current_user.username if current_user else 'Kullanıcı' }}</h4>
+                            <p class="text-muted">{{ current_user.email if current_user else 'email@example.com' }}</p>
+                            <p class="text-muted">Rol: {{ current_user.role.title() if current_user else 'Operator' }}</p>
+                          </div>
+                        </div>
+                      </li>
+                      <li>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="/user-settings">Profilim</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="/logout">Çıkış</a>
+                      </li>
+                    </div>
+                  </ul>
+                </li>
+              </ul>
+            </div>
+          </nav>
+          <!-- End Navbar -->
+        </div>
+
+        <div class="container">
+          <div class="page-inner">
+            <div
+              class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4"
+            >
+              <div>
+                <h3 class="fw-bold mb-3">PCBA Test Çalıştır</h3>
+                <h6 class="op-7 mb-2">PCBA kartlarınızı test edin ve sonuçları analiz edin</h6>
+              </div>
+            </div>
+
+            <!-- Test Progress -->
+            <div class="row test-progress">
+              <div class="col-12">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="progress mb-3">
+                      <div class="progress-bar" role="progressbar" style="width: 0%" id="testProgress">
+                        <span class="sr-only">0% Complete</span>
+                      </div>
+                    </div>
+                    <div class="text-center">
+                      <span id="progressText">Test başlatmaya hazır</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <!-- Test Configuration -->
+              <div class="col-md-4">
+                <div class="card">
+                  <div class="card-header">
+                    <div class="card-title">
+                      <i class="fas fa-cog me-2"></i>Test Konfigürasyonu
+                    </div>
+                  </div>
+                  <div class="card-body">
+                    <form id="testConfigForm">
+                      <div class="form-group">
+                        <label for="pcba_model">PCBA Modeli <span class="text-danger">*</span></label>
+                        <select class="form-select" id="pcba_model" name="pcba_model" required>
+                          <option value="">Model seçin</option>
+                          {% for model in pcba_models %}
+                          <option value="{{ model.id }}" 
+                                  data-params="{{ model.test_scenario.test_parameters | tojson if model.test_scenario else '{}' }}"
+                                  data-scenario="{{ model.test_scenario.scenario_name if model.test_scenario else 'Tanımsız' }}">
+                            {{ model.model_name }} ({{ model.part_number }})
+                            {% if model.test_scenario %} - {{ model.test_scenario.scenario_name }}{% endif %}
+                          </option>
+                          {% endfor %}
+                        </select>
+                      </div>
+
+                      <div class="form-group">
+                        <label for="serial_number">Seri Numarası <span class="text-danger">*</span></label>
+                        <input
+                          type="text"
+                          class="form-control"
+                          id="serial_number"
+                          name="serial_number"
+                          placeholder="Örn: SN001234"
+                          required
+                        />
+                      </div>
+
+                      <div class="form-group">
+                        <label for="test_type">Test Tipi <span class="text-danger">*</span></label>
+                        <select class="form-select" id="test_type" name="test_type" required>
+                          <option value="">Test tipi seçin</option>
+                          {% for test_type in test_types %}
+                          <option value="{{ test_type.id }}" title="{{ test_type.description }}">
+                            {{ test_type.type_code }} ({{ test_type.type_name }})
+                          </option>
+                          {% endfor %}
+                        </select>
+                      </div>
+
+                      <div class="form-group">
+                        <label for="test_notes">Test Notları</label>
+                        <textarea
+                          class="form-control"
+                          id="test_notes"
+                          name="test_notes"
+                          rows="3"
+                          placeholder="Opsiyonel test notları..."
+                        ></textarea>
+                      </div>
+                    </form>
+                  </div>
+                  <div class="card-action">
+                    <button type="button" class="btn btn-success btn-lg w-100" id="startTestBtn">
+                      <i class="fas fa-play me-2"></i>Testi Başlat
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Test Parameters Info -->
+                <div class="card" id="testParamsCard" style="display: none;">
+                  <div class="card-header">
+                    <div class="card-title">
+                      <i class="fas fa-info-circle me-2"></i>Test Parametreleri
+                    </div>
+                  </div>
+                  <div class="card-body">
+                    <div id="testParamsContent">
+                      <!-- Test parametreleri dinamik olarak yüklenecek -->
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Test Results -->
+              <div class="col-md-8">
+                <!-- Test Step 1: Ready -->
+                <div class="test-step active" id="step-ready">
+                  <div class="card">
+                    <div class="card-header">
+                      <div class="card-title">
+                        <i class="fas fa-clipboard-check me-2"></i>Test Hazırlığı
+                      </div>
+                    </div>
+                    <div class="card-body text-center">
+                      <div class="mb-4">
+                        <i class="fas fa-microchip fa-5x text-primary mb-3"></i>
+                        <h4>PCBA Test Sistemi Hazır</h4>
+                        <p class="text-muted">
+                          Sol taraftan PCBA modelini, seri numarasını ve test tipini seçin.
+                          Testi başlatmak için "Testi Başlat" butonuna tıklayın.
+                        </p>
+                      </div>
+                      <div class="row">
+                        <div class="col-md-4">
+                          <div class="card card-stats card-primary">
+                            <div class="card-body">
+                              <div class="row">
+                                <div class="col-5">
+                                  <div class="icon-big text-center">
+                                    <i class="fas fa-check-circle"></i>
+                                  </div>
+                                </div>
+                                <div class="col-7 col-stats">
+                                  <div class="numbers">
+                                    <p class="card-category">Sistem</p>
+                                    <h4 class="card-title">Hazır</h4>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-md-4">
+                          <div class="card card-stats card-info">
+                            <div class="card-body">
+                              <div class="row">
+                                <div class="col-5">
+                                  <div class="icon-big text-center">
+                                    <i class="fas fa-thermometer-half"></i>
+                                  </div>
+                                </div>
+                                <div class="col-7 col-stats">
+                                  <div class="numbers">
+                                    <p class="card-category">Sıcaklık</p>
+                                    <h4 class="card-title">23°C</h4>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-md-4">
+                          <div class="card card-stats card-warning">
+                            <div class="card-body">
+                              <div class="row">
+                                <div class="col-5">
+                                  <div class="icon-big text-center">
+                                    <i class="fas fa-clock"></i>
+                                  </div>
+                                </div>
+                                <div class="col-7 col-stats">
+                                  <div class="numbers">
+                                    <p class="card-category">Son Test</p>
+                                    <h4 class="card-title">-</h4>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Test Step 2: Running -->
+                <div class="test-step" id="step-running">
+                  <div class="card">
+                    <div class="card-header">
+                      <div class="card-title">
+                        <i class="fas fa-spinner fa-spin me-2"></i>Test Çalışıyor
+                      </div>
+                    </div>
+                    <div class="card-body">
+                      <div class="test-running">
+                        <div class="spinner-border spinner-border-lg text-primary mb-4" role="status">
+                          <span class="sr-only">Loading...</span>
+                        </div>
+                        <h4 id="currentTestStatus">Test başlatılıyor...</h4>
+                        <p class="text-muted" id="currentTestDetails">Lütfen bekleyin...</p>
+                        <div class="mt-4">
+                          <div class="progress">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                 role="progressbar" style="width: 0%" id="testDetailProgress">
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Test Step 3: Results -->
+                <div class="test-step" id="step-results">
+                  <div class="card">
+                    <div class="card-header">
+                      <div class="card-title">
+                        <i class="fas fa-chart-bar me-2"></i>Test Sonuçları
+                      </div>
+                    </div>
+                    <div class="card-body">
+                      <div id="testResultsContent">
+                        <!-- Test sonuçları dinamik olarak yüklenecek -->
+                      </div>
+                    </div>
+                    <div class="card-action">
+                      <button type="button" class="btn btn-primary" id="newTestBtn">
+                        <i class="fas fa-plus me-2"></i>Yeni Test
+                      </button>
+                      <button type="button" class="btn btn-secondary" id="viewAllResultsBtn">
+                        <i class="fas fa-list me-2"></i>Tüm Sonuçlar
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <footer class="footer">
+          <div class="container-fluid d-flex justify-content-between">
+            <div class="copyright">
+              2024, TayTech PCBA Test Sistemi
+            </div>
+          </div>
+        </footer>
+      </div>
+    </div>
+
+    <!--   Core JS Files   -->
+    <script src="assets/js/core/jquery-3.7.1.min.js"></script>
+    <script src="assets/js/core/popper.min.js"></script>
+    <script src="assets/js/core/bootstrap.min.js"></script>
+
+    <!-- jQuery Scrollbar -->
+    <script src="assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js"></script>
+
+    <!-- Sweet Alert -->
+    <script src="assets/js/plugin/sweetalert/sweetalert.min.js"></script>
+
+    <!-- Kaiadmin JS -->
+    <script src="assets/js/kaiadmin.min.js"></script>
+
+    <script>
+      $(document).ready(function() {
+        // Son kullanılan değerleri ayarla
+        {% if last_pcba_model_id %}
+          $('#pcba_model').val('{{ last_pcba_model_id }}');
+          $('#pcba_model').trigger('change'); // Test parametrelerini göstermek için
+        {% endif %}
+        
+        {% if last_test_type_id %}
+          $('#test_type').val('{{ last_test_type_id }}');
+        {% endif %}
+        
+        // PCBA Model seçildiğinde test parametrelerini göster
+        $('#pcba_model').on('change', function() {
+          const selectedOption = $(this).find('option:selected');
+          const params = selectedOption.data('params');
+          const scenario = selectedOption.data('scenario');
+          
+          if (params && Object.keys(params).length > 0) {
+            let paramsHtml = `<div class="mb-3"><strong>Test Senaryosu:</strong> <span class="badge badge-info">${scenario}</span></div>`;
+            
+            if (params.voltage_range) {
+              paramsHtml += `
+                <div class="mb-3">
+                  <strong>Voltaj Testi:</strong><br>
+                  <span class="text-muted">Min: ${params.voltage_range.min}V, Max: ${params.voltage_range.max}V</span>
+                </div>
+              `;
+            }
+            
+            if (params.current_range) {
+              paramsHtml += `
+                <div class="mb-3">
+                  <strong>Akım Testi:</strong><br>
+                  <span class="text-muted">Min: ${params.current_range.min}A, Max: ${params.current_range.max}A</span>
+                </div>
+              `;
+            }
+            
+            if (params.frequency_test) {
+              paramsHtml += `
+                <div class="mb-3">
+                  <strong>Frekans Testi:</strong><br>
+                  <span class="text-muted">Hedef: ${params.frequency_test.target}Hz, Tolerans: ±${params.frequency_test.tolerance}Hz</span>
+                </div>
+              `;
+            }
+            
+            $('#testParamsContent').html(paramsHtml);
+            $('#testParamsCard').show();
+          } else {
+            $('#testParamsCard').hide();
+          }
+        });
+
+        // Test başlatma
+        $('#startTestBtn').on('click', function() {
+          const pcbaModel = $('#pcba_model').val();
+          const serialNumber = $('#serial_number').val();
+          const testType = $('#test_type').val();
+          
+          if (!pcbaModel || !serialNumber || !testType) {
+            swal("Hata!", "Lütfen tüm gerekli alanları doldurun.", "error");
+            return;
+          }
+          
+          startTest(pcbaModel, serialNumber, testType);
+        });
+
+        // Yeni test başlatma
+        $('#newTestBtn').on('click', function() {
+          resetTestForm();
+        });
+
+        // Tüm sonuçları görüntüleme
+        $('#viewAllResultsBtn').on('click', function() {
+          window.location.href = '/test-results';
+        });
+      });
+
+      function startTest(pcbaModelId, serialNumber, testType) {
+        // UI'yi test çalışıyor durumuna getir
+        showTestStep('step-running');
+        updateProgress(10, 'Test başlatılıyor...');
+        $('#currentTestStatus').text('Test başlatılıyor...');
+        $('#currentTestDetails').text('Bağlantılar kontrol ediliyor...');
+        
+        // Simüle edilmiş test adımları
+        setTimeout(() => {
+          updateProgress(30, 'Test bağlantısı kuruluyor...');
+          $('#currentTestStatus').text('PCBA Kartı Taranıyor');
+          $('#currentTestDetails').text('Seri numarası: ' + serialNumber);
+        }, 1000);
+        
+        setTimeout(() => {
+          updateProgress(50, 'Test parametreleri yükleniyor...');
+          $('#currentTestStatus').text('Test Parametreleri Yüklendi');
+          $('#currentTestDetails').text('Test tipi: ' + testType);
+        }, 2000);
+        
+        setTimeout(() => {
+          updateProgress(70, 'Test çalıştırılıyor...');
+          $('#currentTestStatus').text('Test Çalıştırılıyor');
+          $('#currentTestDetails').text('Ölçümler alınıyor...');
+        }, 3000);
+        
+        setTimeout(() => {
+          updateProgress(90, 'Sonuçlar işleniyor...');
+          $('#currentTestStatus').text('Sonuçlar İşleniyor');
+          $('#currentTestDetails').text('Test verileri analiz ediliyor...');
+        }, 4000);
+        
+        // Gerçek API çağrısı
+        setTimeout(() => {
+          fetch('/api/run-test', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              pcba_model_id: pcbaModelId,
+              serial_number: serialNumber,
+              test_type_id: testType
+            })
+          })
+          .then(response => response.json())
+          .then(data => {
+            updateProgress(100, 'Test tamamlandı!');
+            
+            if (data.success) {
+              setTimeout(() => {
+                showTestResults(data.test_result);
+              }, 1000);
+            } else {
+              swal("Test Hatası!", data.message, "error");
+              resetTestForm();
+            }
+          })
+          .catch(error => {
+            console.error('Test error:', error);
+            swal("Hata!", "Test sırasında bir hata oluştu.", "error");
+            resetTestForm();
+          });
+        }, 5000);
+      }
+
+      function showTestStep(stepId) {
+        $('.test-step').removeClass('active');
+        $('#' + stepId).addClass('active');
+      }
+
+      function updateProgress(percent, text) {
+        $('#testProgress').css('width', percent + '%');
+        $('#progressText').text(text);
+        $('#testDetailProgress').css('width', percent + '%');
+      }
+
+      function showTestResults(testResult) {
+        showTestStep('step-results');
+        
+        let statusClass = testResult.status === 'PASS' ? 'success' : 'danger';
+        let statusIcon = testResult.status === 'PASS' ? 'fa-check-circle' : 'fa-times-circle';
+        let statusText = testResult.status === 'PASS' ? 'BAŞARILI' : 'BAŞARISIZ';
+        
+        let resultsHtml = `
+          <div class="alert alert-${statusClass} alert-dismissible" role="alert">
+            <i class="fas ${statusIcon} me-2"></i>
+            <strong>Test ${statusText}!</strong> 
+            Seri No: ${testResult.serial_number} | Süre: ${testResult.duration}s
+          </div>
+          
+          <div class="row mb-4">
+            <div class="col-md-4">
+              <div class="card card-stats">
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-5">
+                      <div class="icon-big text-center">
+                        <i class="fas fa-microchip text-primary"></i>
+                      </div>
+                    </div>
+                    <div class="col-7 col-stats">
+                      <div class="numbers">
+                        <p class="card-category">Model</p>
+                        <h4 class="card-title">${testResult.model_name}</h4>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="card card-stats">
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-5">
+                      <div class="icon-big text-center">
+                        <i class="fas fa-vial text-info"></i>
+                      </div>
+                    </div>
+                    <div class="col-7 col-stats">
+                      <div class="numbers">
+                        <p class="card-category">Test Tipi</p>
+                        <h4 class="card-title">${testResult.test_type}</h4>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="card card-stats">
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-5">
+                      <div class="icon-big text-center">
+                        <i class="fas fa-clock text-warning"></i>
+                      </div>
+                    </div>
+                    <div class="col-7 col-stats">
+                      <div class="numbers">
+                        <p class="card-category">Süre</p>
+                        <h4 class="card-title">${testResult.duration}s</h4>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+        
+        // Test sonuçlarını göster
+        if (testResult.results) {
+          resultsHtml += '<h5 class="mb-3">Detaylı Test Sonuçları:</h5>';
+          
+          Object.keys(testResult.results).forEach(testName => {
+            const result = testResult.results[testName];
+            const cardClass = result.status === 'PASS' ? 'pass' : 'fail';
+            const iconClass = result.status === 'PASS' ? 'fa-check text-success' : 'fa-times text-danger';
+            
+            resultsHtml += `
+              <div class="card test-result-card ${cardClass} mb-3">
+                <div class="card-body">
+                  <div class="row align-items-center">
+                    <div class="col-md-2">
+                      <i class="fas ${iconClass} fa-2x"></i>
+                    </div>
+                    <div class="col-md-3">
+                      <h6 class="mb-0">${testName.toUpperCase()} Test</h6>
+                      <small class="text-muted">Status: ${result.status}</small>
+                    </div>
+                    <div class="col-md-7">
+                      <div class="measurement-display">
+                        Ölçülen: ${result.measured}${getUnit(testName)}
+                      </div>
+                      <small class="text-muted">
+                        Beklenen: ${getExpectedText(result, testName)}
+                      </small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            `;
+          });
+        }
+        
+        $('#testResultsContent').html(resultsHtml);
+      }
+
+      function getUnit(testName) {
+        switch(testName) {
+          case 'voltage': return 'V';
+          case 'current': return 'A';
+          case 'frequency': return 'Hz';
+          default: return '';
+        }
+      }
+
+      function getExpectedText(result, testName) {
+        if (testName === 'frequency') {
+          return `${result.expected}Hz (±${result.tolerance}Hz)`;
+        } else {
+          return `${result.expected_min} - ${result.expected_max}${getUnit(testName)}`;
+        }
+      }
+
+      function resetTestForm() {
+        showTestStep('step-ready');
+        updateProgress(0, 'Test başlatmaya hazır');
+        $('#testConfigForm')[0].reset();
+        $('#testParamsCard').hide();
+        
+        // Son kullanılan değerleri tekrar ayarla
+        {% if last_pcba_model_id %}
+          $('#pcba_model').val('{{ last_pcba_model_id }}');
+          $('#pcba_model').trigger('change');
+        {% endif %}
+        
+        {% if last_test_type_id %}
+          $('#test_type').val('{{ last_test_type_id }}');
+        {% endif %}
+      }
+    </script>
+  </body>
+</html>

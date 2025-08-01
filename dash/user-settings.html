@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="tr">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>PCBA Test Sistemi - Kullanıcı Ayarları</title>
+    <meta
+      content="width=device-width, initial-scale=1.0, shrink-to-fit=no"
+      name="viewport"
+    />
+    <link
+      rel="icon"
+      href="assets/img/tay.png"
+      type="image/x-icon"
+    />
+
+    <!-- Fonts and icons -->
+    <script src="assets/js/plugin/webfont/webfont.min.js"></script>
+    <script>
+      WebFont.load({
+        google: { families: ["Public Sans:300,400,500,600,700"] },
+        custom: {
+          families: [
+            "Font Awesome 5 Solid",
+            "Font Awesome 5 Regular",
+            "Font Awesome 5 Brands",
+            "simple-line-icons",
+          ],
+          urls: ["assets/css/fonts.min.css"],
+        },
+        active: function () {
+          sessionStorage.fonts = true;
+        },
+      });
+    </script>
+
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="assets/css/plugins.min.css" />
+    <link rel="stylesheet" href="assets/css/kaiadmin.min.css" />
+
+    <!-- CSS Just for demo purpose, don't include it in your project -->
+    <link rel="stylesheet" href="assets/css/demo.css" />
+  </head>
+  <body>
+    <div class="wrapper">
+      <!-- Sidebar -->
+      <div class="sidebar" data-background-color="dark">
+        <div class="sidebar-logo">
+          <!-- Logo Header -->
+          <div class="logo-header" data-background-color="dark">
+            <a href="/" class="logo">
+              <img
+                src="assets/img/tay.png"
+                alt="TayTech Logo"
+                class="navbar-brand"
+                height="35"
+              />
+            </a>
+            <div class="nav-toggle">
+              <button class="btn btn-toggle toggle-sidebar">
+                <i class="gg-menu-right"></i>
+              </button>
+              <button class="btn btn-toggle sidenav-toggler">
+                <i class="gg-menu-left"></i>
+              </button>
+            </div>
+            <button class="topbar-toggler more">
+              <i class="gg-more-vertical-alt"></i>
+            </button>
+          </div>
+          <!-- End Logo Header -->
+        </div>
+        <div class="sidebar-wrapper scrollbar scrollbar-inner">
+          <div class="sidebar-content">
+            <ul class="nav nav-secondary">
+              <li class="nav-item">
+                <a
+                  href="/"
+                  class="collapsed"
+                  aria-expanded="false"
+                >
+                  <i class="fas fa-home"></i>
+                  <p>Dashboard</p>
+                </a>
+              </li>
+              <li class="nav-section">
+                <span class="sidebar-mini-icon">
+                  <i class="fa fa-ellipsis-h"></i>
+                </span>
+                <h4 class="text-section">Test İşlemleri</h4>
+              </li>
+              <li class="nav-item">
+                <a href="/test-operations">
+                  <i class="fas fa-play-circle"></i>
+                  <p>Test Çalıştır</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="/test-results">
+                  <i class="fas fa-chart-line"></i>
+                  <p>Test Sonuçları</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="/reports">
+                  <i class="fas fa-file-alt"></i>
+                  <p>Raporlar</p>
+                </a>
+              </li>
+              <li class="nav-item active">
+                <a data-bs-toggle="collapse" href="#submenu">
+                  <i class="fas fa-cog"></i>
+                  <p>Settings</p>
+                  <span class="caret"></span>
+                </a>
+                <div class="collapse show" id="submenu">
+                  <ul class="nav nav-collapse">
+                    <li class="active">
+                      <a href="/user-settings">
+                        <span class="sub-item">User Settings</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="/system-settings">
+                        <span class="sub-item">System Settings</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="/test-parameters">
+                        <span class="sub-item">Test Parameters</span>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <!-- End Sidebar -->
+
+      <div class="main-panel">
+        <div class="main-header">
+          <div class="main-header-logo">
+            <!-- Logo Header -->
+            <div class="logo-header" data-background-color="dark">
+              <a href="/" class="logo">
+                <img
+                  src="assets/img/tay.png"
+                  alt="TayTech Logo"
+                  class="navbar-brand"
+                  height="35"
+                />
+              </a>
+              <div class="nav-toggle">
+                <button class="btn btn-toggle toggle-sidebar">
+                  <i class="gg-menu-right"></i>
+                </button>
+                <button class="btn btn-toggle sidenav-toggler">
+                  <i class="gg-menu-left"></i>
+                </button>
+              </div>
+              <button class="topbar-toggler more">
+                <i class="gg-more-vertical-alt"></i>
+              </button>
+            </div>
+            <!-- End Logo Header -->
+          </div>
+          <!-- Navbar Header -->
+          <nav
+            class="navbar navbar-header navbar-header-transparent navbar-expand-lg border-bottom"
+          >
+            <div class="container-fluid">
+              <nav
+                class="navbar navbar-header-left navbar-expand-lg navbar-form nav-search p-0 d-none d-lg-flex"
+              >
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <button type="submit" class="btn btn-search pe-1">
+                      <i class="fa fa-search search-icon"></i>
+                    </button>
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Arama..."
+                    class="form-control"
+                  />
+                </div>
+              </nav>
+
+              <ul class="navbar-nav topbar-nav ms-md-auto align-items-center">
+                <li class="nav-item topbar-user dropdown hidden-caret">
+                  <a
+                    class="dropdown-toggle profile-pic"
+                    data-bs-toggle="dropdown"
+                    href="#"
+                    aria-expanded="false"
+                  >
+                    <div class="avatar-sm">
+                      <img
+                        src="assets/img/profile2.jpg"
+                        alt="..."
+                        class="avatar-img rounded-circle"
+                      />
+                    </div>
+                    <span class="profile-username">
+                      <span class="op-7">Merhaba,</span>
+                      <span class="fw-bold">{{ user.username if user else 'Kullanıcı' }}</span>
+                    </span>
+                  </a>
+                  <ul class="dropdown-menu dropdown-user animated fadeIn">
+                    <div class="dropdown-user-scroll scrollbar-outer">
+                      <li>
+                        <div class="user-box">
+                          <div class="avatar-lg">
+                            <img
+                              src="assets/img/profile2.jpg"
+                              alt="image profile"
+                              class="avatar-img rounded"
+                            />
+                          </div>
+                          <div class="u-text">
+                            <h4>{{ user.username if user else 'Kullanıcı' }}</h4>
+                            <p class="text-muted">{{ user.email if user else 'email@example.com' }}</p>
+                            <p class="text-muted">Rol: {{ user.role.title() if user else 'Operator' }}</p>
+                          </div>
+                        </div>
+                      </li>
+                      <li>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="/user-settings">Profilim</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="/logout">Çıkış</a>
+                      </li>
+                    </div>
+                  </ul>
+                </li>
+              </ul>
+            </div>
+          </nav>
+          <!-- End Navbar -->
+        </div>
+
+        <div class="container">
+          <div class="page-inner">
+            <div
+              class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4"
+            >
+              <div>
+                <h3 class="fw-bold mb-3">Kullanıcı Ayarları</h3>
+                <h6 class="op-7 mb-2">Profil bilgilerinizi ve hesap ayarlarınızı yönetin</h6>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-8">
+                <div class="card">
+                  <div class="card-header">
+                    <div class="card-title">Profil Bilgileri</div>
+                  </div>
+                  <div class="card-body">
+                    <form id="profileForm">
+                      <div class="row">
+                        <div class="col-sm-6">
+                          <div class="form-group">
+                            <label for="username">Kullanıcı Adı</label>
+                            <input
+                              type="text"
+                              class="form-control"
+                              id="username"
+                              value="{{ user.username if user else '' }}"
+                              readonly
+                            />
+                            <small class="form-text text-muted">Kullanıcı adı değiştirilemez</small>
+                          </div>
+                        </div>
+                        <div class="col-sm-6">
+                          <div class="form-group">
+                            <label for="email">E-posta</label>
+                            <input
+                              type="email"
+                              class="form-control"
+                              id="email"
+                              value="{{ user.email if user else '' }}"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                      <div class="row">
+                        <div class="col-sm-6">
+                          <div class="form-group">
+                            <label for="role">Rol</label>
+                            <input
+                              type="text"
+                              class="form-control"
+                              id="role"
+                              value="{{ user.role.title() if user else '' }}"
+                              readonly
+                            />
+                            <small class="form-text text-muted">Rol yönetici tarafından belirlenir</small>
+                          </div>
+                        </div>
+                        <div class="col-sm-6">
+                          <div class="form-group">
+                            <label for="created_at">Kayıt Tarihi</label>
+                            <input
+                              type="text"
+                              class="form-control"
+                              id="created_at"
+                              value="{{ user.created_at.strftime('%d.%m.%Y %H:%M') if user else '' }}"
+                              readonly
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </form>
+                  </div>
+                  <div class="card-action">
+                    <button class="btn btn-success" onclick="saveProfile()">Kaydet</button>
+                    <button class="btn btn-danger" onclick="resetForm()">İptal</button>
+                  </div>
+                </div>
+
+                <div class="card">
+                  <div class="card-header">
+                    <div class="card-title">Şifre Değiştir</div>
+                  </div>
+                  <div class="card-body">
+                    <form id="passwordForm">
+                      <div class="form-group">
+                        <label for="current_password">Mevcut Şifre</label>
+                        <input
+                          type="password"
+                          class="form-control"
+                          id="current_password"
+                          required
+                        />
+                      </div>
+                      <div class="form-group">
+                        <label for="new_password">Yeni Şifre</label>
+                        <input
+                          type="password"
+                          class="form-control"
+                          id="new_password"
+                          required
+                        />
+                      </div>
+                      <div class="form-group">
+                        <label for="confirm_password">Yeni Şifre (Tekrar)</label>
+                        <input
+                          type="password"
+                          class="form-control"
+                          id="confirm_password"
+                          required
+                        />
+                      </div>
+                    </form>
+                  </div>
+                  <div class="card-action">
+                    <button class="btn btn-primary" onclick="changePassword()">Şifre Değiştir</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-4">
+                <div class="card card-profile">
+                  <div class="card-header" style="background-image: url('assets/img/blogpost.jpg')">
+                    <div class="profile-picture">
+                      <div class="avatar avatar-xl">
+                        <img
+                          src="assets/img/profile2.jpg"
+                          alt="..."
+                          class="avatar-img rounded-circle"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div class="card-body">
+                    <div class="user-profile text-center">
+                      <div class="name">{{ user.username if user else 'Kullanıcı' }}</div>
+                      <div class="job">{{ user.role.title() if user else 'Operator' }}</div>
+                      <div class="desc">{{ user.email if user else 'email@example.com' }}</div>
+                    </div>
+                  </div>
+                  <div class="card-footer">
+                    <div class="row user-stats text-center">
+                      <div class="col">
+                        <div class="number">23</div>
+                        <div class="title">Başarılı Test</div>
+                      </div>
+                      <div class="col">
+                        <div class="number">2</div>
+                        <div class="title">Hatalı Test</div>
+                      </div>
+                      <div class="col">
+                        <div class="number">92%</div>
+                        <div class="title">Başarı Oranı</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <footer class="footer">
+          <div class="container-fluid d-flex justify-content-between">
+            <div class="copyright">
+              2024, PCBA Test Sistemi
+            </div>
+          </div>
+        </footer>
+      </div>
+    </div>
+
+    <!--   Core JS Files   -->
+    <script src="assets/js/core/jquery-3.7.1.min.js"></script>
+    <script src="assets/js/core/popper.min.js"></script>
+    <script src="assets/js/core/bootstrap.min.js"></script>
+
+    <!-- jQuery Scrollbar -->
+    <script src="assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js"></script>
+
+    <!-- Sweet Alert -->
+    <script src="assets/js/plugin/sweetalert/sweetalert.min.js"></script>
+
+    <!-- Kaiadmin JS -->
+    <script src="assets/js/kaiadmin.min.js"></script>
+
+    <script>
+      function saveProfile() {
+        const email = document.getElementById('email').value;
+        
+        fetch('/api/update-profile', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: email
+          })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            swal("Başarılı!", "Profil bilgileri güncellendi.", "success");
+          } else {
+            swal("Hata!", data.message || "Güncelleme sırasında hata oluştu.", "error");
+          }
+        })
+        .catch(error => {
+          swal("Hata!", "Güncelleme sırasında hata oluştu.", "error");
+        });
+      }
+
+      function changePassword() {
+        const currentPassword = document.getElementById('current_password').value;
+        const newPassword = document.getElementById('new_password').value;
+        const confirmPassword = document.getElementById('confirm_password').value;
+
+        if (newPassword !== confirmPassword) {
+          swal("Hata!", "Yeni şifreler eşleşmiyor.", "error");
+          return;
+        }
+
+        if (newPassword.length < 6) {
+          swal("Hata!", "Yeni şifre en az 6 karakter olmalıdır.", "error");
+          return;
+        }
+
+        fetch('/api/change-password', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            current_password: currentPassword,
+            new_password: newPassword
+          })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            swal("Başarılı!", "Şifre başarıyla değiştirildi.", "success");
+            document.getElementById('passwordForm').reset();
+          } else {
+            swal("Hata!", data.message || "Şifre değiştirme sırasında hata oluştu.", "error");
+          }
+        })
+        .catch(error => {
+          swal("Hata!", "Şifre değiştirme sırasında hata oluştu.", "error");
+        });
+      }
+
+      function resetForm() {
+        location.reload();
+      }
+    </script>
+  </body>
+</html>
