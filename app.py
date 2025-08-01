@@ -91,6 +91,33 @@ class TestResult(db.Model):
     test_type = db.relationship('TestType', backref=db.backref('test_results', lazy=True))
     operator = db.relationship('User', backref=db.backref('test_results', lazy=True))
 
+class Connection(db.Model):
+    __tablename__ = 'connections'
+    id = db.Column(db.Integer, primary_key=True)
+    connection_name = db.Column(db.String(100), nullable=False)
+    protocol_type = db.Column(db.String(20), nullable=False)  # 'MODBUS_RTU' or 'MODBUS_TCP'
+    description = db.Column(db.Text)
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Modbus RTU Parameters
+    serial_port = db.Column(db.String(20))  # COM1, COM2, etc.
+    baud_rate = db.Column(db.Integer)  # 9600, 19200, 38400, 115200
+    data_bits = db.Column(db.Integer, default=8)  # 7, 8
+    parity = db.Column(db.String(10), default='NONE')  # NONE, EVEN, ODD
+    stop_bits = db.Column(db.Integer, default=1)  # 1, 2
+    modbus_address = db.Column(db.Integer)  # 1-247
+    
+    # Modbus TCP Parameters
+    ip_address = db.Column(db.String(15))  # IP address
+    port = db.Column(db.Integer, default=502)  # Modbus TCP port
+    gateway_address = db.Column(db.String(15))  # Gateway IP
+    subnet_mask = db.Column(db.String(15))  # Subnet mask
+    timeout = db.Column(db.Integer, default=5000)  # Connection timeout in ms
+    
+    # Additional parameters
+    connection_parameters = db.Column(db.JSON)  # Additional flexible parameters
+
 # Ana sayfa route'ları
 @app.route('/')
 @login_required
@@ -902,6 +929,143 @@ def api_change_password():
     
     except Exception as e:
         return jsonify({'success': False, 'message': 'Şifre değiştirme sırasında hata oluştu'})
+
+# Bağlantı Yönetimi Route'ları
+@app.route('/connections')
+@login_required
+def connections():
+    connections = Connection.query.filter_by(is_active=True).all()
+    return render_template('connections.html', connections=connections)
+
+@app.route('/add-connection', methods=['GET', 'POST'])
+@login_required
+def add_connection():
+    if request.method == 'POST':
+        try:
+            connection_name = request.form['connection_name']
+            protocol_type = request.form['protocol_type']
+            description = request.form.get('description', '')
+            
+            connection = Connection(
+                connection_name=connection_name,
+                protocol_type=protocol_type,
+                description=description
+            )
+            
+            # Protocol specific parameters
+            if protocol_type == 'MODBUS_RTU':
+                connection.serial_port = request.form.get('serial_port')
+                connection.baud_rate = int(request.form.get('baud_rate', 9600))
+                connection.data_bits = int(request.form.get('data_bits', 8))
+                connection.parity = request.form.get('parity', 'NONE')
+                connection.stop_bits = int(request.form.get('stop_bits', 1))
+                connection.modbus_address = int(request.form.get('modbus_address', 1))
+            
+            elif protocol_type == 'MODBUS_TCP':
+                connection.ip_address = request.form.get('ip_address')
+                connection.port = int(request.form.get('port', 502))
+                connection.gateway_address = request.form.get('gateway_address')
+                connection.subnet_mask = request.form.get('subnet_mask')
+                connection.timeout = int(request.form.get('timeout', 5000))
+            
+            db.session.add(connection)
+            db.session.commit()
+            
+            return redirect(url_for('connections'))
+            
+        except Exception as e:
+            return render_template('add-connection.html', error='Bağlantı eklenirken hata oluştu: ' + str(e))
+    
+    return render_template('add-connection.html')
+
+@app.route('/edit-connection/<int:connection_id>', methods=['GET', 'POST'])
+@login_required
+def edit_connection(connection_id):
+    connection = Connection.query.get_or_404(connection_id)
+    
+    if request.method == 'POST':
+        try:
+            connection.connection_name = request.form['connection_name']
+            connection.protocol_type = request.form['protocol_type']
+            connection.description = request.form.get('description', '')
+            
+            # Protocol specific parameters
+            if connection.protocol_type == 'MODBUS_RTU':
+                connection.serial_port = request.form.get('serial_port')
+                connection.baud_rate = int(request.form.get('baud_rate', 9600))
+                connection.data_bits = int(request.form.get('data_bits', 8))
+                connection.parity = request.form.get('parity', 'NONE')
+                connection.stop_bits = int(request.form.get('stop_bits', 1))
+                connection.modbus_address = int(request.form.get('modbus_address', 1))
+                # Clear TCP parameters
+                connection.ip_address = None
+                connection.port = 502
+                connection.gateway_address = None
+                connection.subnet_mask = None
+                connection.timeout = 5000
+                
+            elif connection.protocol_type == 'MODBUS_TCP':
+                connection.ip_address = request.form.get('ip_address')
+                connection.port = int(request.form.get('port', 502))
+                connection.gateway_address = request.form.get('gateway_address')
+                connection.subnet_mask = request.form.get('subnet_mask')
+                connection.timeout = int(request.form.get('timeout', 5000))
+                # Clear RTU parameters
+                connection.serial_port = None
+                connection.baud_rate = None
+                connection.modbus_address = None
+            
+            db.session.commit()
+            return redirect(url_for('connections'))
+            
+        except Exception as e:
+            return render_template('edit-connection.html', connection=connection, 
+                                 error='Bağlantı güncellenirken hata oluştu: ' + str(e))
+    
+    return render_template('edit-connection.html', connection=connection)
+
+@app.route('/delete-connection/<int:connection_id>', methods=['POST'])
+@login_required
+def delete_connection(connection_id):
+    connection = Connection.query.get_or_404(connection_id)
+    connection.is_active = False
+    db.session.commit()
+    return redirect(url_for('connections'))
+
+@app.route('/api/test-connection/<int:connection_id>', methods=['POST'])
+@login_required
+def api_test_connection(connection_id):
+    connection = Connection.query.get_or_404(connection_id)
+    
+    try:
+        # Bu kısımda gerçek Modbus bağlantı testi yapılacak
+        # Şimdilik basit bir simülasyon yapıyoruz
+        
+        if connection.protocol_type == 'MODBUS_RTU':
+            # RTU bağlantı testi simülasyonu
+            test_result = {
+                'success': True,
+                'message': f'Modbus RTU bağlantısı başarılı: {connection.serial_port}, Adres: {connection.modbus_address}',
+                'connection_time': 250,  # ms
+                'device_info': 'Test Device RTU'
+            }
+        
+        elif connection.protocol_type == 'MODBUS_TCP':
+            # TCP bağlantı testi simülasyonu
+            test_result = {
+                'success': True,
+                'message': f'Modbus TCP bağlantısı başarılı: {connection.ip_address}:{connection.port}',
+                'connection_time': 150,  # ms
+                'device_info': 'Test Device TCP'
+            }
+        
+        return jsonify(test_result)
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'message': f'Bağlantı testi başarısız: {str(e)}'
+        })
 
 # Veritabanını başlat
 def init_db():

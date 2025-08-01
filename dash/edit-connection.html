@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="tr">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>TayTech - Bağlantı Düzenle</title>
+    <meta
+      content="width=device-width, initial-scale=1.0, shrink-to-fit=no"
+      name="viewport"
+    />
+    <link rel="icon" href="assets/img/tay.png" type="image/png" />
+
+    <!-- Fonts and icons -->
+    <script src="assets/js/plugin/webfont/webfont.min.js"></script>
+    <script>
+      WebFont.load({
+        google: { families: ["Public Sans:300,400,500,600,700"] },
+        custom: {
+          families: [
+            "Font Awesome 5 Solid",
+            "Font Awesome 5 Regular",
+            "Font Awesome 5 Brands",
+            "simple-line-icons",
+          ],
+          urls: ["assets/css/fonts.min.css"],
+        },
+        active: function () {
+          sessionStorage.fonts = true;
+        },
+      });
+    </script>
+
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="assets/css/plugins.min.css" />
+    <link rel="stylesheet" href="assets/css/kaiadmin.min.css" />
+
+    <!-- CSS Just for demo purpose, don't include it in your project -->
+    <link rel="stylesheet" href="assets/css/demo.css" />
+  </head>
+  <body>
+    <div class="wrapper">
+      <!-- Sidebar -->
+      <div class="sidebar" data-background-color="dark">
+        <div class="sidebar-logo">
+          <!-- Logo Header -->
+          <div class="logo-header" data-background-color="dark">
+            <a href="/" class="logo">
+              <img
+                src="assets/img/tay.png"
+                alt="TayTech Logo"
+                class="navbar-brand"
+                height="35"
+              />
+            </a>
+            <div class="nav-toggle">
+              <button class="btn btn-toggle toggle-sidebar">
+                <i class="gg-menu-right"></i>
+              </button>
+              <button class="btn btn-toggle sidenav-toggler">
+                <i class="gg-menu-left"></i>
+              </button>
+            </div>
+            <button class="topbar-toggler more">
+              <i class="gg-more-vertical-alt"></i>
+            </button>
+          </div>
+          <!-- End Logo Header -->
+        </div>
+        <div class="sidebar-wrapper scrollbar scrollbar-inner">
+          <div class="sidebar-content">
+            <ul class="nav nav-secondary">
+              <li class="nav-item">
+                <a href="/" class="collapsed" aria-expanded="false">
+                  <i class="fas fa-home"></i>
+                  <p>Dashboard</p>
+                </a>
+              </li>
+              <li class="nav-section">
+                <span class="sidebar-mini-icon">
+                  <i class="fa fa-ellipsis-h"></i>
+                </span>
+                <h4 class="text-section">Test İşlemleri</h4>
+              </li>
+              <li class="nav-item">
+                <a href="/test-operations">
+                  <i class="fas fa-play-circle"></i>
+                  <p>Test Çalıştır</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="/test-results">
+                  <i class="fas fa-chart-line"></i>
+                  <p>Test Sonuçları</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="/reports">
+                  <i class="fas fa-file-alt"></i>
+                  <p>Raporlar</p>
+                </a>
+              </li>
+              <li class="nav-section">
+                <span class="sidebar-mini-icon">
+                  <i class="fa fa-ellipsis-h"></i>
+                </span>
+                <h4 class="text-section">Yönetim</h4>
+              </li>
+              <li class="nav-item">
+                <a data-bs-toggle="collapse" href="#userManagement">
+                  <i class="fas fa-users"></i>
+                  <p>Kullanıcı Yönetimi</p>
+                  <span class="caret"></span>
+                </a>
+                <div class="collapse" id="userManagement">
+                  <ul class="nav nav-collapse">
+                    <li>
+                      <a href="/users">
+                        <span class="sub-item">Kullanıcı Listesi</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="/add-user">
+                        <span class="sub-item">Yeni Kullanıcı</span>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </li>
+              <li class="nav-item">
+                <a data-bs-toggle="collapse" href="#testManagement">
+                  <i class="fas fa-cogs"></i>
+                  <p>Test Yönetimi</p>
+                  <span class="caret"></span>
+                </a>
+                <div class="collapse show" id="testManagement">
+                  <ul class="nav nav-collapse">
+                    <li>
+                      <a href="/test-types">
+                        <span class="sub-item">Test Tipleri</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="/test-scenarios">
+                        <span class="sub-item">Test Senaryoları</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="/pcba-models">
+                        <span class="sub-item">PCBA Modelleri</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="/connections" class="active">
+                        <span class="sub-item">Bağlantı Yönetimi</span>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </li>
+              <li class="nav-section">
+                <span class="sidebar-mini-icon">
+                  <i class="fa fa-ellipsis-h"></i>
+                </span>
+                <h4 class="text-section">Ayarlar</h4>
+              </li>
+              <li class="nav-item">
+                <a data-bs-toggle="collapse" href="#submenu">
+                  <i class="fas fa-cog"></i>
+                  <p>Settings</p>
+                  <span class="caret"></span>
+                </a>
+                <div class="collapse" id="submenu">
+                  <ul class="nav nav-collapse">
+                    <li>
+                      <a href="/user-settings">
+                        <span class="sub-item">User Settings</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="/system-settings">
+                        <span class="sub-item">System Settings</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="/test-parameters">
+                        <span class="sub-item">Test Parameters</span>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <!-- End Sidebar -->
+
+      <div class="main-panel">
+        <div class="main-header">
+          <div class="main-header-logo">
+            <!-- Logo Header -->
+            <div class="logo-header" data-background-color="dark">
+              <a href="/" class="logo">
+                <img
+                  src="assets/img/tay.png"
+                  alt="TayTech Logo"
+                  class="navbar-brand"
+                  height="35"
+                />
+              </a>
+              <div class="nav-toggle">
+                <button class="btn btn-toggle toggle-sidebar">
+                  <i class="gg-menu-right"></i>
+                </button>
+                <button class="btn btn-toggle sidenav-toggler">
+                  <i class="gg-menu-left"></i>
+                </button>
+              </div>
+              <button class="topbar-toggler more">
+                <i class="gg-more-vertical-alt"></i>
+              </button>
+            </div>
+            <!-- End Logo Header -->
+          </div>
+          <!-- Navbar Header -->
+          <nav
+            class="navbar navbar-header navbar-header-transparent navbar-expand-lg border-bottom"
+          >
+            <div class="container-fluid">
+              <ul class="navbar-nav topbar-nav ms-md-auto align-items-center">
+                <li class="nav-item topbar-user dropdown hidden-caret">
+                  <a
+                    class="dropdown-toggle profile-pic"
+                    data-bs-toggle="dropdown"
+                    href="#"
+                    aria-expanded="false"
+                  >
+                    <div class="avatar-sm">
+                      <img
+                        src="assets/img/profile2.jpg"
+                        alt="..."
+                        class="avatar-img rounded-circle"
+                      />
+                    </div>
+                    <span class="profile-username">
+                      <span class="op-7">Merhaba,</span>
+                      <span class="fw-bold">{{ current_user.username if current_user else 'Kullanıcı' }}</span>
+                    </span>
+                  </a>
+                  <ul class="dropdown-menu dropdown-user animated fadeIn">
+                    <div class="dropdown-user-scroll scrollbar-outer">
+                      <li>
+                        <div class="user-box">
+                          <div class="avatar-lg">
+                            <img
+                              src="assets/img/profile2.jpg"
+                              alt="image profile"
+                              class="avatar-img rounded"
+                            />
+                          </div>
+                          <div class="u-text">
+                            <h4>{{ current_user.username if current_user else 'Kullanıcı' }}</h4>
+                            <p class="text-muted">{{ current_user.email if current_user else 'email@example.com' }}</p>
+                            <p class="text-muted">Rol: {{ current_user.role.title() if current_user else 'Operator' }}</p>
+                          </div>
+                        </div>
+                      </li>
+                      <li>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="/user-settings">Profilim</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="/logout">Çıkış</a>
+                      </li>
+                    </div>
+                  </ul>
+                </li>
+              </ul>
+            </div>
+          </nav>
+          <!-- End Navbar -->
+        </div>
+
+        <div class="container">
+          <div class="page-inner">
+            <div class="page-header">
+              <h3 class="fw-bold mb-3">Bağlantı Düzenle</h3>
+              <ul class="breadcrumbs mb-3">
+                <li class="nav-home">
+                  <a href="/">
+                    <i class="icon-home"></i>
+                  </a>
+                </li>
+                <li class="separator">
+                  <i class="icon-arrow-right"></i>
+                </li>
+                <li class="nav-item">
+                  <a href="#">Test Yönetimi</a>
+                </li>
+                <li class="separator">
+                  <i class="icon-arrow-right"></i>
+                </li>
+                <li class="nav-item">
+                  <a href="/connections">Bağlantı Yönetimi</a>
+                </li>
+                <li class="separator">
+                  <i class="icon-arrow-right"></i>
+                </li>
+                <li class="nav-item">
+                  <a href="#">Bağlantı Düzenle</a>
+                </li>
+              </ul>
+            </div>
+
+            <div class="row">
+              <div class="col-md-12">
+                <div class="card">
+                  <div class="card-header">
+                    <div class="card-title">Bağlantı Bilgilerini Düzenle</div>
+                  </div>
+                  <div class="card-body">
+                    <form id="connectionForm" action="/edit-connection/{{ connection.id }}" method="POST">
+                      <input type="hidden" name="connection_id" value="{{ connection.id }}">
+                      
+                      <!-- Genel Bilgiler -->
+                      <div class="row">
+                        <div class="col-md-6">
+                          <div class="form-group">
+                            <label for="connection_name">Bağlantı Adı <span class="text-danger">*</span></label>
+                            <input
+                              type="text"
+                              class="form-control"
+                              id="connection_name"
+                              name="connection_name"
+                              value="{{ connection.connection_name }}"
+                              placeholder="Örn: Test Modülü 1"
+                              required
+                            />
+                            <small class="form-text text-muted">Benzersiz bir bağlantı adı girin</small>
+                          </div>
+                        </div>
+                        <div class="col-md-6">
+                          <div class="form-group">
+                            <label for="description">Açıklama</label>
+                            <input
+                              type="text"
+                              class="form-control"
+                              id="description"
+                              name="description"
+                              value="{{ connection.description or '' }}"
+                              placeholder="Bağlantı açıklaması"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Protokol Seçimi -->
+                      <div class="row">
+                        <div class="col-md-12">
+                          <div class="form-group">
+                            <label>Protokol Tipi <span class="text-danger">*</span></label>
+                            <div class="d-flex">
+                              <div class="form-check me-4">
+                                <input
+                                  class="form-check-input"
+                                  type="radio"
+                                  name="protocol_type"
+                                  id="protocolRTU"
+                                  value="MODBUS_RTU"
+                                  {% if connection.protocol_type == 'MODBUS_RTU' %}checked{% endif %}
+                                />
+                                <label class="form-check-label" for="protocolRTU">
+                                  <i class="fas fa-usb me-2"></i>MODBUS RTU (Seri)
+                                </label>
+                              </div>
+                              <div class="form-check">
+                                <input
+                                  class="form-check-input"
+                                  type="radio"
+                                  name="protocol_type"
+                                  id="protocolTCP"
+                                  value="MODBUS_TCP"
+                                  {% if connection.protocol_type == 'MODBUS_TCP' %}checked{% endif %}
+                                />
+                                <label class="form-check-label" for="protocolTCP">
+                                  <i class="fas fa-network-wired me-2"></i>MODBUS TCP (Ethernet)
+                                </label>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <hr>
+
+                      <!-- RTU Ayarları -->
+                      <div id="rtuSettings" class="protocol-settings">
+                        <h5 class="mb-3"><i class="fas fa-usb me-2"></i>MODBUS RTU Ayarları</h5>
+                        <div class="row">
+                          <div class="col-md-4">
+                            <div class="form-group">
+                              <label for="serial_port">Seri Port <span class="text-danger">*</span></label>
+                              <select class="form-control" id="serial_port" name="serial_port">
+                                <option value="">Port Seçin</option>
+                                {% for i in range(1, 21) %}
+                                <option value="COM{{ i }}" {% if connection.serial_port == 'COM' + i|string %}selected{% endif %}>COM{{ i }}</option>
+                                {% endfor %}
+                              </select>
+                            </div>
+                          </div>
+                          <div class="col-md-4">
+                            <div class="form-group">
+                              <label for="baud_rate">Baud Rate <span class="text-danger">*</span></label>
+                              <select class="form-control" id="baud_rate" name="baud_rate">
+                                <option value="9600" {% if connection.baud_rate == 9600 %}selected{% endif %}>9600</option>
+                                <option value="19200" {% if connection.baud_rate == 19200 %}selected{% endif %}>19200</option>
+                                <option value="38400" {% if connection.baud_rate == 38400 %}selected{% endif %}>38400</option>
+                                <option value="115200" {% if connection.baud_rate == 115200 %}selected{% endif %}>115200</option>
+                              </select>
+                            </div>
+                          </div>
+                          <div class="col-md-4">
+                            <div class="form-group">
+                              <label for="modbus_address">MODBUS Adresi <span class="text-danger">*</span></label>
+                              <input
+                                type="number"
+                                class="form-control"
+                                id="modbus_address"
+                                name="modbus_address"
+                                min="1"
+                                max="247"
+                                value="{{ connection.modbus_address or 1 }}"
+                              />
+                              <small class="form-text text-muted">1-247 arası</small>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="row">
+                          <div class="col-md-4">
+                            <div class="form-group">
+                              <label for="data_bits">Veri Biti</label>
+                              <select class="form-control" id="data_bits" name="data_bits">
+                                <option value="7" {% if connection.data_bits == 7 %}selected{% endif %}>7</option>
+                                <option value="8" {% if connection.data_bits == 8 or not connection.data_bits %}selected{% endif %}>8</option>
+                              </select>
+                            </div>
+                          </div>
+                          <div class="col-md-4">
+                            <div class="form-group">
+                              <label for="parity">Parity</label>
+                              <select class="form-control" id="parity" name="parity">
+                                <option value="NONE" {% if connection.parity == 'NONE' or not connection.parity %}selected{% endif %}>None</option>
+                                <option value="EVEN" {% if connection.parity == 'EVEN' %}selected{% endif %}>Even</option>
+                                <option value="ODD" {% if connection.parity == 'ODD' %}selected{% endif %}>Odd</option>
+                              </select>
+                            </div>
+                          </div>
+                          <div class="col-md-4">
+                            <div class="form-group">
+                              <label for="stop_bits">Stop Biti</label>
+                              <select class="form-control" id="stop_bits" name="stop_bits">
+                                <option value="1" {% if connection.stop_bits == 1 or not connection.stop_bits %}selected{% endif %}>1</option>
+                                <option value="2" {% if connection.stop_bits == 2 %}selected{% endif %}>2</option>
+                              </select>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- TCP Ayarları -->
+                      <div id="tcpSettings" class="protocol-settings" style="display: none;">
+                        <h5 class="mb-3"><i class="fas fa-network-wired me-2"></i>MODBUS TCP Ayarları</h5>
+                        <div class="row">
+                          <div class="col-md-6">
+                            <div class="form-group">
+                              <label for="ip_address">IP Adresi <span class="text-danger">*</span></label>
+                              <input
+                                type="text"
+                                class="form-control"
+                                id="ip_address"
+                                name="ip_address"
+                                value="{{ connection.ip_address or '' }}"
+                                placeholder="192.168.1.100"
+                                pattern="^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
+                              />
+                            </div>
+                          </div>
+                          <div class="col-md-6">
+                            <div class="form-group">
+                              <label for="port">Port</label>
+                              <input
+                                type="number"
+                                class="form-control"
+                                id="port"
+                                name="port"
+                                min="1"
+                                max="65535"
+                                value="{{ connection.port or 502 }}"
+                              />
+                              <small class="form-text text-muted">Varsayılan: 502</small>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="row">
+                          <div class="col-md-6">
+                            <div class="form-group">
+                              <label for="gateway_address">Gateway Adresi</label>
+                              <input
+                                type="text"
+                                class="form-control"
+                                id="gateway_address"
+                                name="gateway_address"
+                                value="{{ connection.gateway_address or '' }}"
+                                placeholder="192.168.1.1"
+                                pattern="^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
+                              />
+                            </div>
+                          </div>
+                          <div class="col-md-6">
+                            <div class="form-group">
+                              <label for="subnet_mask">Alt Ağ Maskesi</label>
+                              <input
+                                type="text"
+                                class="form-control"
+                                id="subnet_mask"
+                                name="subnet_mask"
+                                value="{{ connection.subnet_mask or '' }}"
+                                placeholder="255.255.255.0"
+                                pattern="^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                        <div class="row">
+                          <div class="col-md-6">
+                            <div class="form-group">
+                              <label for="timeout">Timeout (ms)</label>
+                              <input
+                                type="number"
+                                class="form-control"
+                                id="timeout"
+                                name="timeout"
+                                min="1000"
+                                max="30000"
+                                value="{{ connection.timeout or 5000 }}"
+                              />
+                              <small class="form-text text-muted">Varsayılan: 5000ms</small>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <hr>
+
+                      <!-- Durum -->
+                      <div class="row">
+                        <div class="col-md-12">
+                          <div class="form-group">
+                            <div class="form-check">
+                              <input
+                                class="form-check-input"
+                                type="checkbox"
+                                id="is_active"
+                                name="is_active"
+                                value="1"
+                                {% if connection.is_active %}checked{% endif %}
+                              />
+                              <label class="form-check-label" for="is_active">
+                                Bu bağlantıyı aktif olarak işaretle
+                              </label>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Form Buttons -->
+                      <div class="card-action">
+                        <button type="submit" class="btn btn-success">
+                          <i class="fa fa-save"></i> Güncelle
+                        </button>
+                        <button type="button" class="btn btn-info ms-2" onclick="testConnection()">
+                          <i class="fa fa-plug"></i> Bağlantı Testi
+                        </button>
+                        <a href="/connections" class="btn btn-danger ms-2">
+                          <i class="fa fa-times"></i> İptal
+                        </a>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <footer class="footer">
+          <div class="container-fluid d-flex justify-content-between">
+            <div class="copyright">
+              2024, TayTech PCBA Test Sistemi
+            </div>
+          </div>
+        </footer>
+      </div>
+    </div>
+
+    <!--   Core JS Files   -->
+    <script src="assets/js/core/jquery-3.7.1.min.js"></script>
+    <script src="assets/js/core/popper.min.js"></script>
+    <script src="assets/js/core/bootstrap.min.js"></script>
+
+    <!-- jQuery Scrollbar -->
+    <script src="assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js"></script>
+
+    <!-- Sweet Alert -->
+    <script src="assets/js/plugin/sweetalert/sweetalert.min.js"></script>
+
+    <!-- Kaiadmin JS -->
+    <script src="assets/js/kaiadmin.min.js"></script>
+
+    <script>
+      $(document).ready(function () {
+        // Protokol değişimini dinle
+        $('input[name="protocol_type"]').change(function() {
+          toggleProtocolSettings();
+        });
+
+        // Tooltip'leri aktif et
+        $('[data-bs-toggle="tooltip"]').tooltip();
+
+        // Form validasyonu
+        $('#connectionForm').on('submit', function(e) {
+          if (!validateForm()) {
+            e.preventDefault();
+          }
+        });
+
+        // Başlangıçta mevcut protokole göre ayarları göster
+        toggleProtocolSettings();
+      });
+
+      function toggleProtocolSettings() {
+        var selectedProtocol = $('input[name="protocol_type"]:checked').val();
+        
+        if (selectedProtocol === 'MODBUS_RTU') {
+          $('#rtuSettings').show();
+          $('#tcpSettings').hide();
+          // RTU alanları zorunlu yap
+          $('#serial_port, #baud_rate, #modbus_address').prop('required', true);
+          // TCP alanları opsiyonel yap
+          $('#ip_address').prop('required', false);
+        } else {
+          $('#rtuSettings').hide();
+          $('#tcpSettings').show();
+          // TCP alanları zorunlu yap
+          $('#ip_address').prop('required', true);
+          // RTU alanları opsiyonel yap
+          $('#serial_port, #baud_rate, #modbus_address').prop('required', false);
+        }
+      }
+
+      function validateForm() {
+        var isValid = true;
+        var protocol = $('input[name="protocol_type"]:checked').val();
+        
+        // Bağlantı adı kontrolü
+        if (!$('#name').val().trim()) {
+          showError('Bağlantı adı zorunludur!');
+          return false;
+        }
+
+        if (protocol === 'MODBUS_RTU') {
+          // RTU validasyonu
+          if (!$('#serial_port').val()) {
+            showError('Seri port seçimi zorunludur!');
+            return false;
+          }
+          if (!$('#modbus_address').val()) {
+            showError('MODBUS adresi zorunludur!');
+            return false;
+          }
+        } else {
+          // TCP validasyonu
+          if (!$('#ip_address').val()) {
+            showError('IP adresi zorunludur!');
+            return false;
+          }
+          
+          // IP adresi format kontrolü
+          var ipPattern = /^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+          if (!ipPattern.test($('#ip_address').val())) {
+            showError('Geçerli bir IP adresi girin!');
+            return false;
+          }
+        }
+
+        return isValid;
+      }
+
+      function testConnection() {
+        if (!validateForm()) {
+          return;
+        }
+
+        swal({
+          title: "Bağlantı Testi",
+          text: "Bağlantı test ediliyor...",
+          type: "info",
+          buttons: false,
+          closeOnClickOutside: false,
+          closeOnEsc: false
+        });
+
+        // Form verilerini topla
+        var formData = new FormData($('#connectionForm')[0]);
+        
+        fetch('/api/test-connection-settings', {
+          method: 'POST',
+          body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            swal({
+              title: "Bağlantı Başarılı!",
+              text: data.message,
+              type: "success",
+              timer: 3000
+            });
+          } else {
+            swal({
+              title: "Bağlantı Hatası!",
+              text: data.message,
+              type: "error"
+            });
+          }
+        })
+        .catch(error => {
+          swal({
+            title: "Hata!",
+            text: "Bağlantı testi sırasında hata oluştu.",
+            type: "error"
+          });
+        });
+      }
+
+      function showError(message) {
+        swal({
+          title: "Hata!",
+          text: message,
+          type: "error"
+        });
+      }
+    </script>
+  </body>
+</html>
