@@ -1208,4 +1208,7 @@ def init_db():
 
 if __name__ == '__main__':
     init_db()
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    print("Flask uygulaması başlatılıyor...")
+    print("Tarayıcınızda şu adresi açın: http://127.0.0.1:9001")
+    print("Eğer bağlantı reddedilirse, Windows Defender'da Python.exe'yi izin verilenler listesine ekleyin")
+    app.run(debug=True, host='127.0.0.1', port=9001, use_reloader=False, threaded=True)

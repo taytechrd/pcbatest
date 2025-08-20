@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  pcba-test:
+    build: .
+    container_name: pcba-test-system
+    ports:
+      - "9001:9001"      # Web arayüzü portu
+      - "502:502"        # Modbus TCP portu (isteğe bağlı)
+    volumes:
+      - ./data:/app/data                    # Veritabanı persistent storage
+      - /dev:/dev                           # Serial portlar için (Linux)
+    devices:
+      # Serial portları container'a bağlamak için (örnekler)
+      # Windows'da bu bölümü açıklama satırına alın
+      - /dev/ttyUSB0:/dev/ttyUSB0           # Linux USB-Serial converter
+      - /dev/ttyS0:/dev/ttyS0               # Linux COM1 equivalent
+      # - /dev/ttyS1:/dev/ttyS1             # Linux COM2 equivalent
+    environment:
+      - FLASK_ENV=production
+      - DATABASE_PATH=/app/data/pcba_test.db
+    privileged: true                        # Serial port erişimi için gerekli
+    restart: unless-stopped
+    networks:
+      - pcba-network
+
+  # İsteğe bağlı: Nginx reverse proxy (production için)
+  # nginx:
+  #   image: nginx:alpine
+  #   container_name: pcba-nginx
+  #   ports:
+  #     - "80:80"
+  #   volumes:
+  #     - ./nginx.conf:/etc/nginx/nginx.conf:ro
+  #   depends_on:
+  #     - pcba-test
+  #   networks:
+  #     - pcba-network
+
+networks:
+  pcba-network:
+    driver: bridge
+
+volumes:
+  pcba-data:
+    driver: local
