@@ -9,37 +9,41 @@
     />
     <link
       rel="icon"
-      href="assets/img/tay.png"
+      href="{{ url_for('static', filename='img/tay.png') }}"
       type="image/x-icon"
     />
 
     <!-- Fonts and icons -->
-    <script src="assets/js/plugin/webfont/webfont.min.js"></script>
+    <script src="{{ url_for('static', filename='js/plugin/webfont/webfont.min.js') }}"></script>
     <script>
-      WebFont.load({
-        google: { families: ["Public Sans:300,400,500,600,700"] },
-        custom: {
-          families: [
-            "Font Awesome 5 Solid",
-            "Font Awesome 5 Regular",
-            "Font Awesome 5 Brands",
-            "simple-line-icons",
-          ],
-          urls: ["assets/css/fonts.min.css"],
-        },
-        active: function () {
-          sessionStorage.fonts = true;
-        },
+      document.addEventListener('DOMContentLoaded', function() {
+        if (typeof WebFont !== 'undefined') {
+          WebFont.load({
+            google: { families: ["Public Sans:300,400,500,600,700"] },
+            custom: {
+              families: [
+                "Font Awesome 5 Solid",
+                "Font Awesome 5 Regular",
+                "Font Awesome 5 Brands",
+                "simple-line-icons",
+              ],
+              urls: ["{{ url_for('static', filename='css/fonts.min.css') }}"],
+            },
+            active: function () {
+              sessionStorage.fonts = true;
+            },
+          });
+        }
       });
     </script>
 
     <!-- CSS Files -->
-    <link rel="stylesheet" href="assets/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="assets/css/plugins.min.css" />
-    <link rel="stylesheet" href="assets/css/kaiadmin.min.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/plugins.min.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/kaiadmin.min.css') }}" />
 
     <!-- CSS Just for demo purpose, don't include it in your project -->
-    <link rel="stylesheet" href="assets/css/demo.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/demo.css') }}" />
   </head>
   <body>
     <div class="wrapper">
@@ -50,7 +54,7 @@
           <div class="logo-header" data-background-color="dark">
             <a href="/" class="logo">
               <img
-                src="assets/img/tay.png"
+                src="{{ url_for('static', filename='img/tay.png') }}"
                 alt="TayTech Logo"
                 class="navbar-brand"
                 height="35"
@@ -113,6 +117,7 @@
                 </span>
                 <h4 class="text-section">Yönetim</h4>
               </li>
+              {% if current_user.is_authenticated and current_user.has_permission('manage_users') %}
               <li class="nav-item active">
                 <a data-bs-toggle="collapse" href="#userManagement">
                   <i class="fas fa-users"></i>
@@ -131,9 +136,18 @@
                         <span class="sub-item">Yeni Kullanıcı</span>
                       </a>
                     </li>
+                    {% if current_user.has_permission('manage_user_permissions') %}
+                    <li>
+                      <a href="/role-management">
+                        <span class="sub-item">Rol Yönetimi</span>
+                      </a>
+                    </li>
+                    {% endif %}
                   </ul>
                 </div>
               </li>
+              {% endif %}
+              {% if current_user.is_authenticated and current_user.has_permission('manage_test_types') %}
               <li class="nav-item">
                 <a data-bs-toggle="collapse" href="#testManagement">
                   <i class="fas fa-cogs"></i>
@@ -157,13 +171,15 @@
                         <span class="sub-item">PCBA Modelleri</span>
                       </a>
                     </li>
-                    <li>
-                      <a href="/connections">
-                        <span class="sub-item">Bağlantı Yönetimi</span>
-                      </a>
-                    </li>
                   </ul>
                 </div>
+              </li>
+              {% endif %}
+              <li class="nav-item">
+                <a href="/connections">
+                  <i class="fas fa-plug"></i>
+                  <p>Bağlantı Yönetimi</p>
+                </a>
               </li>
               <li class="nav-section">
                 <span class="sidebar-mini-icon">
@@ -210,7 +226,7 @@
             <div class="logo-header" data-background-color="dark">
               <a href="/" class="logo">
                 <img
-                  src="assets/img/tay.png"
+                  src="{{ url_for('static', filename='img/tay.png') }}"
                   alt="TayTech Logo"
                   class="navbar-brand"
                   height="35"
@@ -262,14 +278,14 @@
                   >
                     <div class="avatar-sm">
                       <img
-                        src="assets/img/user.png"
+                        src="{{ url_for('static', filename='img/user.png') }}"
                         alt="..."
                         class="avatar-img rounded-circle"
                       />
                     </div>
                     <span class="profile-username">
                       <span class="op-7">Merhaba,</span>
-                      <span class="fw-bold">Admin</span>
+                      <span class="fw-bold">{{ current_user.username if current_user.is_authenticated else 'Admin' }}</span>
                     </span>
                   </a>
                   <ul class="dropdown-menu dropdown-user animated fadeIn">
@@ -278,15 +294,15 @@
                         <div class="user-box">
                           <div class="avatar-lg">
                             <img
-                              src="assets/img/user.png"
+                              src="{{ url_for('static', filename='img/user.png') }}"
                               alt="image profile"
                               class="avatar-img rounded"
                             />
                           </div>
                           <div class="u-text">
-                            <h4>Admin</h4>
-                            <p class="text-muted">admin@pcbatest.com</p>
-                            <p class="text-muted">Rol: Admin</p>
+                            <h4>{{ current_user.username if current_user.is_authenticated else 'Admin' }}</h4>
+                            <p class="text-muted">{{ current_user.email if current_user.is_authenticated else 'admin@pcbatest.com' }}</p>
+                            <p class="text-muted">Rol: {{ current_user.role if current_user.is_authenticated else 'Admin' }}</p>
                           </div>
                         </div>
                       </li>
@@ -315,11 +331,26 @@
                 <h6 class="op-7 mb-2">Sistem kullanıcılarını görüntüleyin ve yönetin</h6>
               </div>
               <div class="ms-md-auto py-2 py-md-0">
-                <a href="/add-user" class="btn btn-primary btn-round">
+                <a href="/add-user" class="btn btn-primary btn-round me-2">
                   <i class="fa fa-plus"></i> Yeni Kullanıcı
+                </a>
+                <a href="/role-management" class="btn btn-info btn-round">
+                  <i class="fa fa-key"></i> Rol Yönetimi
                 </a>
               </div>
             </div>
+
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                {% for category, message in messages %}
+                  <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                  </div>
+                {% endfor %}
+              {% endif %}
+            {% endwith %}
 
             <div class="row">
               <div class="col-md-12">
@@ -351,7 +382,7 @@
                             <td>
                               <div class="d-flex align-items-center">
                                 <div class="avatar avatar-xs me-3">
-                                  <img src="assets/img/user.png" alt="..." class="avatar-img rounded-circle">
+                                  <img src="{{ url_for('static', filename='img/user.png') }}" alt="..." class="avatar-img rounded-circle">
                                 </div>
                                 <div>
                                   <div class="fw-bold">{{ user.username }}</div>
@@ -418,21 +449,21 @@
     </div>
 
     <!--   Core JS Files   -->
-    <script src="assets/js/core/jquery-3.7.1.min.js"></script>
-    <script src="assets/js/core/popper.min.js"></script>
-    <script src="assets/js/core/bootstrap.min.js"></script>
+    <script src="{{ url_for('static', filename='js/core/jquery-3.7.1.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/core/popper.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/core/bootstrap.min.js') }}"></script>
 
     <!-- jQuery Scrollbar -->
-    <script src="assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js"></script>
+    <script src="{{ url_for('static', filename='js/plugin/jquery-scrollbar/jquery.scrollbar.min.js') }}"></script>
 
     <!-- DataTables -->
-    <script src="assets/js/plugin/datatables/datatables.min.js"></script>
+    <script src="{{ url_for('static', filename='js/plugin/datatables/datatables.min.js') }}"></script>
 
     <!-- Sweet Alert -->
-    <script src="assets/js/plugin/sweetalert/sweetalert.min.js"></script>
+    <script src="{{ url_for('static', filename='js/plugin/sweetalert/sweetalert.min.js') }}"></script>
 
     <!-- Kaiadmin JS -->
-    <script src="assets/js/kaiadmin.min.js"></script>
+    <script src="{{ url_for('static', filename='js/kaiadmin.min.js') }}"></script>
 
     <script>
       $(document).ready(function () {

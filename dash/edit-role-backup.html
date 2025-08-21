@@ -2,12 +2,16 @@
 <html lang="tr">
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>TayTech - Test Senaryoları Yönetimi</title>
+    <title>PCBA Test Sistemi - Kullanıcı Listesi</title>
     <meta
       content="width=device-width, initial-scale=1.0, shrink-to-fit=no"
       name="viewport"
     />
-    <link rel="icon" href="assets/img/tay.png" type="image/png" />
+    <link
+      rel="icon"
+      href="assets/img/tay.png"
+      type="image/x-icon"
+    />
 
     <!-- Fonts and icons -->
     <script src="assets/js/plugin/webfont/webfont.min.js"></script>
@@ -39,7 +43,7 @@
   </head>
   <body>
     <div class="wrapper">
-      <!-- Sidebar -->
+      <!-- Sidebar (User-settings.html'den kopyala ve güncelleyelim) -->
       <div class="sidebar" data-background-color="dark">
         <div class="sidebar-logo">
           <!-- Logo Header -->
@@ -70,7 +74,11 @@
           <div class="sidebar-content">
             <ul class="nav nav-secondary">
               <li class="nav-item">
-                <a href="/" class="collapsed" aria-expanded="false">
+                <a
+                  href="/"
+                  class="collapsed"
+                  aria-expanded="false"
+                >
                   <i class="fas fa-home"></i>
                   <p>Dashboard</p>
                 </a>
@@ -105,15 +113,16 @@
                 </span>
                 <h4 class="text-section">Yönetim</h4>
               </li>
-              <li class="nav-item">
+              {% if current_user.is_authenticated and current_user.role == 'admin' %}
+              <li class="nav-item active">
                 <a data-bs-toggle="collapse" href="#userManagement">
                   <i class="fas fa-users"></i>
                   <p>Kullanıcı Yönetimi</p>
                   <span class="caret"></span>
                 </a>
-                <div class="collapse" id="userManagement">
+                <div class="collapse show" id="userManagement">
                   <ul class="nav nav-collapse">
-                    <li>
+                    <li class="active">
                       <a href="/users">
                         <span class="sub-item">Kullanıcı Listesi</span>
                       </a>
@@ -127,18 +136,19 @@
                       <a href="/role-management">
                         <span class="sub-item">Rol Yönetimi</span>
                       </a>
-                      </a>
                     </li>
                   </ul>
                 </div>
               </li>
+              {% endif %}
+              {% if current_user.is_authenticated and current_user.role == 'admin' %}
               <li class="nav-item">
                 <a data-bs-toggle="collapse" href="#testManagement">
                   <i class="fas fa-cogs"></i>
                   <p>Test Yönetimi</p>
                   <span class="caret"></span>
                 </a>
-                <div class="collapse show" id="testManagement">
+                <div class="collapse" id="testManagement">
                   <ul class="nav nav-collapse">
                     <li>
                       <a href="/test-types">
@@ -146,7 +156,7 @@
                       </a>
                     </li>
                     <li>
-                      <a href="/test-scenarios" class="active">
+                      <a href="/test-scenarios">
                         <span class="sub-item">Test Senaryoları</span>
                       </a>
                     </li>
@@ -155,13 +165,15 @@
                         <span class="sub-item">PCBA Modelleri</span>
                       </a>
                     </li>
-                    <li>
-                      <a href="/connections">
-                        <span class="sub-item">Bağlantı Yönetimi</span>
-                      </a>
-                    </li>
                   </ul>
                 </div>
+              </li>
+              {% endif %}
+              <li class="nav-item">
+                <a href="/connections">
+                  <i class="fas fa-plug"></i>
+                  <p>Bağlantı Yönetimi</p>
+                </a>
               </li>
               <li class="nav-section">
                 <span class="sidebar-mini-icon">
@@ -244,9 +256,8 @@
                   </div>
                   <input
                     type="text"
-                    placeholder="Senaryo ara..."
+                    placeholder="Arama..."
                     class="form-control"
-                    id="searchInput"
                   />
                 </div>
               </nav>
@@ -268,7 +279,7 @@
                     </div>
                     <span class="profile-username">
                       <span class="op-7">Merhaba,</span>
-                      <span class="fw-bold">{{ current_user.username if current_user else 'Kullanıcı' }}</span>
+                      <span class="fw-bold">{{ current_user.username if current_user.is_authenticated else 'Admin' }}</span>
                     </span>
                   </a>
                   <ul class="dropdown-menu dropdown-user animated fadeIn">
@@ -283,9 +294,9 @@
                             />
                           </div>
                           <div class="u-text">
-                            <h4>{{ current_user.username if current_user else 'Kullanıcı' }}</h4>
-                            <p class="text-muted">{{ current_user.email if current_user else 'email@example.com' }}</p>
-                            <p class="text-muted">Rol: {{ current_user.role.title() if current_user else 'Operator' }}</p>
+                            <h4>{{ current_user.username if current_user.is_authenticated else 'Admin' }}</h4>
+                            <p class="text-muted">{{ current_user.email if current_user.is_authenticated else 'admin@pcbatest.com' }}</p>
+                            <p class="text-muted">Rol: {{ current_user.role if current_user.is_authenticated else 'Admin' }}</p>
                           </div>
                         </div>
                       </li>
@@ -310,12 +321,15 @@
               class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4"
             >
               <div>
-                <h3 class="fw-bold mb-3">Test Senaryoları Yönetimi</h3>
-                <h6 class="op-7 mb-2">Test senaryolarını ekleyin, düzenleyin ve yönetin</h6>
+                <h3 class="fw-bold mb-3">Kullanıcı Yönetimi</h3>
+                <h6 class="op-7 mb-2">Sistem kullanıcılarını görüntüleyin ve yönetin</h6>
               </div>
               <div class="ms-md-auto py-2 py-md-0">
-                <a href="/add-test-scenario" class="btn btn-primary btn-round">
-                  <i class="fa fa-plus"></i> Yeni Test Senaryosu
+                <a href="/add-user" class="btn btn-primary btn-round me-2">
+                  <i class="fa fa-plus"></i> Yeni Kullanıcı
+                </a>
+                <a href="/role-management" class="btn btn-info btn-round">
+                  <i class="fa fa-key"></i> Rol Yönetimi
                 </a>
               </div>
             </div>
@@ -324,85 +338,74 @@
               <div class="col-md-12">
                 <div class="card">
                   <div class="card-header">
-                    <div class="card-title">Test Senaryoları Listesi</div>
+                    <div class="card-title">Kullanıcı Listesi</div>
                   </div>
                   <div class="card-body">
                     <div class="table-responsive">
                       <table
-                        id="testScenariosTable"
+                        id="usersTable"
                         class="display table table-striped table-hover"
                       >
                         <thead>
                           <tr>
                             <th>ID</th>
-                            <th>Senaryo Adı</th>
-                            <th>Test Parametreleri</th>
-                            <th>Açıklama</th>
+                            <th>Kullanıcı Adı</th>
+                            <th>E-posta</th>
+                            <th>Rol</th>
                             <th>Durum</th>
-                            <th>Kullanim</th>
-                            <th>Oluşturma Tarihi</th>
-                            <th>İşlemler</th>
+                            <th>Kayıt Tarihi</th>
+                            <th style="width: 10%">İşlemler</th>
                           </tr>
                         </thead>
                         <tbody>
-                          {% for scenario in test_scenarios %}
+                          {% for user in users %}
                           <tr>
-                            <td>{{ scenario.id }}</td>
+                            <td>{{ user.id }}</td>
                             <td>
-                              <div class="fw-bold">{{ scenario.scenario_name }}</div>
-                            </td>
-                            <td>
-                              {% if scenario.test_parameters %}
-                                <div class="d-flex flex-wrap">
-                                  {% for param, value in scenario.test_parameters.items() %}
-                                    <span class="badge badge-secondary me-1 mb-1">{{ param }}</span>
-                                  {% endfor %}
+                              <div class="d-flex align-items-center">
+                                <div class="avatar avatar-xs me-3">
+                                  <img src="assets/img/user.png" alt="..." class="avatar-img rounded-circle">
                                 </div>
+                                <div>
+                                  <div class="fw-bold">{{ user.username }}</div>
+                                </div>
+                              </div>
+                            </td>
+                            <td>{{ user.email }}</td>
+                            <td>
+                              {% if user.role == 'admin' %}
+                                <span class="badge badge-danger">Admin</span>
+                              {% elif user.role == 'technician' %}
+                                <span class="badge badge-warning">Teknisyen</span>
                               {% else %}
-                                <span class="text-muted">-</span>
+                                <span class="badge badge-secondary">Operatör</span>
                               {% endif %}
                             </td>
                             <td>
-                              <span class="text-muted">{{ scenario.description[:50] if scenario.description else '-' }}{% if scenario.description and scenario.description|length > 50 %}...{% endif %}</span>
-                            </td>
-                            <td>
-                              {% if scenario.is_active %}
+                              {% if user.is_active %}
                                 <span class="badge badge-success">Aktif</span>
                               {% else %}
-                                <span class="badge badge-secondary">Pasif</span>
+                                <span class="badge badge-danger">Pasif</span>
                               {% endif %}
                             </td>
-                            <td>
-                              {% set model_count = scenario.pcba_models|length %}
-                              {% if model_count > 0 %}
-                                <span class="badge badge-info">{{ model_count }} Model</span>
-                              {% else %}
-                                <span class="text-muted">Kullanılmıyor</span>
-                              {% endif %}
-                            </td>
-                            <td>{{ scenario.created_at.strftime('%d.%m.%Y') }}</td>
+                            <td>{{ user.created_at.strftime('%d.%m.%Y %H:%M') }}</td>
                             <td>
                               <div class="form-button-action">
-                                <button type="button" 
-                                        class="btn btn-link btn-info btn-lg" 
-                                        data-bs-toggle="tooltip" 
-                                        title="Detayları Göster"
-                                        onclick="showScenarioDetails({{ scenario.id }})">
-                                  <i class="fa fa-eye"></i>
-                                </button>
-                                <a href="/edit-test-scenario/{{ scenario.id }}" 
+                                <a href="/edit-user/{{ user.id }}" 
                                    class="btn btn-link btn-primary btn-lg" 
                                    data-bs-toggle="tooltip" 
                                    title="Düzenle">
                                   <i class="fa fa-edit"></i>
                                 </a>
+                                {% if user.id != current_user.id %}
                                 <button type="button" 
-                                        class="btn btn-link btn-danger btn-lg" 
+                                        class="btn btn-link btn-danger" 
                                         data-bs-toggle="tooltip" 
                                         title="Sil"
-                                        onclick="deleteTestScenario({{ scenario.id }}, '{{ scenario.scenario_name }}')">
+                                        onclick="deleteUser({{ user.id }}, '{{ user.username }}')">
                                   <i class="fa fa-times"></i>
                                 </button>
+                                {% endif %}
                               </div>
                             </td>
                           </tr>
@@ -420,28 +423,10 @@
         <footer class="footer">
           <div class="container-fluid d-flex justify-content-between">
             <div class="copyright">
-              2024, TayTech PCBA Test Sistemi
+              2024, PCBA Test Sistemi
             </div>
           </div>
         </footer>
-      </div>
-    </div>
-
-    <!-- Senaryo Detay Modal -->
-    <div class="modal fade" id="scenarioDetailModal" tabindex="-1" role="dialog" aria-hidden="true">
-      <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Test Senaryosu Detayları</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body" id="scenarioDetailContent">
-            <!-- Senaryo detayları buraya yüklenecek -->
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
-          </div>
-        </div>
       </div>
     </div>
 
@@ -464,138 +449,39 @@
 
     <script>
       $(document).ready(function () {
-        // DataTable başlat
-        var table = $('#testScenariosTable').DataTable({
-          "pageLength": 10,
+        $('#usersTable').DataTable({
+          "pageLength": 25,
           "language": {
             "url": "//cdn.datatables.net/plug-ins/1.13.4/i18n/tr.json"
           },
           "columnDefs": [
-            { "orderable": false, "targets": 7 }
-          ],
-          "order": [[ 0, "asc" ]]
-        });
-
-        // Arama inputu
-        $('#searchInput').on('keyup', function() {
-          table.search(this.value).draw();
+            { "orderable": false, "targets": 6 }
+          ]
         });
 
         // Tooltip'leri aktif et
         $('[data-bs-toggle="tooltip"]').tooltip();
       });
 
-      function showScenarioDetails(scenarioId) {
-        fetch('/api/test-scenario-detail/' + scenarioId)
-          .then(response => response.json())
-          .then(data => {
-            let statusClass = data.is_active ? 'success' : 'secondary';
-            let statusText = data.is_active ? 'Aktif' : 'Pasif';
-            
-            let detailHtml = `
-              <div class="row mb-4">
-                <div class="col-md-6">
-                  <h6><strong>Senaryo Bilgileri</strong></h6>
-                  <table class="table table-sm">
-                    <tr><td><strong>ID:</strong></td><td>#${data.id}</td></tr>
-                    <tr><td><strong>Senaryo Adı:</strong></td><td>${data.scenario_name}</td></tr>
-                    <tr><td><strong>Durum:</strong></td><td><span class="badge badge-${statusClass}">${statusText}</span></td></tr>
-                    <tr><td><strong>Oluşturma:</strong></td><td>${data.created_at}</td></tr>
-                  </table>
-                </div>
-                <div class="col-md-6">
-                  <h6><strong>Kullanim Bilgileri</strong></h6>
-                  <table class="table table-sm">
-                    <tr><td><strong>Kullanan Model:</strong></td><td>${data.model_count} adet</td></tr>
-                  </table>
-                </div>
-              </div>
-            `;
-            
-            if (data.description && data.description.trim() !== '') {
-              detailHtml += `
-                <div class="mb-3">
-                  <h6><strong>Açıklama</strong></h6>
-                  <p class="text-muted">${data.description}</p>
-                </div>
-              `;
-            }
-            
-            if (data.test_parameters && Object.keys(data.test_parameters).length > 0) {
-              detailHtml += '<h6><strong>Test Parametreleri</strong></h6>';
-              detailHtml += '<div class="row">';
-              
-              Object.keys(data.test_parameters).forEach(paramName => {
-                const param = data.test_parameters[paramName];
-                
-                detailHtml += `
-                  <div class="col-md-4 mb-3">
-                    <div class="card border-info">
-                      <div class="card-body text-center">
-                        <h6 class="text-info">${paramName.toUpperCase()}</h6>
-                        <div class="mt-2">
-                `;
-                
-                if (typeof param === 'object') {
-                  Object.keys(param).forEach(key => {
-                    detailHtml += `<div class="small"><strong>${key}:</strong> ${param[key]}</div>`;
-                  });
-                } else {
-                  detailHtml += `<div class="h6">${param}</div>`;
-                }
-                
-                detailHtml += `
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                `;
-              });
-              
-              detailHtml += '</div>';
-            }
-            
-            if (data.pcba_models && data.pcba_models.length > 0) {
-              detailHtml += `
-                <div class="mt-3">
-                  <h6><strong>Bu Senaryoyu Kullanan PCBA Modelleri</strong></h6>
-                  <div class="d-flex flex-wrap">
-              `;
-              
-              data.pcba_models.forEach(model => {
-                detailHtml += `<span class="badge badge-primary me-1 mb-1">${model.model_name}</span>`;
-              });
-              
-              detailHtml += '</div></div>';
-            }
-            
-            $('#scenarioDetailContent').html(detailHtml);
-            $('#scenarioDetailModal').modal('show');
-          })
-          .catch(error => {
-            swal("Hata!", "Senaryo detayları yüklenirken hata oluştu.", "error");
-          });
-      }
-
-      function deleteTestScenario(scenarioId, scenarioName) {
+      function deleteUser(userId, username) {
         swal({
           title: "Emin misiniz?",
-          text: `"${scenarioName}" test senaryosu silinecek!`,
+          text: username + " kullanıcısını silmek istediğinizden emin misiniz?",
           type: "warning",
           buttons: {
             cancel: {
               visible: true,
               text: "İptal",
-              className: "btn btn-danger"
+              className: "btn btn-danger",
             },
             confirm: {
               text: "Evet, Sil",
-              className: "btn btn-success"
-            }
-          }
+              className: "btn btn-success",
+            },
+          },
         }).then((willDelete) => {
           if (willDelete) {
-            fetch(`/delete-test-scenario/${scenarioId}`, {
+            fetch('/delete-user/' + userId, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -612,7 +498,7 @@
               }
             })
             .catch(error => {
-              swal("Hata!", "Silme işlemi sırasında hata oluştu.", "error");
+              swal("Hata!", "Kullanıcı silme sırasında hata oluştu.", "error");
             });
           }
         });

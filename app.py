@@ -1,9 +1,10 @@
-from flask import Flask, render_template, request, jsonify, redirect, url_for, session
+from flask import Flask, render_template, request, jsonify, redirect, url_for, session, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 import os
+from functools import wraps
 
 # Flask uygulaması oluştur
 app = Flask(__name__, 
@@ -26,21 +27,91 @@ login_manager.login_view = 'login'
 def load_user(user_id):
     return User.query.get(int(user_id))
 
+# Template context processor - tüm template'lerde current_user kullanılabilir yapar
+@app.context_processor
+def inject_user():
+    return dict(current_user=current_user)
+
 # Veritabanı Modelleri
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(120), nullable=False)
-    role = db.Column(db.String(20), nullable=False, default='operator')  # admin, technician, operator
+    role = db.Column(db.String(20), nullable=False, default='operator')  # Keep for backward compatibility
+    role_id = db.Column(db.Integer, db.ForeignKey('roles.id'), nullable=True)  # New dynamic role system
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     is_active = db.Column(db.Boolean, default=True)
+    
+    # Relations
+    assigned_role = db.relationship('Role', backref='users')
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
     
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
+    
+    def has_permission(self, permission_name):
+        """Check if user has a specific permission"""
+        # Cache permissions in session to avoid repeated DB queries
+        if not hasattr(self, '_cached_permissions'):
+            self._cached_permissions = self._load_all_permissions()
+        
+        # Check if permission exists in cached permissions
+        return permission_name in self._cached_permissions
+    
+    def _load_all_permissions(self):
+        """Load all effective permissions for this user"""
+        permissions = set()
+        
+        # Get role permissions
+        if self.assigned_role:
+            permissions.update([p.name for p in self.assigned_role.permissions])
+        
+        # Get individual permissions
+        user_perms = UserPermission.query.filter_by(user_id=self.id).all()
+        for up in user_perms:
+            if up.granted:
+                permissions.add(up.permission.name)
+            else:
+                # Individual denial overrides role permission
+                permissions.discard(up.permission.name)
+        
+        # Fallback to legacy role system for backward compatibility
+        if self.role == 'admin':
+            # Admin has all permissions
+            all_permissions = Permission.query.all()
+            permissions.update([p.name for p in all_permissions])
+        elif self.role in ['admin', 'technician']:
+            # Add basic view permissions for technicians
+            view_permissions = Permission.query.filter(Permission.name.like('view_%')).all()
+            permissions.update([p.name for p in view_permissions])
+            
+        return permissions
+    
+    def clear_permission_cache(self):
+        """Clear cached permissions - call when permissions change"""
+        if hasattr(self, '_cached_permissions'):
+            delattr(self, '_cached_permissions')
+    
+    def get_permissions(self):
+        """Get all permissions for this user"""
+        permissions = set()
+        
+        # Get role permissions
+        if self.assigned_role:
+            permissions.update([p.name for p in self.assigned_role.permissions])
+        
+        # Get individual permissions
+        user_perms = UserPermission.query.filter_by(user_id=self.id).all()
+        for up in user_perms:
+            if up.granted:
+                permissions.add(up.permission.name)
+            else:
+                permissions.discard(up.permission.name)  # Deny permission
+        
+        return list(permissions)
 
 class TestType(db.Model):
     __tablename__ = 'test_type'
@@ -118,6 +189,60 @@ class Connection(db.Model):
     # Additional parameters
     connection_parameters = db.Column(db.JSON)  # Additional flexible parameters
 
+# Permission Management Models
+class Permission(db.Model):
+    __tablename__ = 'permissions'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), unique=True, nullable=False)  # e.g., 'view_users', 'manage_tests'
+    description = db.Column(db.String(200))
+    module = db.Column(db.String(50))  # e.g., 'user_management', 'test_management'
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class Role(db.Model):
+    __tablename__ = 'roles'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), unique=True, nullable=False)  # admin, technician, operator
+    description = db.Column(db.String(200))
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+# Association table for many-to-many relationship between roles and permissions
+role_permissions = db.Table('role_permissions',
+    db.Column('role_id', db.Integer, db.ForeignKey('roles.id'), primary_key=True),
+    db.Column('permission_id', db.Integer, db.ForeignKey('permissions.id'), primary_key=True)
+)
+
+class UserPermission(db.Model):
+    __tablename__ = 'user_permissions'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    permission_id = db.Column(db.Integer, db.ForeignKey('permissions.id'), nullable=False)
+    granted = db.Column(db.Boolean, default=True)  # True for grant, False for deny
+    granted_by = db.Column(db.Integer, db.ForeignKey('user.id'))
+    granted_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relations
+    user = db.relationship('User', foreign_keys=[user_id], backref='user_permissions')
+    permission = db.relationship('Permission', backref='user_permissions')
+    granted_by_user = db.relationship('User', foreign_keys=[granted_by])
+
+# Add relationships to existing models
+Role.permissions = db.relationship('Permission', secondary=role_permissions, backref='roles')
+
+# Permission decorator
+def require_permission(permission_name):
+    """Decorator to require specific permission for route access"""
+    def decorator(f):
+        @wraps(f)
+        @login_required
+        def decorated_function(*args, **kwargs):
+            if not current_user.has_permission(permission_name):
+                flash(f'Bu sayfaya erişim için "{permission_name}" yetkisine ihtiyacınız var.', 'error')
+                return redirect(url_for('dashboard'))
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator
+
 # Ana sayfa route'ları
 @app.route('/')
 @login_required
@@ -165,37 +290,26 @@ def user_settings():
     return render_template('user-settings.html', user=current_user)
 
 @app.route('/system-settings')
-@login_required
+@require_permission('manage_system_settings')
 def system_settings():
-    # Sadece admin kullanıcıları görebilir
-    if current_user.role != 'admin':
-        return redirect(url_for('dashboard'))
     return render_template('system-settings.html')
 
 @app.route('/test-parameters')
-@login_required
+@require_permission('manage_test_parameters')
 def test_parameters():
-    # Admin ve technician kullanıcıları görebilir
-    if current_user.role not in ['admin', 'technician']:
-        return redirect(url_for('dashboard'))
     pcba_models = PCBAModel.query.filter_by(is_active=True).all()
     return render_template('test-parameters.html', pcba_models=pcba_models)
 
 # Test Type Management Routes
 @app.route('/test-types')
-@login_required
+@require_permission('manage_test_types')
 def test_types():
-    # Sadece admin kullanıcıları görebilir
-    if current_user.role != 'admin':
-        return redirect(url_for('dashboard'))
     test_types = TestType.query.all()
     return render_template('test-types.html', test_types=test_types)
 
 @app.route('/add-test-type', methods=['GET', 'POST'])
-@login_required
+@require_permission('manage_test_types')
 def add_test_type():
-    if current_user.role != 'admin':
-        return redirect(url_for('dashboard'))
     
     if request.method == 'POST':
         type_code = request.form['type_code'].upper()
@@ -220,10 +334,8 @@ def add_test_type():
     return render_template('add-test-type.html')
 
 @app.route('/edit-test-type/<int:test_type_id>', methods=['GET', 'POST'])
-@login_required
+@require_permission('manage_test_types')
 def edit_test_type(test_type_id):
-    if current_user.role != 'admin':
-        return redirect(url_for('dashboard'))
     
     test_type = TestType.query.get_or_404(test_type_id)
     
@@ -250,10 +362,8 @@ def edit_test_type(test_type_id):
     return render_template('edit-test-type.html', test_type=test_type)
 
 @app.route('/delete-test-type/<int:test_type_id>', methods=['POST'])
-@login_required
+@require_permission('manage_test_types')
 def delete_test_type(test_type_id):
-    if current_user.role != 'admin':
-        return redirect(url_for('dashboard'))
     
     test_type = TestType.query.get_or_404(test_type_id)
     
@@ -473,20 +583,14 @@ def delete_pcba_model(model_id):
     return jsonify({'success': True, 'message': 'PCBA modeli başarıyla silindi'})
 
 @app.route('/users')
-@login_required
+@require_permission('manage_users')
 def users():
-    # Sadece admin kullanıcıları görebilir
-    if current_user.role != 'admin':
-        return redirect(url_for('dashboard'))
     users = User.query.all()
     return render_template('users.html', users=users)
 
 @app.route('/add-user', methods=['GET', 'POST'])
-@login_required
+@require_permission('manage_users')
 def add_user():
-    # Sadece admin kullanıcıları görebilir
-    if current_user.role != 'admin':
-        return redirect(url_for('dashboard'))
     
     if request.method == 'POST':
         username = request.form['username']
@@ -518,11 +622,8 @@ def add_user():
     return render_template('add-user.html')
 
 @app.route('/edit-user/<int:user_id>', methods=['GET', 'POST'])
-@login_required
+@require_permission('manage_users')
 def edit_user(user_id):
-    # Sadece admin kullanıcıları görebilir
-    if current_user.role != 'admin':
-        return redirect(url_for('dashboard'))
     
     user = User.query.get_or_404(user_id)
     
@@ -551,11 +652,8 @@ def edit_user(user_id):
     return render_template('edit-user.html', user=user)
 
 @app.route('/delete-user/<int:user_id>', methods=['POST'])
-@login_required
+@require_permission('manage_users')
 def delete_user(user_id):
-    # Sadece admin kullanıcıları silebilir
-    if current_user.role != 'admin':
-        return redirect(url_for('dashboard'))
     
     user = User.query.get_or_404(user_id)
     
@@ -1082,6 +1180,16 @@ def init_db():
             admin.set_password('admin123')
             db.session.add(admin)
             
+        # Test operator kullanıcısı oluştur
+        if not User.query.filter_by(username='operator').first():
+            operator = User(
+                username='operator',
+                email='operator@pcbatest.com',
+                role='operator'
+            )
+            operator.set_password('operator123')
+            db.session.add(operator)
+            
             # Test tiplerini oluştur
             test_types_data = [
                 {'code': 'ICT', 'name': 'In-Circuit Test', 'desc': 'Devre içi test - elektriksel bağlantıları kontrol eder'},
@@ -1204,11 +1312,199 @@ def init_db():
                 db.session.add(test_result)
             
             db.session.commit()
+            
+            # Initialize permissions and roles
+            init_permissions_and_roles()
             print("Veritabanı başlatıldı ve varsayılan veriler eklendi.")
+
+def init_permissions_and_roles():
+    """Initialize default permissions and roles"""
+    
+    # Define default permissions
+    default_permissions = [
+        # Dashboard permissions
+        {'name': 'view_dashboard', 'description': 'Dashboard görüntüleme yetkisi', 'module': 'dashboard'},
+        
+        # User management permissions
+        {'name': 'view_users', 'description': 'Kullanıcıları görüntüleme yetkisi', 'module': 'user_management'},
+        {'name': 'manage_users', 'description': 'Kullanıcıları yönetme yetkisi (ekleme, düzenleme, silme)', 'module': 'user_management'},
+        {'name': 'manage_user_permissions', 'description': 'Kullanıcı yetkilerini yönetme', 'module': 'user_management'},
+        
+        # Test management permissions  
+        {'name': 'view_test_types', 'description': 'Test tiplerini görüntüleme yetkisi', 'module': 'test_management'},
+        {'name': 'manage_test_types', 'description': 'Test tiplerini yönetme yetkisi', 'module': 'test_management'},
+        {'name': 'view_test_scenarios', 'description': 'Test senaryolarını görüntüleme yetkisi', 'module': 'test_management'},
+        {'name': 'manage_test_scenarios', 'description': 'Test senaryolarını yönetme yetkisi', 'module': 'test_management'},
+        {'name': 'view_pcba_models', 'description': 'PCBA modellerini görüntüleme yetkisi', 'module': 'test_management'},
+        {'name': 'manage_pcba_models', 'description': 'PCBA modellerini yönetme yetkisi', 'module': 'test_management'},
+        
+        # Test operations permissions
+        {'name': 'run_tests', 'description': 'Test çalıştırma yetkisi', 'module': 'test_operations'},
+        {'name': 'view_test_results', 'description': 'Test sonuçlarını görüntüleme yetkisi', 'module': 'test_operations'},
+        {'name': 'delete_test_results', 'description': 'Test sonuçlarını silme yetkisi', 'module': 'test_operations'},
+        
+        # Connection management permissions
+        {'name': 'view_connections', 'description': 'Bağlantıları görüntüleme yetkisi', 'module': 'connection_management'},
+        {'name': 'manage_connections', 'description': 'Bağlantıları yönetme yetkisi', 'module': 'connection_management'},
+        {'name': 'test_connections', 'description': 'Bağlantı testi yapma yetkisi', 'module': 'connection_management'},
+        
+        # Report permissions
+        {'name': 'view_reports', 'description': 'Raporları görüntüleme yetkisi', 'module': 'reports'},
+        {'name': 'export_reports', 'description': 'Raporları dışa aktarma yetkisi', 'module': 'reports'},
+        
+        # Settings permissions
+        {'name': 'view_settings', 'description': 'Ayarları görüntüleme yetkisi', 'module': 'settings'},
+        {'name': 'manage_system_settings', 'description': 'Sistem ayarlarını yönetme yetkisi', 'module': 'settings'},
+        {'name': 'manage_test_parameters', 'description': 'Test parametrelerini yönetme yetkisi', 'module': 'settings'}
+    ]
+    
+    # Create permissions
+    for perm_data in default_permissions:
+        if not Permission.query.filter_by(name=perm_data['name']).first():
+            permission = Permission(
+                name=perm_data['name'],
+                description=perm_data['description'],
+                module=perm_data['module']
+            )
+            db.session.add(permission)
+    
+    db.session.commit()
+    
+    # Define default roles
+    default_roles = [
+        {
+            'name': 'admin',
+            'description': 'Sistem yöneticisi - tüm yetkilere sahip',
+            'permissions': [
+                'view_dashboard', 'view_users', 'manage_users',
+                'manage_user_permissions', 'view_test_types', 'manage_test_types',
+                'view_test_scenarios', 'manage_test_scenarios', 'view_pcba_models',
+                'manage_pcba_models', 'run_tests', 'view_test_results', 'delete_test_results',
+                'view_connections', 'manage_connections', 'test_connections', 'view_reports',
+                'export_reports', 'view_settings', 'manage_system_settings', 'manage_test_parameters'
+            ]
+        },
+        {
+            'name': 'technician',
+            'description': 'Teknisyen - test yönetimi ve çalıştırma yetkileri',
+            'permissions': [
+                'view_dashboard', 'view_test_types', 'view_test_scenarios', 'view_pcba_models',
+                'run_tests', 'view_test_results', 'view_connections', 'test_connections',
+                'view_reports', 'view_settings', 'manage_test_parameters'
+            ]
+        },
+        {
+            'name': 'operator',
+            'description': 'Operatör - temel test çalıştırma yetkileri',
+            'permissions': [
+                'view_dashboard', 'run_tests', 'view_test_results', 'view_connections', 'view_settings'
+            ]
+        }
+    ]
+    
+    # Create roles and assign permissions
+    for role_data in default_roles:
+        role = Role.query.filter_by(name=role_data['name']).first()
+        if not role:
+            role = Role(
+                name=role_data['name'],
+                description=role_data['description']
+            )
+            db.session.add(role)
+            db.session.commit()  # Commit to get role ID
+        
+        # Clear existing permissions for this role
+        role.permissions.clear()
+        
+        # Add permissions to role
+        for perm_name in role_data['permissions']:
+            permission = Permission.query.filter_by(name=perm_name).first()
+            if permission:
+                role.permissions.append(permission)
+    
+    db.session.commit()
+    
+    # Assign roles to existing users
+    admin_role = Role.query.filter_by(name='admin').first()
+    technician_role = Role.query.filter_by(name='technician').first()
+    operator_role = Role.query.filter_by(name='operator').first()
+    
+    # Update admin user
+    admin_user = User.query.filter_by(username='admin').first()
+    if admin_user and not admin_user.role_id:
+        admin_user.role_id = admin_role.id
+    
+    # Update operator user
+    operator_user = User.query.filter_by(username='operator').first()
+    if operator_user and not operator_user.role_id:
+        operator_user.role_id = operator_role.id
+    
+    db.session.commit()
+
+# Role Management Routes (Individual user permissions removed - using role-based system only)
+
+@app.route('/role-management')
+@require_permission('manage_user_permissions')
+def role_management():
+    
+    roles = Role.query.all()
+    permissions = Permission.query.all()
+    
+    return render_template('role-management.html', roles=roles, permissions=permissions)
+
+@app.route('/api/role-permissions/<int:role_id>')
+@require_permission('manage_user_permissions')
+def api_role_permissions(role_id):
+    
+    role = Role.query.get_or_404(role_id)
+    role_permissions = [p.name for p in role.permissions]
+    
+    return jsonify({
+        'role_id': role.id,
+        'role': role.name,
+        'description': role.description,
+        'permissions': role_permissions
+    })
+
+@app.route('/edit-role/<int:role_id>', methods=['GET', 'POST'])
+@require_permission('manage_user_permissions')
+def edit_role(role_id):
+    
+    role = Role.query.get_or_404(role_id)
+    
+    if request.method == 'POST':
+        try:
+            role.name = request.form['name']
+            role.description = request.form['description']
+            role.is_active = 'is_active' in request.form
+            
+            # Update permissions
+            role.permissions.clear()
+            for permission_id in request.form.getlist('permissions'):
+                permission = Permission.query.get(int(permission_id))
+                if permission:
+                    role.permissions.append(permission)
+            
+            db.session.commit()
+            return redirect(url_for('role_management'))
+            
+        except Exception as e:
+            db.session.rollback()
+            return render_template('edit-role.html', role=role, error=f'Güncelleme hatası: {str(e)}')
+    
+    permissions = Permission.query.all()
+    role_permission_ids = [p.id for p in role.permissions]
+    
+    return render_template('edit-role-fixed.html', role=role, permissions=permissions,
+                         role_permission_ids=role_permission_ids)
 
 if __name__ == '__main__':
     init_db()
     print("Flask uygulaması başlatılıyor...")
-    print("Tarayıcınızda şu adresi açın: http://127.0.0.1:9001")
+    port = int(os.environ.get('FLASK_PORT', '9002'))
+    print(f"Tarayıcınızda şu adresi açın: http://127.0.0.1:{port}")
     print("Eğer bağlantı reddedilirse, Windows Defender'da Python.exe'yi izin verilenler listesine ekleyin")
-    app.run(debug=True, host='127.0.0.1', port=9001, use_reloader=False, threaded=True)
+    # Docker container için 0.0.0.0, normal kullanım için 127.0.0.1 kullan
+    host = os.environ.get('FLASK_HOST', '127.0.0.1')
+    port = int(os.environ.get('FLASK_PORT', '9002'))
+    app.run(debug=True, host=host, port=port, use_reloader=False, threaded=True)

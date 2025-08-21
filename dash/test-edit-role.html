@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8">
+    <title>Test - Edit Role</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+    <h1>Test Edit Role Page</h1>
+    <h2>Debug Info:</h2>
+    
+    <h3>Role Data:</h3>
+    {% if role %}
+        <p><strong>ID:</strong> {{ role.id }}</p>
+        <p><strong>Name:</strong> {{ role.name }}</p>
+        <p><strong>Description:</strong> {{ role.description }}</p>
+        <p><strong>Is Active:</strong> {{ role.is_active }}</p>
+    {% else %}
+        <p>No role data</p>
+    {% endif %}
+    
+    <h3>Permissions Count:</h3>
+    {% if permissions %}
+        <p>Total permissions: {{ permissions|length }}</p>
+    {% else %}
+        <p>No permissions data</p>
+    {% endif %}
+    
+    <h3>Role Permission IDs:</h3>
+    {% if role_permission_ids %}
+        <p>Permission IDs: {{ role_permission_ids }}</p>
+    {% else %}
+        <p>No role permission IDs</p>
+    {% endif %}
+    
+    <h3>Current User:</h3>
+    {% if current_user %}
+        <p><strong>User:</strong> {{ current_user.email }}</p>
+        <p><strong>Role:</strong> {{ current_user.role }}</p>
+    {% else %}
+        <p>No current user</p>
+    {% endif %}
+    
+</body>
+</html>

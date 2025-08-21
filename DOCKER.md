@@ -17,7 +17,7 @@ docker-compose up -d
 
 ### 2. Web Arayüzüne Erişim
 
-- **URL:** http://localhost:9001
+- **URL:** http://localhost:9002
 - **Kullanıcı:** admin
 - **Şifre:** admin123
 
@@ -25,7 +25,7 @@ docker-compose up -d
 
 ### ✅ TCP Portları (Sorunsuz)
 - **Modbus TCP:** Port 502 otomatik olarak yönlendirilir
-- **Web Arayüzü:** Port 9001 host'a açılır
+- **Web Arayüzü:** Port 9002 host'a açılır
 - Herhangi bir ek yapılandırma gerektirmez
 
 ### ⚠️ Serial Portları (Dikkat Gerekli)
@@ -95,7 +95,7 @@ server {
     server_name pcba-test.local;
     
     location / {
-        proxy_pass http://pcba-test:9001;
+        proxy_pass http://pcba-test:9002;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
     }
@@ -126,7 +126,7 @@ docker exec pcba-test-system ls -la /dev/tty*
 ### Port Çakışması
 ```bash
 # Port kullanımını kontrol etme
-netstat -tulpn | grep :9001
+netstat -tulpn | grep :9002
 
 # Farklı port kullanma
 docker-compose up -d -e HOST_PORT=9002

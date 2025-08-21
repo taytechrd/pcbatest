@@ -140,6 +140,7 @@
                 </span>
                 <h4 class="text-section">Yönetim</h4>
               </li>
+              {% if current_user.is_authenticated and current_user.role == 'admin' %}
               <li class="nav-item">
                 <a data-bs-toggle="collapse" href="#userManagement">
                   <i class="fas fa-users"></i>
@@ -158,9 +159,16 @@
                         <span class="sub-item">Yeni Kullanıcı</span>
                       </a>
                     </li>
+                    <li>
+                      <a href="/role-management">
+                        <span class="sub-item">Rol Yönetimi</span>
+                      </a>
+                    </li>
                   </ul>
                 </div>
               </li>
+              {% endif %}
+              {% if current_user.is_authenticated and current_user.role == 'admin' %}
               <li class="nav-item">
                 <a data-bs-toggle="collapse" href="#testManagement">
                   <i class="fas fa-cogs"></i>
@@ -184,13 +192,15 @@
                         <span class="sub-item">PCBA Modelleri</span>
                       </a>
                     </li>
-                    <li>
-                      <a href="/connections">
-                        <span class="sub-item">Bağlantı Yönetimi</span>
-                      </a>
-                    </li>
                   </ul>
                 </div>
+              </li>
+              {% endif %}
+              <li class="nav-item">
+                <a href="/connections">
+                  <i class="fas fa-plug"></i>
+                  <p>Bağlantı Yönetimi</p>
+                </a>
               </li>
               <li class="nav-section">
                 <span class="sidebar-mini-icon">
@@ -289,7 +299,7 @@
                   >
                     <div class="avatar-sm">
                       <img
-                        src="assets/img/profile2.jpg"
+                        src="assets/img/user.png"
                         alt="..."
                         class="avatar-img rounded-circle"
                       />
@@ -305,7 +315,7 @@
                         <div class="user-box">
                           <div class="avatar-lg">
                             <img
-                              src="assets/img/profile2.jpg"
+                              src="assets/img/user.png"
                               alt="image profile"
                               class="avatar-img rounded"
                             />

@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>PCBA Test Sistemi - Kullanıcı Düzenle</title>
+  <meta content="width=device-width, initial-scale=1.0, shrink-to-fit=no" name="viewport" />
+  <link rel="icon" href="{{ url_for('static', filename='img/tay.png') }}" type="image/x-icon" />
+
+  <!-- Fonts and icons -->
+  <script src="{{ url_for('static', filename='js/plugin/webfont/webfont.min.js') }}"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      if (typeof WebFont !== 'undefined') {
+        WebFont.load({
+          google: { families: ["Public Sans:300,400,500,600,700"] },
+          custom: {
+            families: [
+              "Font Awesome 5 Solid",
+              "Font Awesome 5 Regular",
+              "Font Awesome 5 Brands",
+              "simple-line-icons",
+            ],
+            urls: ["{{ url_for('static', filename='css/fonts.min.css') }}"],
+          },
+          active: function () {
+            sessionStorage.fonts = true;
+          },
+        });
+      }
+    });
+  </script>
+
+  <!-- CSS Files -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/plugins.min.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/kaiadmin.min.css') }}" />
+
+  <!-- CSS Just for demo purpose, don't include it in your project -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/demo.css') }}" />
+</head>
+
+<body>
+  <div class="wrapper">
+    <!-- Sidebar -->
+    <div class="sidebar" data-background-color="dark">
+      <div class="sidebar-logo">
+        <!-- Logo Header -->
+        <div class="logo-header" data-background-color="dark">
+          <a href="/" class="logo">
+            <img src="{{ url_for('static', filename='img/tay.png') }}" alt="TayTech Logo" class="navbar-brand"
+              height="35" />
+          </a>
+          <div class="nav-toggle">
+            <button class="btn btn-toggle toggle-sidebar">
+              <i class="gg-menu-right"></i>
+            </button>
+            <button class="btn btn-toggle sidenav-toggler">
+              <i class="gg-menu-left"></i>
+            </button>
+          </div>
+          <button class="topbar-toggler more">
+            <i class="gg-more-vertical-alt"></i>
+          </button>
+        </div>
+        <!-- End Logo Header -->
+      </div>
+      <div class="sidebar-wrapper scrollbar scrollbar-inner">
+        <div class="sidebar-content">
+          <ul class="nav nav-secondary">
+            <li class="nav-item">
+              <a href="/" class="collapsed" aria-expanded="false">
+                <i class="fas fa-home"></i>
+                <p>Dashboard</p>
+              </a>
+            </li>
+            <li class="nav-section">
+              <span class="sidebar-mini-icon">
+                <i class="fa fa-ellipsis-h"></i>
+              </span>
+              <h4 class="text-section">Test İşlemleri</h4>
+            </li>
+            <li class="nav-item">
+              <a href="/test-operations">
+                <i class="fas fa-play-circle"></i>
+                <p>Test Çalıştır</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="/test-results">
+                <i class="fas fa-chart-line"></i>
+                <p>Test Sonuçları</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="/reports">
+                <i class="fas fa-file-alt"></i>
+                <p>Raporlar</p>
+              </a>
+            </li>
+            <li class="nav-section">
+              <span class="sidebar-mini-icon">
+                <i class="fa fa-ellipsis-h"></i>
+              </span>
+              <h4 class="text-section">Yönetim</h4>
+            </li>
+            {% if current_user.is_authenticated and current_user.has_permission('manage_users') %}
+            <li class="nav-item active">
+              <a data-bs-toggle="collapse" href="#userManagement">
+                <i class="fas fa-users"></i>
+                <p>Kullanıcı Yönetimi</p>
+                <span class="caret"></span>
+              </a>
+              <div class="collapse show" id="userManagement">
+                <ul class="nav nav-collapse">
+                  <li>
+                    <a href="/users">
+                      <span class="sub-item">Kullanıcı Listesi</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a href="/add-user">
+                      <span class="sub-item">Yeni Kullanıcı</span>
+                    </a>
+                  </li>
+                  {% if current_user.has_permission('manage_user_permissions') %}
+                  <li>
+                    <a href="/role-management">
+                      <span class="sub-item">Rol Yönetimi</span>
+                    </a>
+                  </li>
+                  {% endif %}
+                </ul>
+              </div>
+            </li>
+            {% endif %}
+            {% if current_user.is_authenticated and current_user.has_permission('manage_test_types') %}
+            <li class="nav-item">
+              <a data-bs-toggle="collapse" href="#testManagement">
+                <i class="fas fa-cogs"></i>
+                <p>Test Yönetimi</p>
+                <span class="caret"></span>
+              </a>
+              <div class="collapse" id="testManagement">
+                <ul class="nav nav-collapse">
+                  <li>
+                    <a href="/test-types">
+                      <span class="sub-item">Test Tipleri</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a href="/test-scenarios">
+                      <span class="sub-item">Test Senaryoları</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a href="/pcba-models">
+                      <span class="sub-item">PCBA Modelleri</span>
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </li>
+            {% endif %}
+            <li class="nav-item">
+              <a href="/connections">
+                <i class="fas fa-plug"></i>
+                <p>Bağlantı Yönetimi</p>
+              </a>
+            </li>
+            <li class="nav-section">
+              <span class="sidebar-mini-icon">
+                <i class="fa fa-ellipsis-h"></i>
+              </span>
+              <h4 class="text-section">Ayarlar</h4>
+            </li>
+            <li class="nav-item">
+              <a data-bs-toggle="collapse" href="#submenu">
+                <i class="fas fa-cog"></i>
+                <p>Settings</p>
+                <span class="caret"></span>
+              </a>
+              <div class="collapse" id="submenu">
+                <ul class="nav nav-collapse">
+                  <li>
+                    <a href="/user-settings">
+                      <span class="sub-item">User Settings</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a href="/system-settings">
+                      <span class="sub-item">System Settings</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a href="/test-parameters">
+                      <span class="sub-item">Test Parameters</span>
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <!-- End Sidebar -->
+
+    <div class="main-panel">
+      <div class="main-header">
+        <div class="main-header-logo">
+          <!-- Logo Header -->
+          <div class="logo-header" data-background-color="dark">
+            <a href="/" class="logo">
+              <img src="{{ url_for('static', filename='img/tay.png') }}" alt="TayTech Logo" class="navbar-brand"
+                height="35" />
+            </a>
+            <div class="nav-toggle">
+              <button class="btn btn-toggle toggle-sidebar">
+                <i class="gg-menu-right"></i>
+              </button>
+              <button class="btn btn-toggle sidenav-toggler">
+                <i class="gg-menu-left"></i>
+              </button>
+            </div>
+            <button class="topbar-toggler more">
+              <i class="gg-more-vertical-alt"></i>
+            </button>
+          </div>
+          <!-- End Logo Header -->
+        </div>
+        <!-- Navbar Header -->
+        <nav class="navbar navbar-header navbar-header-transparent navbar-expand-lg border-bottom">
+          <div class="container-fluid">
+            <nav class="navbar navbar-header-left navbar-expand-lg navbar-form nav-search p-0 d-none d-lg-flex">
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <button type="submit" class="btn btn-search pe-1">
+                    <i class="fa fa-search search-icon"></i>
+                  </button>
+                </div>
+                <input type="text" placeholder="Arama..." class="form-control" />
+              </div>
+            </nav>
+
+            <ul class="navbar-nav topbar-nav ms-md-auto align-items-center">
+              <li class="nav-item topbar-user dropdown hidden-caret">
+                <a class="dropdown-toggle profile-pic" data-bs-toggle="dropdown" href="#" aria-expanded="false">
+                  <div class="avatar-sm">
+                    <img src="{{ url_for('static', filename='img/user.png') }}" alt="..."
+                      class="avatar-img rounded-circle" />
+                  </div>
+                  <span class="profile-username">
+                    <span class="op-7">Merhaba,</span>
+                    <span class="fw-bold">{{ current_user.username if current_user.is_authenticated else 'Admin'
+                      }}</span>
+                  </span>
+                </a>
+                <ul class="dropdown-menu dropdown-user animated fadeIn">
+                  <div class="dropdown-user-scroll scrollbar-outer">
+                    <li>
+                      <div class="user-box">
+                        <div class="avatar-lg">
+                          <img src="{{ url_for('static', filename='img/user.png') }}" alt="image profile"
+                            class="avatar-img rounded" />
+                        </div>
+                        <div class="u-text">
+                          <h4>{{ current_user.username if current_user.is_authenticated else 'Admin' }}</h4>
+                          <p class="text-muted">{{ current_user.email if current_user.is_authenticated else
+                            'admin@pcbatest.com' }}</p>
+                          <p class="text-muted">Rol: {{ current_user.role if current_user.is_authenticated else 'Admin'
+                            }}</p>
+                        </div>
+                      </div>
+                    </li>
+                    <li>
+                      <div class="dropdown-divider"></div>
+                      <a class="dropdown-item" href="/user-settings">Profilim</a>
+                      <div class="dropdown-divider"></div>
+                      <a class="dropdown-item" href="/logout">Çıkış</a>
+                    </li>
+                  </div>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </nav>
+        <!-- End Navbar -->
+      </div>
+
+      <div class="container">
+        <div class="page-inner">
+          <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
+            <div>
+              <h3 class="fw-bold mb-3">Kullanıcı Düzenle</h3>
+              <h6 class="op-7 mb-2">{{ user.username }} kullanıcısının bilgilerini düzenleyin</h6>
+            </div>
+            <div class="ms-md-auto py-2 py-md-0">
+              <a href="/users" class="btn btn-secondary btn-round">
+                <i class="fa fa-arrow-left"></i> Kullanıcı Listesi
+              </a>
+            </div>
+          </div>
+
+          <!-- Flash Messages -->
+          {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+          {% for category, message in messages %}
+          <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show"
+            role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+          {% endfor %}
+          {% endif %}
+          {% endwith %}
+
+          <div class="row">
+            <div class="col-md-8">
+              <div class="card">
+                <div class="card-header">
+                  <div class="card-title">Kullanıcı Bilgileri</div>
+                </div>
+                <div class="card-body">
+                  <form method="POST" id="editUserForm">
+                    <div class="row">
+                      <div class="col-sm-6">
+                        <div class="form-group">
+                          <label for="username">Kullanıcı Adı <span class="text-danger">*</span></label>
+                          <input type="text" class="form-control" id="username" name="username" required
+                            value="{{ user.username }}" placeholder="Kullanıcı adını girin" />
+                          <small class="form-text text-muted">Kullanıcı adı benzersiz olmalıdır</small>
+                        </div>
+                      </div>
+                      <div class="col-sm-6">
+                        <div class="form-group">
+                          <label for="email">E-posta <span class="text-danger">*</span></label>
+                          <input type="email" class="form-control" id="email" name="email" required
+                            value="{{ user.email }}" placeholder="E-posta adresini girin" />
+                        </div>
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col-sm-6">
+                        <div class="form-group">
+                          <label for="password">Yeni Şifre</label>
+                          <input type="password" class="form-control" id="password" name="password" minlength="6"
+                            placeholder="Yeni şifre (boş bırakılırsa değişmez)" />
+                          <small class="form-text text-muted">Şifreyi değiştirmek istemiyorsanız boş bırakın</small>
+                        </div>
+                      </div>
+                      <div class="col-sm-6">
+                        <div class="form-group">
+                          <label for="confirm_password">Yeni Şifre (Tekrar)</label>
+                          <input type="password" class="form-control" id="confirm_password" minlength="6"
+                            placeholder="Yeni şifreyi tekrar girin" />
+                        </div>
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col-sm-6">
+                        <div class="form-group">
+                          <label for="role">Rol <span class="text-danger">*</span></label>
+                          <select class="form-control" id="role" name="role" required>
+                            <option value="">Rol seçin</option>
+                            <option value="operator" {% if user.role=='operator' %}selected{% endif %}>Operatör</option>
+                            <option value="technician" {% if user.role=='technician' %}selected{% endif %}>Teknisyen
+                            </option>
+                            <option value="admin" {% if user.role=='admin' %}selected{% endif %}>Admin</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div class="col-sm-6">
+                        <div class="form-group">
+                          <label for="is_active">Durum</label>
+                          <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="is_active" name="is_active" {% if
+                              user.is_active %}checked{% endif %}>
+                            <label class="form-check-label" for="is_active">
+                              Kullanıcı Aktif
+                            </label>
+                          </div>
+                          <small class="form-text text-muted">Pasif kullanıcılar sisteme giriş yapamaz</small>
+                        </div>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+                <div class="card-action">
+                  <button type="submit" form="editUserForm" class="btn btn-success">
+                    <i class="fa fa-check"></i> Değişiklikleri Kaydet
+                  </button>
+                  <a href="/users" class="btn btn-danger">
+                    <i class="fa fa-times"></i> İptal
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-4">
+              <div class="card card-info">
+                <div class="card-header">
+                  <div class="card-title">Kullanıcı Bilgileri</div>
+                </div>
+                <div class="card-body">
+                  <div class="d-flex align-items-center mb-3">
+                    <div class="avatar avatar-lg me-3">
+                      <img src="{{ url_for('static', filename='img/user.png') }}" alt="..."
+                        class="avatar-img rounded-circle">
+                    </div>
+                    <div>
+                      <h5 class="mb-1">{{ user.username }}</h5>
+                      <p class="text-muted mb-0">{{ user.email }}</p>
+                    </div>
+                  </div>
+                  <div class="separator-dashed"></div>
+                  <div class="row">
+                    <div class="col-6">
+                      <div class="text-center">
+                        <p class="text-muted mb-1">Kayıt Tarihi</p>
+                        <h6>{{ user.created_at.strftime('%d.%m.%Y') }}</h6>
+                      </div>
+                    </div>
+                    <div class="col-6">
+                      <div class="text-center">
+                        <p class="text-muted mb-1">Durum</p>
+                        {% if user.is_active %}
+                        <span class="badge badge-success">Aktif</span>
+                        {% else %}
+                        <span class="badge badge-danger">Pasif</span>
+                        {% endif %}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card card-secondary">
+                <div class="card-header">
+                  <div class="card-title">Rol Açıklamaları</div>
+                </div>
+                <div class="card-body pb-0">
+                  <div class="d-flex">
+                    <div class="avatar avatar-xs">
+                      <span class="badge badge-danger rounded-pill">A</span>
+                    </div>
+                    <div class="flex-1 pt-1 ms-2">
+                      <h6 class="fw-bold mb-1">Admin</h6>
+                      <p class="text-muted">
+                        Tüm sistem yetkilerine sahip. Kullanıcı yönetimi, sistem ayarları ve tüm test işlemlerine
+                        erişebilir.
+                      </p>
+                    </div>
+                  </div>
+                  <div class="separator-dashed"></div>
+                  <div class="d-flex">
+                    <div class="avatar avatar-xs">
+                      <span class="badge badge-warning rounded-pill">T</span>
+                    </div>
+                    <div class="flex-1 pt-1 ms-2">
+                      <h6 class="fw-bold mb-1">Teknisyen</h6>
+                      <p class="text-muted">
+                        Test parametrelerini düzenleyebilir, test sonuçlarını görüntüleyebilir ve raporlar
+                        oluşturabilir.
+                      </p>
+                    </div>
+                  </div>
+                  <div class="separator-dashed"></div>
+                  <div class="d-flex">
+                    <div class="avatar avatar-xs">
+                      <span class="badge badge-secondary rounded-pill">O</span>
+                    </div>
+                    <div class="flex-1 pt-1 ms-2">
+                      <h6 class="fw-bold mb-1">Operatör</h6>
+                      <p class="text-muted">
+                        Sadece test çalıştırabilir ve kendi test sonuçlarını görüntüleyebilir.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer class="footer">
+        <div class="container-fluid d-flex justify-content-between">
+          <div class="copyright">
+            2024, PCBA Test Sistemi
+          </div>
+        </div>
+      </footer>
+    </div>
+  </div>
+
+  <!--   Core JS Files   -->
+  <script src="{{ url_for('static', filename='js/core/jquery-3.7.1.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/core/popper.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/core/bootstrap.min.js') }}"></script>
+
+  <!-- jQuery Scrollbar -->
+  <script src="{{ url_for('static', filename='js/plugin/jquery-scrollbar/jquery.scrollbar.min.js') }}"></script>
+
+  <!-- Sweet Alert -->
+  <script src="{{ url_for('static', filename='js/plugin/sweetalert/sweetalert.min.js') }}"></script>
+
+  <!-- Kaiadmin JS -->
+  <script src="{{ url_for('static', filename='js/kaiadmin.min.js') }}"></script>
+
+  <script>
+    $(document).ready(function () {
+      // Form validasyonu
+      $('#editUserForm').on('submit', function (e) {
+        const password = $('#password').val();
+        const confirmPassword = $('#confirm_password').val();
+
+        // Şifre alanları doldurulmuşsa kontrol et
+        if (password || confirmPassword) {
+          if (password !== confirmPassword) {
+            e.preventDefault();
+            swal("Hata!", "Şifreler eşleşmiyor.", "error");
+            return false;
+          }
+
+          if (password.length < 6) {
+            e.preventDefault();
+            swal("Hata!", "Şifre en az 6 karakter olmalıdır.", "error");
+            return false;
+          }
+        }
+      });
+
+      // Şifre eşleşme kontrolü (gerçek zamanlı)
+      $('#confirm_password').on('keyup', function () {
+        const password = $('#password').val();
+        const confirmPassword = $(this).val();
+
+        if (confirmPassword && password !== confirmPassword) {
+          $(this).addClass('is-invalid');
+        } else {
+          $(this).removeClass('is-invalid');
+        }
+      });
+
+      // Şifre alanı değiştiğinde confirm alanını da kontrol et
+      $('#password').on('keyup', function () {
+        const password = $(this).val();
+        const confirmPassword = $('#confirm_password').val();
+
+        if (confirmPassword && password !== confirmPassword) {
+          $('#confirm_password').addClass('is-invalid');
+        } else {
+          $('#confirm_password').removeClass('is-invalid');
+        }
+      });
+    });
+  </script>
+</body>
+
+</html>

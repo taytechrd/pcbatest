@@ -131,6 +131,12 @@
                         <span class="sub-item">Yeni Kullanıcı</span>
                       </a>
                     </li>
+                    <li>
+                      <a href="/role-management">
+                        <span class="sub-item">Rol Yönetimi</span>
+                      </a>
+                      </a>
+                    </li>
                   </ul>
                 </div>
               </li>
@@ -262,14 +268,14 @@
                   >
                     <div class="avatar-sm">
                       <img
-                        src="assets/img/profile2.jpg"
+                        src="assets/img/user.png"
                         alt="..."
                         class="avatar-img rounded-circle"
                       />
                     </div>
                     <span class="profile-username">
                       <span class="op-7">Merhaba,</span>
-                      <span class="fw-bold">Admin</span>
+                      <span class="fw-bold">{{ current_user.username if current_user.is_authenticated else 'Admin' }}</span>
                     </span>
                   </a>
                   <ul class="dropdown-menu dropdown-user animated fadeIn">
@@ -278,15 +284,15 @@
                         <div class="user-box">
                           <div class="avatar-lg">
                             <img
-                              src="assets/img/profile2.jpg"
+                              src="assets/img/user.png"
                               alt="image profile"
                               class="avatar-img rounded"
                             />
                           </div>
                           <div class="u-text">
-                            <h4>Admin</h4>
-                            <p class="text-muted">admin@pcbatest.com</p>
-                            <p class="text-muted">Rol: Admin</p>
+                            <h4>{{ current_user.username if current_user.is_authenticated else 'Admin' }}</h4>
+                            <p class="text-muted">{{ current_user.email if current_user.is_authenticated else 'admin@pcbatest.com' }}</p>
+                            <p class="text-muted">Rol: {{ current_user.role if current_user.is_authenticated else 'Admin' }}</p>
                           </div>
                         </div>
                       </li>

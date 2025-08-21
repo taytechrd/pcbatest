@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="tr">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>PCBA Test Sistemi - Rol Düzenle</title>
+    <meta
+      content="width=device-width, initial-scale=1.0, shrink-to-fit=no"
+      name="viewport"
+    />
+    <link rel="icon" href="{{ url_for('static', filename='img/tay.png') }}" type="image/png" />
+
+    <!-- Fonts and icons -->
+    <script src="{{ url_for('static', filename='js/plugin/webfont/webfont.min.js') }}"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        if (typeof WebFont !== 'undefined') {
+          WebFont.load({
+            google: { families: ["Public Sans:300,400,500,600,700"] },
+            custom: {
+              families: [
+                "Font Awesome 5 Solid",
+                "Font Awesome 5 Regular",
+                "Font Awesome 5 Brands",
+                "simple-line-icons",
+              ],
+              urls: ["{{ url_for('static', filename='css/fonts.min.css') }}"],
+            },
+            active: function () {
+              sessionStorage.fonts = true;
+            },
+          });
+        }
+      });
+    </script>
+
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/plugins.min.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/kaiadmin.min.css') }}" />
+
+    <!-- CSS Just for demo purpose, don't include it in your project -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/demo.css') }}" />
+  </head>
+  <body>
+    <div class="wrapper">
+      <!-- Sidebar -->
+      <div class="sidebar" data-background-color="dark">
+        <div class="sidebar-logo">
+          <!-- Logo Header -->
+          <div class="logo-header" data-background-color="dark">
+            <a href="/" class="logo">
+              <img
+                src="{{ url_for('static', filename='img/tay.png') }}"
+                alt="TayTech Logo"
+                class="navbar-brand"
+                height="35"
+              />
+            </a>
+            <div class="nav-toggle">
+              <button class="btn btn-toggle toggle-sidebar">
+                <i class="gg-menu-right"></i>
+              </button>
+              <button class="btn btn-toggle sidenav-toggler">
+                <i class="gg-menu-left"></i>
+              </button>
+            </div>
+            <button class="topbar-toggler more">
+              <i class="gg-more-vertical-alt"></i>
+            </button>
+          </div>
+          <!-- End Logo Header -->
+        </div>
+        <div class="sidebar-wrapper scrollbar scrollbar-inner">
+          <div class="sidebar-content">
+            <ul class="nav nav-secondary">
+              <li class="nav-item">
+                <a href="/">
+                  <i class="fas fa-home"></i>
+                  <p>Dashboard</p>
+                </a>
+              </li>
+              <li class="nav-section">
+                <span class="sidebar-mini-icon">
+                  <i class="fa fa-ellipsis-h"></i>
+                </span>
+                <h4 class="text-section">Test İşlemleri</h4>
+              </li>
+              <li class="nav-item">
+                <a href="/test-operations">
+                  <i class="fas fa-play-circle"></i>
+                  <p>Test Çalıştır</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="/test-results">
+                  <i class="fas fa-chart-line"></i>
+                  <p>Test Sonuçları</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="/reports">
+                  <i class="fas fa-file-alt"></i>
+                  <p>Raporlar</p>
+                </a>
+              </li>
+              <li class="nav-section">
+                <span class="sidebar-mini-icon">
+                  <i class="fa fa-ellipsis-h"></i>
+                </span>
+                <h4 class="text-section">Yönetim</h4>
+              </li>
+              {% if current_user.is_authenticated and current_user.has_permission('manage_users') %}
+              <li class="nav-item">
+                <a data-bs-toggle="collapse" href="#userManagement">
+                  <i class="fas fa-users"></i>
+                  <p>Kullanıcı Yönetimi</p>
+                  <span class="caret"></span>
+                </a>
+                <div class="collapse show" id="userManagement">
+                  <ul class="nav nav-collapse">
+                    <li>
+                      <a href="/users">
+                        <span class="sub-item">Kullanıcı Listesi</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="/add-user">
+                        <span class="sub-item">Yeni Kullanıcı</span>
+                      </a>
+                    </li>
+                    {% if current_user.has_permission('manage_user_permissions') %}
+                    <li>
+                      <a href="/role-management">
+                        <span class="sub-item">Rol Yönetimi</span>
+                      </a>
+                    </li>
+                    {% endif %}
+                  </ul>
+                </div>
+              </li>
+              {% endif %}
+              {% if current_user.is_authenticated and current_user.has_permission('manage_test_types') %}
+              <li class="nav-item">
+                <a data-bs-toggle="collapse" href="#testManagement">
+                  <i class="fas fa-cogs"></i>
+                  <p>Test Yönetimi</p>
+                  <span class="caret"></span>
+                </a>
+                <div class="collapse" id="testManagement">
+                  <ul class="nav nav-collapse">
+                    <li>
+                      <a href="/test-types">
+                        <span class="sub-item">Test Tipleri</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="/test-scenarios">
+                        <span class="sub-item">Test Senaryoları</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="/pcba-models">
+                        <span class="sub-item">PCBA Modelleri</span>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </li>
+              {% endif %}
+              <li class="nav-item">
+                <a href="/connections">
+                  <i class="fas fa-plug"></i>
+                  <p>Bağlantı Yönetimi</p>
+                </a>
+              </li>
+              <li class="nav-section">
+                <span class="sidebar-mini-icon">
+                  <i class="fa fa-ellipsis-h"></i>
+                </span>
+                <h4 class="text-section">Ayarlar</h4>
+              </li>
+              <li class="nav-item">
+                <a data-bs-toggle="collapse" href="#submenu">
+                  <i class="fas fa-cog"></i>
+                  <p>Settings</p>
+                  <span class="caret"></span>
+                </a>
+                <div class="collapse" id="submenu">
+                  <ul class="nav nav-collapse">
+                    <li>
+                      <a href="/user-settings">
+                        <span class="sub-item">User Settings</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="/system-settings">
+                        <span class="sub-item">System Settings</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="/test-parameters">
+                        <span class="sub-item">Test Parameters</span>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <!-- End Sidebar -->
+
+      <div class="main-panel">
+        <div class="main-header">
+          <div class="main-header-logo">
+            <!-- Logo Header -->
+            <div class="logo-header" data-background-color="dark">
+              <a href="/" class="logo">
+                <img
+                  src="{{ url_for('static', filename='img/tay.png') }}"
+                  alt="TayTech Logo"
+                  class="navbar-brand"
+                  height="35"
+                />
+              </a>
+              <div class="nav-toggle">
+                <button class="btn btn-toggle toggle-sidebar">
+                  <i class="gg-menu-right"></i>
+                </button>
+                <button class="btn btn-toggle sidenav-toggler">
+                  <i class="gg-menu-left"></i>
+                </button>
+              </div>
+              <button class="topbar-toggler more">
+                <i class="gg-more-vertical-alt"></i>
+              </button>
+            </div>
+            <!-- End Logo Header -->
+          </div>
+          <!-- Navbar Header -->
+          <nav
+            class="navbar navbar-header navbar-header-transparent navbar-expand-lg border-bottom"
+          >
+            <div class="container-fluid">
+              <ul class="navbar-nav topbar-nav ms-md-auto align-items-center">
+                <li class="nav-item topbar-user dropdown hidden-caret">
+                  <a
+                    class="dropdown-toggle profile-pic"
+                    data-bs-toggle="dropdown"
+                    href="#"
+                    aria-expanded="false"
+                  >
+                    <div class="avatar-sm">
+                      <img
+                        src="{{ url_for('static', filename='img/user.png') }}"
+                        alt="..."
+                        class="avatar-img rounded-circle"
+                      />
+                    </div>
+                    <span class="profile-username">
+                      <span class="op-7">Merhaba,</span>
+                      <span class="fw-bold">{{ current_user.username if current_user else 'Kullanıcı' }}</span>
+                    </span>
+                  </a>
+                  <ul class="dropdown-menu dropdown-user animated fadeIn">
+                    <div class="dropdown-user-scroll scrollbar-outer">
+                      <li>
+                        <div class="user-box">
+                          <div class="avatar-lg">
+                            <img
+                              src="{{ url_for('static', filename='img/user.png') }}"
+                              alt="image profile"
+                              class="avatar-img rounded"
+                            />
+                          </div>
+                          <div class="u-text">
+                            <h4>{{ current_user.username if current_user else 'Kullanıcı' }}</h4>
+                            <p class="text-muted">{{ current_user.email if current_user else 'email@example.com' }}</p>
+                            <p class="text-muted">Rol: {{ current_user.role.title() if current_user else 'Operator' }}</p>
+                          </div>
+                        </div>
+                      </li>
+                      <li>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="/user-settings">Profilim</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="/logout">Çıkış</a>
+                      </li>
+                    </div>
+                  </ul>
+                </li>
+              </ul>
+            </div>
+          </nav>
+          <!-- End Navbar -->
+        </div>
+
+        <div class="container">
+          <div class="page-inner">
+            <div class="page-header">
+              <h3 class="fw-bold mb-3">Rol Düzenle</h3>
+              <ul class="breadcrumbs mb-3">
+                <li class="nav-home">
+                  <a href="/">
+                    <i class="icon-home"></i>
+                  </a>
+                </li>
+                <li class="separator">
+                  <i class="icon-arrow-right"></i>
+                </li>
+                <li class="nav-item">
+                  <a href="#">Kullanıcı Yönetimi</a>
+                </li>
+                <li class="separator">
+                  <i class="icon-arrow-right"></i>
+                </li>
+                <li class="nav-item">
+                  <a href="/role-management">Rol Yönetimi</a>
+                </li>
+                <li class="separator">
+                  <i class="icon-arrow-right"></i>
+                </li>
+                <li class="nav-item">
+                  <a href="#">Rol Düzenle</a>
+                </li>
+              </ul>
+            </div>
+            <div class="row">
+              <div class="col-md-12">
+                <div class="card">
+                  <div class="card-header">
+                    <div class="card-title">{{ role.name.title() }} - Rol Düzenleme</div>
+                  </div>
+                  <div class="card-body">
+                    {% if error %}
+                    <div class="alert alert-danger">
+                      {{ error }}
+                    </div>
+                    {% endif %}
+                    <form method="POST">
+                      <!-- Role Info -->
+                      <div class="row mb-4">
+                        <div class="col-md-4">
+                          <div class="card card-stats card-primary">
+                            <div class="card-body">
+                              <div class="row">
+                                <div class="col-5">
+                                  <div class="icon-big text-center">
+                                    <i class="fas fa-users-cog"></i>
+                                  </div>
+                                </div>
+                                <div class="col-7 col-stats">
+                                  <div class="numbers">
+                                    <p class="card-category">Rol Adı</p>
+                                    <h4 class="card-title">{{ role.name.title() }}</h4>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-md-4">
+                          <div class="card card-stats card-info">
+                            <div class="card-body">
+                              <div class="row">
+                                <div class="col-5">
+                                  <div class="icon-big text-center">
+                                    <i class="fas fa-key"></i>
+                                  </div>
+                                </div>
+                                <div class="col-7 col-stats">
+                                  <div class="numbers">
+                                    <p class="card-category">Yetki Sayısı</p>
+                                    <h4 class="card-title">{{ role.permissions|length }}</h4>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-md-4">
+                          <div class="card card-stats card-warning">
+                            <div class="card-body">
+                              <div class="row">
+                                <div class="col-5">
+                                  <div class="icon-big text-center">
+                                    <i class="fas fa-users"></i>
+                                  </div>
+                                </div>
+                                <div class="col-7 col-stats">
+                                  <div class="numbers">
+                                    <p class="card-category">Kullanıcı Sayısı</p>
+                                    <h4 class="card-title">{{ role.users|length }}</h4>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <!-- Role Basic Info -->
+                      <div class="row">
+                        <div class="col-md-6">
+                          <div class="form-group">
+                            <label for="name">Rol Adı <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="name" name="name" 
+                                   value="{{ role.name }}" required>
+                            <small class="form-text text-muted">
+                              Rol adını değiştirebilirsiniz (örn: admin, technician, operator)
+                            </small>
+                          </div>
+                        </div>
+                        <div class="col-md-6">
+                          <div class="form-group">
+                            <label for="description">Açıklama <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="description" name="description" 
+                                   value="{{ role.description }}" required>
+                            <small class="form-text text-muted">
+                              Rol açıklamasını güncelleyin
+                            </small>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="form-group">
+                        <div class="form-check">
+                          <input class="form-check-input" type="checkbox" id="is_active" name="is_active" 
+                                 {% if role.is_active %}checked{% endif %}>
+                          <label class="form-check-label" for="is_active">
+                            Rol aktif
+                          </label>
+                          <small class="form-text text-muted d-block">
+                            Pasif roller yeni kullanıcılara atanamaz
+                          </small>
+                        </div>
+                      </div>
+                      <!-- Role Permissions -->
+                      <div class="form-group mt-4">
+                        <label>Rol Yetkileri</label>
+                        <small class="form-text text-muted mb-3">
+                          Bu role sahip olmasını istediğiniz yetkileri seçin. Seçilen yetkiler bu role sahip tüm kullanıcılar için geçerli olacaktır.
+                        </small>
+                        
+                        <div class="row">
+                          {% set modules = permissions|groupby('module') %}
+                          {% for module, module_permissions in modules %}
+                          <div class="col-md-6">
+                            <div class="card">
+                              <div class="card-header">
+                                <h6 class="card-title mb-0">
+                                  {{ module.replace('_', ' ').title() }}
+                                </h6>
+                              </div>
+                              <div class="card-body">
+                                {% for permission in module_permissions %}
+                                <div class="form-check">
+                                  <input
+                                    class="form-check-input"
+                                    type="checkbox"
+                                    name="permissions"
+                                    value="{{ permission.id }}"
+                                    id="permission_{{ permission.id }}"
+                                    {% if permission.id in role_permission_ids %}checked{% endif %}
+                                  />
+                                  <label class="form-check-label" for="permission_{{ permission.id }}">
+                                    <strong>{{ permission.name.replace('_', ' ').title() }}</strong>
+                                    <br><small class="text-muted">{{ permission.description }}</small>
+                                  </label>
+                                </div>
+                                {% endfor %}
+                              </div>
+                            </div>
+                          </div>
+                          {% endfor %}
+                        </div>
+                      </div>
+                      <!-- Form Actions -->
+                      <div class="card-action">
+                        <button type="submit" class="btn btn-success">
+                          <i class="fa fa-save"></i> Rol Bilgilerini Güncelle
+                        </button>
+                        <a href="/role-management" class="btn btn-danger">
+                          <i class="fa fa-times"></i> İptal
+                        </a>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <footer class="footer">
+          <div class="container-fluid d-flex justify-content-between">
+            <div class="copyright">
+              2024, PCBA Test Sistemi
+            </div>
+          </div>
+        </footer>
+      </div>
+
+      <!-- Custom template -->
+      <div class="custom-template">
+        <div class="title">Settings</div>
+        <div class="custom-content">
+          <div class="switcher">
+            <div class="switch-block">
+              <h4>Logo Header</h4>
+              <div class="btnSwitch">
+                <button
+                  type="button"
+                  class="changeLogoHeaderColor"
+                  data-color="dark"
+                ></button>
+                <button
+                  type="button"
+                  class="selected changeLogoHeaderColor"
+                  data-color="blue"
+                ></button>
+                <button
+                  type="button"
+                  class="changeLogoHeaderColor"
+                  data-color="purple"
+                ></button>
+                <button
+                  type="button"
+                  class="changeLogoHeaderColor"
+                  data-color="light-blue"
+                ></button>
+                <button
+                  type="button"
+                  class="changeLogoHeaderColor"
+                  data-color="green"
+                ></button>
+                <button
+                  type="button"
+                  class="changeLogoHeaderColor"
+                  data-color="orange"
+                ></button>
+                <button
+                  type="button"
+                  class="changeLogoHeaderColor"
+                  data-color="red"
+                ></button>
+                <button
+                  type="button"
+                  class="changeLogoHeaderColor"
+                  data-color="white"
+                ></button>
+                <br />
+                <button
+                  type="button"
+                  class="changeLogoHeaderColor"
+                  data-color="dark2"
+                ></button>
+                <button
+                  type="button"
+                  class="changeLogoHeaderColor"
+                  data-color="blue2"
+                ></button>
+                <button
+                  type="button"
+                  class="changeLogoHeaderColor"
+                  data-color="purple2"
+                ></button>
+                <button
+                  type="button"
+                  class="changeLogoHeaderColor"
+                  data-color="light-blue2"
+                ></button>
+                <button
+                  type="button"
+                  class="changeLogoHeaderColor"
+                  data-color="green2"
+                ></button>
+                <button
+                  type="button"
+                  class="changeLogoHeaderColor"
+                  data-color="orange2"
+                ></button>
+                <button
+                  type="button"
+                  class="changeLogoHeaderColor"
+                  data-color="red2"
+                ></button>
+              </div>
+            </div>
+            <div class="switch-block">
+              <h4>Navbar Header</h4>
+              <div class="btnSwitch">
+                <button
+                  type="button"
+                  class="changeTopBarColor"
+                  data-color="dark"
+                ></button>
+                <button
+                  type="button"
+                  class="changeTopBarColor"
+                  data-color="blue"
+                ></button>
+                <button
+                  type="button"
+                  class="changeTopBarColor"
+                  data-color="purple"
+                ></button>
+                <button
+                  type="button"
+                  class="changeTopBarColor"
+                  data-color="light-blue"
+                ></button>
+                <button
+                  type="button"
+                  class="changeTopBarColor"
+                  data-color="green"
+                ></button>
+                <button
+                  type="button"
+                  class="changeTopBarColor"
+                  data-color="orange"
+                ></button>
+                <button
+                  type="button"
+                  class="changeTopBarColor"
+                  data-color="red"
+                ></button>
+                <button
+                  type="button"
+                  class="selected changeTopBarColor"
+                  data-color="white"
+                ></button>
+                <br />
+                <button
+                  type="button"
+                  class="changeTopBarColor"
+                  data-color="dark2"
+                ></button>
+                <button
+                  type="button"
+                  class="changeTopBarColor"
+                  data-color="blue2"
+                ></button>
+                <button
+                  type="button"
+                  class="changeTopBarColor"
+                  data-color="purple2"
+                ></button>
+                <button
+                  type="button"
+                  class="changeTopBarColor"
+                  data-color="light-blue2"
+                ></button>
+                <button
+                  type="button"
+                  class="changeTopBarColor"
+                  data-color="green2"
+                ></button>
+                <button
+                  type="button"
+                  class="changeTopBarColor"
+                  data-color="orange2"
+                ></button>
+                <button
+                  type="button"
+                  class="changeTopBarColor"
+                  data-color="red2"
+                ></button>
+              </div>
+            </div>
+            <div class="switch-block">
+              <h4>Sidebar</h4>
+              <div class="btnSwitch">
+                <button
+                  type="button"
+                  class="changeSideBarColor selected"
+                  data-color="white"
+                ></button>
+                <button
+                  type="button"
+                  class="changeSideBarColor"
+                  data-color="dark"
+                ></button>
+                <button
+                  type="button"
+                  class="changeSideBarColor"
+                  data-color="dark2"
+                ></button>
+              </div>
+            </div>
+            <div class="switch-block">
+              <h4>Background</h4>
+              <div class="btnSwitch">
+                <button
+                  type="button"
+                  class="changeBackgroundColor selected"
+                  data-color="bg2"
+                ></button>
+                <button
+                  type="button"
+                  class="changeBackgroundColor"
+                  data-color="bg1"
+                ></button>
+                <button
+                  type="button"
+                  class="changeBackgroundColor"
+                  data-color="bg3"
+                ></button>
+                <button
+                  type="button"
+                  class="changeBackgroundColor"
+                  data-color="dark"
+                ></button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="custom-toggle">
+          <i class="icon-settings"></i>
+        </div>
+      </div>
+      <!-- End Custom template -->
+    </div>
+    <!--   Core JS Files   -->
+    <script src="{{ url_for('static', filename='js/core/jquery-3.7.1.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/core/popper.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/core/bootstrap.min.js') }}"></script>
+
+    <!-- jQuery Scrollbar -->
+    <script src="{{ url_for('static', filename='js/plugin/jquery-scrollbar/jquery.scrollbar.min.js') }}"></script>
+
+    <!-- Chart JS -->
+    <script src="{{ url_for('static', filename='js/plugin/chart.js/chart.min.js') }}"></script>
+
+    <!-- jQuery Sparkline -->
+    <script src="{{ url_for('static', filename='js/plugin/jquery.sparkline/jquery.sparkline.min.js') }}"></script>
+
+    <!-- Chart Circle -->
+    <script src="{{ url_for('static', filename='js/plugin/chart-circle/circles.min.js') }}"></script>
+
+    <!-- Datatables -->
+    <script src="{{ url_for('static', filename='js/plugin/datatables/datatables.min.js') }}"></script>
+
+    <!-- Bootstrap Notify -->
+    <script src="{{ url_for('static', filename='js/plugin/bootstrap-notify/bootstrap-notify.min.js') }}"></script>
+
+    <!-- jQuery Vector Maps -->
+    <script src="{{ url_for('static', filename='js/plugin/jsvectormap/jsvectormap.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/plugin/jsvectormap/world.js') }}"></script>
+
+    <!-- Sweet Alert -->
+    <script src="{{ url_for('static', filename='js/plugin/sweetalert/sweetalert.min.js') }}"></script>
+
+    <!-- Kaiadmin JS -->
+    <script src="{{ url_for('static', filename='js/kaiadmin.min.js') }}"></script>
+
+    <!-- Kaiadmin DEMO methods, don't include it in your project! -->
+    <script src="{{ url_for('static', filename='js/setting-demo.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/demo.js') }}"></script>
+  </body>
+</html>

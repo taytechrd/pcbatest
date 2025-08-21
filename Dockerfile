@@ -20,11 +20,13 @@ COPY dash/ dash/
 # SQLite veritabanı için volume mount noktası
 VOLUME ["/app/data"]
 
-# Port 9001'i aç
-EXPOSE 9001
+# Port 9002'i aç
+EXPOSE 9002
 
 # Veritabanı dosyasının data dizininde olması için environment variable
 ENV DATABASE_PATH=/app/data/pcba_test.db
+ENV FLASK_HOST=0.0.0.0
+ENV FLASK_PORT=9002
 
 # Uygulamayı başlat
 CMD ["python", "app.py"]

@@ -5,7 +5,7 @@ services:
     build: .
     container_name: pcba-test-system
     ports:
-      - "9001:9001"      # Web arayüzü portu
+      - "9002:9002"      # Web arayüzü portu
       - "502:502"        # Modbus TCP portu (isteğe bağlı)
     volumes:
       - ./data:/app/data                    # Veritabanı persistent storage

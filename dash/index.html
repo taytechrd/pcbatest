@@ -109,13 +109,14 @@
                 </span>
                 <h4 class="text-section">Yönetim</h4>
               </li>
+              {% if current_user.is_authenticated and current_user.role == 'admin' %}
               <li class="nav-item">
                 <a data-bs-toggle="collapse" href="#userManagement">
                   <i class="fas fa-users"></i>
                   <p>Kullanıcı Yönetimi</p>
                   <span class="caret"></span>
                 </a>
-                <div class="collapse" id="userManagement">
+                <div class="collapse show" id="userManagement">
                   <ul class="nav nav-collapse">
                     <li>
                       <a href="/users">
@@ -127,9 +128,16 @@
                         <span class="sub-item">Yeni Kullanıcı</span>
                       </a>
                     </li>
+                    <li>
+                      <a href="/role-management">
+                        <span class="sub-item">Rol Yönetimi</span>
+                      </a>
+                    </li>
                   </ul>
                 </div>
               </li>
+              {% endif %}
+              {% if current_user.is_authenticated and current_user.role == 'admin' %}
               <li class="nav-item">
                 <a data-bs-toggle="collapse" href="#testManagement">
                   <i class="fas fa-cogs"></i>
@@ -153,13 +161,15 @@
                         <span class="sub-item">PCBA Modelleri</span>
                       </a>
                     </li>
-                    <li>
-                      <a href="/connections">
-                        <span class="sub-item">Bağlantı Yönetimi</span>
-                      </a>
-                    </li>
                   </ul>
                 </div>
+              </li>
+              {% endif %}
+              <li class="nav-item">
+                <a href="/connections">
+                  <i class="fas fa-plug"></i>
+                  <p>Bağlantı Yönetimi</p>
+                </a>
               </li>
               <li class="nav-section">
                 <span class="sidebar-mini-icon">
@@ -413,7 +423,7 @@
                           <a href="#">
                             <div class="notif-img">
                               <img
-                                src="assets/img/profile2.jpg"
+                                src="assets/img/user.png"
                                 alt="Img Profile"
                               />
                             </div>
