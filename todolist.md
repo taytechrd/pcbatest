@@ -111,6 +111,26 @@
 ---
 
 **Son Güncelleme:** 2025-08-22  
-**Durum:** v1.2.0 Release Tamamlandı  
-**Versiyon:** 1.2.0  
-**GitHub:** https://github.com/taytechrd/pcbatest/releases/tag/v1.2.0
+**Durum:** v1.2.1 Release Tamamlandı  
+**Versiyon:** 1.2.1  
+**GitHub:** https://github.com/taytechrd/pcbatest/releases/tag/v1.2.1
+
+## 🎉 v1.2.1 Yeni Tamamlananlar
+
+### Performans İyileştirmeleri ✅
+- [x] Database query optimization - Eager loading eklendi
+- [x] Static file caching - Cache headers eklendi  
+- [x] Session management - 24 saat timeout
+- [x] Memory usage optimization - Connection pool iyileştirmeleri
+
+### Hata Düzeltmeleri ✅
+- [x] Template filter hatalarının düzeltilmesi
+- [x] Error handling iyileştirmeleri (404, 500, 403)
+- [x] Error.html template oluşturuldu
+- [x] Dashboard statik içerik temizliği
+
+### Geliştirme Araçları ✅
+- [x] start_server.bat/sh otomatik başlatma scriptleri
+- [x] migrate_db.py database migration tool
+- [x] Varsayılan roller, yetkiler ve admin kullanıcısı
+- [x] 40+ gereksiz template resmi kaldırıldı (~2MB tasarruf)

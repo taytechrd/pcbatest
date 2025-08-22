@@ -6,7 +6,7 @@ Bu script veritabanı şemasını güncellemek için kullanılır.
 
 import os
 import sys
-from datetime import datetime
+from datetime import datetime, timedelta
 from app import app, db, User, Role, Permission
 
 def create_default_roles():
@@ -18,7 +18,6 @@ def create_default_roles():
     if not admin_role:
         admin_role = Role(
             name='admin',
-            display_name='Yönetici',
             description='Sistem yöneticisi - Tüm yetkilere sahip'
         )
         db.session.add(admin_role)
@@ -29,7 +28,6 @@ def create_default_roles():
     if not operator_role:
         operator_role = Role(
             name='operator',
-            display_name='Operatör',
             description='Test operatörü - Test çalıştırma yetkisi'
         )
         db.session.add(operator_role)
@@ -40,7 +38,6 @@ def create_default_roles():
     if not viewer_role:
         viewer_role = Role(
             name='viewer',
-            display_name='Görüntüleyici',
             description='Sadece görüntüleme yetkisi'
         )
         db.session.add(viewer_role)
@@ -66,7 +63,6 @@ def create_default_permissions():
         if not permission:
             permission = Permission(
                 name=perm_name,
-                display_name=display_name,
                 description=description
             )
             db.session.add(permission)
@@ -151,6 +147,141 @@ def create_default_admin():
         db.session.commit()
         print("✓ Varsayılan admin kullanıcısı oluşturuldu (admin/admin123)")
 
+def create_communication_permissions():
+    """Communication logging için gerekli izinleri oluştur"""
+    print("Communication logging izinleri oluşturuluyor...")
+    
+    comm_permissions = [
+        ('communication_view', 'Haberleşme Loglarını Görüntüleme', 'Haberleşme loglarını görüntüleyebilir'),
+        ('communication_manage', 'Bağlantı Yönetimi', 'Test cihazı bağlantılarını yönetebilir'),
+        ('communication_export', 'Log Dışa Aktarma', 'Haberleşme loglarını dışa aktarabilir'),
+        ('communication_admin', 'Haberleşme Yöneticisi', 'Tüm haberleşme özelliklerine erişim')
+    ]
+    
+    for name, display_name, description in comm_permissions:
+        permission = Permission.query.filter_by(name=name).first()
+        if not permission:
+            permission = Permission(
+                name=name,
+                description=description
+            )
+            db.session.add(permission)
+            print(f"✓ {display_name} izni oluşturuldu")
+    
+    db.session.commit()
+
+def create_default_connections():
+    """Varsayılan bağlantı konfigürasyonları oluştur"""
+    print("Varsayılan bağlantı konfigürasyonları oluşturuluyor...")
+    
+    from app import ConnectionConfig
+    
+    # Örnek seri port bağlantısı
+    serial_conn = ConnectionConfig.query.filter_by(name='Test DMM (Serial)').first()
+    if not serial_conn:
+        serial_conn = ConnectionConfig(
+            name='Test DMM (Serial)',
+            connection_type='serial',
+            port='COM3',
+            baud_rate=9600,
+            data_bits=8,
+            stop_bits=1,
+            parity='none',
+            timeout=5000,
+            is_active=True
+        )
+        db.session.add(serial_conn)
+        print("✓ Örnek seri port bağlantısı oluşturuldu")
+    
+    # Örnek TCP bağlantısı
+    tcp_conn = ConnectionConfig.query.filter_by(name='Power Supply (TCP)').first()
+    if not tcp_conn:
+        tcp_conn = ConnectionConfig(
+            name='Power Supply (TCP)',
+            connection_type='tcp',
+            ip_address='192.168.1.100',
+            tcp_port=5025,
+            timeout=5000,
+            is_active=True
+        )
+        db.session.add(tcp_conn)
+        print("✓ Örnek TCP bağlantısı oluşturuldu")
+    
+    db.session.commit()
+
+def create_sample_communication_logs():
+    """Test için örnek haberleşme logları oluştur"""
+    print("Örnek haberleşme logları oluşturuluyor...")
+    
+    from app import CommunicationLog, ConnectionConfig
+    import uuid
+    
+    # Bağlantıları al
+    serial_conn = ConnectionConfig.query.filter_by(connection_type='serial').first()
+    tcp_conn = ConnectionConfig.query.filter_by(connection_type='tcp').first()
+    
+    if serial_conn and tcp_conn:
+        sample_logs = [
+            {
+                'connection_id': serial_conn.id,
+                'direction': 'sent',
+                'data_hex': '2A49444E3F0D0A',
+                'data_ascii': '*IDN?\\r\\n',
+                'data_size': 7,
+                'is_error': False,
+                'response_time': 45.2,
+                'timestamp': datetime.utcnow() - timedelta(minutes=5)
+            },
+            {
+                'connection_id': serial_conn.id,
+                'direction': 'received',
+                'data_hex': '4B657973696768742054656368...',
+                'data_ascii': 'Keysight Technologies,34465A,MY61234567,A.03.02\\r\\n',
+                'data_size': 58,
+                'is_error': False,
+                'response_time': None,
+                'timestamp': datetime.utcnow() - timedelta(minutes=4, seconds=58)
+            },
+            {
+                'connection_id': tcp_conn.id,
+                'direction': 'sent',
+                'data_hex': '4D4541533A564F4C543A44433F0D0A',
+                'data_ascii': 'MEAS:VOLT:DC?\\r\\n',
+                'data_size': 15,
+                'is_error': False,
+                'response_time': 123.7,
+                'timestamp': datetime.utcnow() - timedelta(minutes=2)
+            },
+            {
+                'connection_id': tcp_conn.id,
+                'direction': 'received',
+                'data_hex': '2B312E32333435363738394530310D0A',
+                'data_ascii': '+1.23456789E01\\r\\n',
+                'data_size': 17,
+                'is_error': False,
+                'response_time': None,
+                'timestamp': datetime.utcnow() - timedelta(minutes=1, seconds=58)
+            },
+            {
+                'connection_id': serial_conn.id,
+                'direction': 'sent',
+                'data_hex': '544553543A53544152540D0A',
+                'data_ascii': 'TEST:START\\r\\n',
+                'data_size': 12,
+                'is_error': True,
+                'error_message': 'Device timeout - No response received',
+                'response_time': 5000.0,
+                'timestamp': datetime.utcnow() - timedelta(minutes=1)
+            }
+        ]
+        
+        for log_data in sample_logs:
+            log = CommunicationLog(**log_data)
+            db.session.add(log)
+        
+        db.session.commit()
+        print("✓ Örnek haberleşme logları oluşturuldu")
+
 def main():
     """Ana migration fonksiyonu"""
     print("=" * 50)
@@ -167,9 +298,14 @@ def main():
             # Varsayılan verileri oluştur
             create_default_roles()
             create_default_permissions()
+            create_communication_permissions()  # Communication izinleri ekle
             assign_permissions_to_roles()
             update_existing_users()
             create_default_admin()
+            
+            # Communication verileri oluştur
+            create_default_connections()
+            create_sample_communication_logs()
             
             print("\n" + "=" * 50)
             print("✅ Migration başarıyla tamamlandı!")

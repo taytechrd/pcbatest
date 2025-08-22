@@ -237,6 +237,121 @@ class UserPermission(db.Model):
 # Add relationships to existing models
 Role.permissions = db.relationship('Permission', secondary=role_permissions, backref='roles')
 
+# Communication Logging Models
+class CommunicationLog(db.Model):
+    __tablename__ = 'communication_logs'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    connection_id = db.Column(db.Integer, db.ForeignKey('connection_configs.id'), nullable=False)
+    direction = db.Column(db.String(10), nullable=False)  # 'sent', 'received'
+    data_hex = db.Column(db.Text)
+    data_ascii = db.Column(db.Text)
+    data_size = db.Column(db.Integer)
+    is_error = db.Column(db.Boolean, default=False)
+    error_message = db.Column(db.String(500))
+    response_time = db.Column(db.Float)  # milliseconds
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    
+    # Relationships
+    connection = db.relationship('ConnectionConfig', backref='communication_logs')
+    user = db.relationship('User', backref='communication_logs')
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'timestamp': self.timestamp.isoformat() if self.timestamp else None,
+            'connection_id': self.connection_id,
+            'connection_name': self.connection.name if self.connection else None,
+            'direction': self.direction,
+            'data_hex': self.data_hex,
+            'data_ascii': self.data_ascii,
+            'data_size': self.data_size,
+            'is_error': self.is_error,
+            'error_message': self.error_message,
+            'response_time': self.response_time,
+            'user_id': self.user_id,
+            'username': self.user.username if self.user else None
+        }
+
+class ConnectionConfig(db.Model):
+    __tablename__ = 'connection_configs'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    connection_type = db.Column(db.String(20), nullable=False)  # 'serial', 'tcp'
+    is_active = db.Column(db.Boolean, default=True)
+    
+    # Serial Port Settings
+    port = db.Column(db.String(50))
+    baud_rate = db.Column(db.Integer, default=9600)
+    data_bits = db.Column(db.Integer, default=8)
+    stop_bits = db.Column(db.Integer, default=1)
+    parity = db.Column(db.String(10), default='none')
+    
+    # TCP Settings
+    ip_address = db.Column(db.String(15))
+    tcp_port = db.Column(db.Integer)
+    timeout = db.Column(db.Integer, default=5000)  # milliseconds
+    
+    # Status
+    is_connected = db.Column(db.Boolean, default=False)
+    last_connected = db.Column(db.DateTime)
+    connection_duration = db.Column(db.Integer, default=0)  # seconds
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'connection_type': self.connection_type,
+            'is_active': self.is_active,
+            'port': self.port,
+            'baud_rate': self.baud_rate,
+            'data_bits': self.data_bits,
+            'stop_bits': self.stop_bits,
+            'parity': self.parity,
+            'ip_address': self.ip_address,
+            'tcp_port': self.tcp_port,
+            'timeout': self.timeout,
+            'is_connected': self.is_connected,
+            'last_connected': self.last_connected.isoformat() if self.last_connected else None,
+            'connection_duration': self.connection_duration,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None
+        }
+
+class ConnectionStatistics(db.Model):
+    __tablename__ = 'connection_statistics'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    connection_id = db.Column(db.Integer, db.ForeignKey('connection_configs.id'), nullable=False)
+    date = db.Column(db.Date, default=datetime.utcnow().date())
+    bytes_sent = db.Column(db.BigInteger, default=0)
+    bytes_received = db.Column(db.BigInteger, default=0)
+    messages_sent = db.Column(db.Integer, default=0)
+    messages_received = db.Column(db.Integer, default=0)
+    errors_count = db.Column(db.Integer, default=0)
+    avg_response_time = db.Column(db.Float, default=0)
+    
+    # Relationship
+    connection = db.relationship('ConnectionConfig', backref='statistics')
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'connection_id': self.connection_id,
+            'connection_name': self.connection.name if self.connection else None,
+            'date': self.date.isoformat() if self.date else None,
+            'bytes_sent': self.bytes_sent,
+            'bytes_received': self.bytes_received,
+            'messages_sent': self.messages_sent,
+            'messages_received': self.messages_received,
+            'errors_count': self.errors_count,
+            'avg_response_time': self.avg_response_time
+        }
+
 # Permission decorator
 def require_permission(permission_name):
     """Decorator to require specific permission for route access"""
@@ -1534,6 +1649,171 @@ def before_request():
     if hasattr(db.engine, 'pool'):
         db.engine.pool.pre_ping = True
 
+# Communication Logging Routes
+@app.route('/communication-logs')
+def communication_logs():
+    """Communication logs sayfası"""
+    return render_template('communication-logs.html')
+
+@app.route('/api/communication-logs')
+@login_required
+@require_permission('communication_view')
+def api_communication_logs():
+    """Communication logs API - AJAX için"""
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 20, type=int)
+    
+    # Filters
+    connection_type = request.args.get('connection_type')
+    connection_id = request.args.get('connection_id', type=int)
+    direction = request.args.get('direction')
+    status = request.args.get('status')  # 'success' or 'error'
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+    search = request.args.get('search')
+    
+    # Base query with join to get connection info
+    query = CommunicationLog.query.join(ConnectionConfig)
+    
+    # Apply filters
+    if connection_type:
+        query = query.filter(ConnectionConfig.connection_type == connection_type)
+    if connection_id:
+        query = query.filter(CommunicationLog.connection_id == connection_id)
+    if direction:
+        query = query.filter(CommunicationLog.direction == direction)
+    if status:
+        if status == 'error':
+            query = query.filter(CommunicationLog.is_error == True)
+        elif status == 'success':
+            query = query.filter(CommunicationLog.is_error == False)
+    if start_date:
+        query = query.filter(CommunicationLog.timestamp >= start_date)
+    if end_date:
+        query = query.filter(CommunicationLog.timestamp <= end_date)
+    if search:
+        query = query.filter(
+            db.or_(
+                CommunicationLog.data_ascii.contains(search),
+                CommunicationLog.data_hex.contains(search),
+                CommunicationLog.error_message.contains(search)
+            )
+        )
+    
+    # Order by timestamp desc and paginate
+    logs = query.order_by(CommunicationLog.timestamp.desc()).paginate(
+        page=page, per_page=per_page, error_out=False
+    )
+    
+    # Convert to dict with connection info
+    logs_data = []
+    for log in logs.items:
+        log_dict = log.to_dict()
+        if log.connection:
+            log_dict['connection_type'] = log.connection.connection_type
+            log_dict['connection_display'] = log.connection.port if log.connection.connection_type == 'serial' else f"{log.connection.ip_address}:{log.connection.tcp_port}"
+        logs_data.append(log_dict)
+    
+    return jsonify({
+        'logs': logs_data,
+        'total': logs.total,
+        'pages': logs.pages,
+        'current_page': logs.page,
+        'per_page': logs.per_page,
+        'has_next': logs.has_next,
+        'has_prev': logs.has_prev
+    })
+
+@app.route('/api/connection-status')
+@login_required
+@require_permission('communication_view')
+def api_connection_status():
+    """Connection status API"""
+    connections = ConnectionConfig.query.filter_by(is_active=True).all()
+    return jsonify({
+        'connections': [conn.to_dict() for conn in connections]
+    })
+
+@app.route('/api/connection-configs')
+@login_required
+@require_permission('communication_view')
+def api_connection_configs():
+    """Connection configurations API"""
+    connections = ConnectionConfig.query.filter_by(is_active=True).all()
+    return jsonify({
+        'connections': [conn.to_dict() for conn in connections]
+    })
+
+@app.route('/api/communication-logs/export', methods=['POST'])
+@login_required
+@require_permission('communication_export')
+def export_communication_logs():
+    """Communication logs export"""
+    data = request.get_json()
+    export_format = data.get('format', 'csv')  # csv, json
+    
+    # Apply same filters as API
+    query = CommunicationLog.query
+    
+    # Apply filters from request
+    if data.get('connection_id'):
+        query = query.filter(CommunicationLog.connection_id == data['connection_id'])
+    if data.get('direction'):
+        query = query.filter(CommunicationLog.direction == data['direction'])
+    if data.get('is_error') is not None:
+        query = query.filter(CommunicationLog.is_error == data['is_error'])
+    if data.get('start_date'):
+        query = query.filter(CommunicationLog.timestamp >= data['start_date'])
+    if data.get('end_date'):
+        query = query.filter(CommunicationLog.timestamp <= data['end_date'])
+    
+    logs = query.order_by(CommunicationLog.timestamp.desc()).limit(10000).all()  # Limit for performance
+    
+    if export_format == 'csv':
+        import csv
+        import io
+        
+        output = io.StringIO()
+        writer = csv.writer(output)
+        
+        # Header
+        writer.writerow([
+            'Timestamp', 'Connection', 'Direction', 'Data (ASCII)', 'Data (HEX)',
+            'Data Size', 'Is Error', 'Error Message', 'Response Time (ms)', 'User'
+        ])
+        
+        # Data
+        for log in logs:
+            writer.writerow([
+                log.timestamp.isoformat() if log.timestamp else '',
+                log.connection.name if log.connection else '',
+                log.direction,
+                log.data_ascii or '',
+                log.data_hex or '',
+                log.data_size or 0,
+                'Yes' if log.is_error else 'No',
+                log.error_message or '',
+                log.response_time or '',
+                log.user.username if log.user else ''
+            ])
+        
+        output.seek(0)
+        return jsonify({
+            'success': True,
+            'data': output.getvalue(),
+            'filename': f'communication_logs_{datetime.utcnow().strftime("%Y%m%d_%H%M%S")}.csv'
+        })
+    
+    elif export_format == 'json':
+        return jsonify({
+            'success': True,
+            'data': [log.to_dict() for log in logs],
+            'filename': f'communication_logs_{datetime.utcnow().strftime("%Y%m%d_%H%M%S")}.json'
+        })
+    
+    else:
+        return jsonify({'success': False, 'message': 'Unsupported export format'})
+
 # Error Handlers
 @app.errorhandler(404)
 def not_found_error(error):
@@ -1582,6 +1862,13 @@ def handle_exception(e):
 if __name__ == '__main__':
     init_db()
     print("Flask uygulaması başlatılıyor...")
+    
+    # Debug: Route'ları listele
+    print("Yüklenen route'lar:")
+    for rule in app.url_map.iter_rules():
+        if 'communication' in rule.rule:
+            print(f"  {rule.rule} -> {rule.endpoint}")
+    
     port = int(os.environ.get('FLASK_PORT', '9002'))
     print(f"Tarayıcınızda şu adresi açın: http://127.0.0.1:{port}")
     print("Eğer bağlantı reddedilirse, Windows Defender'da Python.exe'yi izin verilenler listesine ekleyin")

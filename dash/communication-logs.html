@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>Haberleşme Logları - TayTech PCBA Test Sistemi</title>
+    <meta content="width=device-width, initial-scale=1.0, shrink-to-fit=no" name="viewport" />
+    <link rel="icon" href="{{ url_for('static', filename='img/tay.png') }}" type="image/x-icon" />
+
+    <!-- Fonts and icons -->
+    <script src="{{ url_for('static', filename='js/plugin/webfont/webfont.min.js') }}"></script>
+    <script>
+        WebFont.load({
+            google: { families: ["Public Sans:300,400,500,600,700"] },
+            custom: {
+                families: [
+                    "Font Awesome 5 Solid",
+                    "Font Awesome 5 Regular",
+                    "Font Awesome 5 Brands",
+                    "simple-line-icons",
+                ],
+                urls: ["{{ url_for('static', filename='css/fonts.min.css') }}"],
+            },
+            active: function () {
+                sessionStorage.fonts = true;
+            },
+        });
+    </script>
+
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/plugins.min.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/kaiadmin.min.css') }}" />
+
+    <!-- Custom CSS for Communication Logs -->
+    <style>
+        .communication-logs-container {
+            display: grid;
+            grid-template-areas:
+                "header"
+                "filters"
+                "logs"
+                "details"
+                "connections";
+            grid-template-rows: auto auto 4fr 2fr 220px;
+            grid-template-columns: 1fr;
+            min-height: calc(100vh - 80px);
+            gap: 1rem;
+        }
+
+        .logs-header {
+            grid-area: header;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 0.5rem;
+        }
+
+        .filter-panel {
+            grid-area: filters;
+            padding: 1rem;
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .log-table-container {
+            grid-area: logs;
+            background: #1a1a1a;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #333;
+        }
+
+        .log-details-panel {
+            grid-area: details;
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 1rem;
+            overflow-y: auto;
+        }
+
+        .connection-panel {
+            grid-area: connections;
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 1rem;
+        }
+
+        .connection-indicator {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            margin: 0.25rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .connection-indicator.connected {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .connection-indicator.disconnected {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .log-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+
+        .log-table th {
+            background-color: #2d2d2d;
+            color: #ffffff;
+            padding: 0.75rem 0.5rem;
+            text-align: left;
+            border-bottom: 2px solid #444;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95rem;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .log-table td {
+            padding: 0.5rem;
+            border-bottom: 1px solid #333;
+            vertical-align: top;
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+
+        .log-table tbody tr:hover {
+            background-color: #2a2a2a !important;
+            cursor: pointer;
+        }
+
+        .log-table tbody tr:hover td {
+            background-color: #2a2a2a !important;
+        }
+
+        .log-table tbody tr.selected {
+            background-color: #0d4377 !important;
+        }
+
+        .log-table tbody tr.selected td {
+            background-color: #0d4377 !important;
+        }
+
+        .direction-sent {
+            color: #007bff;
+            font-weight: bold;
+        }
+
+        .direction-received {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .status-error {
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        .status-success {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .data-preview {
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-family: 'Courier New', monospace;
+        }
+
+        .table-container {
+            flex: 1;
+            overflow-y: auto;
+            height: 500px;
+            min-height: 500px;
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 1rem;
+            align-items: end;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            min-width: 150px;
+        }
+
+        .filter-group label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+            color: #495057;
+        }
+
+        .connection-status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+
+        .connection-card {
+            border: 1px solid #dee2e6;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            background: #f8f9fa;
+        }
+
+        .connection-card h6 {
+            margin: 0 0 0.5rem 0;
+            font-weight: 600;
+        }
+
+        .connection-details {
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 2rem;
+            color: #6c757d;
+        }
+
+        @media (max-width: 768px) {
+            .communication-logs-container {
+                grid-template-areas:
+                    "header"
+                    "filters"
+                    "logs"
+                    "details"
+                    "connections";
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto 300px 200px auto;
+            }
+
+            .filter-row {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .filter-group {
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrapper">
+        <!-- Sidebar -->
+        <div class="sidebar" data-background-color="dark">
+            <div class="sidebar-logo">
+                <div class="logo-header" data-background-color="dark">
+                    <a href="{{ url_for('dashboard') }}" class="logo">
+                        <img src="{{ url_for('static', filename='img/tay.png') }}" alt="navbar brand"
+                            class="navbar-brand" height="20" />
+                        <span class="text-white ms-2">TayTech PCBA</span>
+                    </a>
+                    <div class="nav-toggle">
+                        <button class="btn btn-toggle toggle-sidebar">
+                            <i class="gg-menu-right"></i>
+                        </button>
+                        <button class="btn btn-toggle sidenav-toggler">
+                            <i class="gg-menu-left"></i>
+                        </button>
+                    </div>
+                    <button class="topbar-toggler more">
+                        <i class="gg-more-vertical-alt"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="sidebar-wrapper scrollbar scrollbar-inner">
+                <div class="sidebar-content">
+                    <ul class="nav nav-secondary">
+                        <li class="nav-item">
+                            <a href="{{ url_for('dashboard') }}">
+                                <i class="fas fa-home"></i>
+                                <p>Ana Sayfa</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ url_for('test_results') }}">
+                                <i class="fas fa-clipboard-list"></i>
+                                <p>Test Sonuçları</p>
+                            </a>
+                        </li>
+                        <li class="nav-item active">
+                            <a href="{{ url_for('communication_logs') }}">
+                                <i class="fas fa-exchange-alt"></i>
+                                <p>Haberleşme Logları</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ url_for('users') }}">
+                                <i class="fas fa-users"></i>
+                                <p>Kullanıcı Yönetimi</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ url_for('user_settings') }}">
+                                <i class="fas fa-cog"></i>
+                                <p>Ayarlar</p>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Panel -->
+        <div class="main-panel">
+            <div class="main-header">
+                <div class="main-header-logo">
+                    <div class="logo-header" data-background-color="dark">
+                        <a href="{{ url_for('dashboard') }}" class="logo">
+                            <img src="{{ url_for('static', filename='img/tay.png') }}" alt="navbar brand"
+                                class="navbar-brand" height="20" />
+                        </a>
+                        <div class="nav-toggle">
+                            <button class="btn btn-toggle toggle-sidebar">
+                                <i class="gg-menu-right"></i>
+                            </button>
+                            <button class="btn btn-toggle sidenav-toggler">
+                                <i class="gg-menu-left"></i>
+                            </button>
+                        </div>
+                        <button class="topbar-toggler more">
+                            <i class="gg-more-vertical-alt"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Navbar Header -->
+                <nav class="navbar navbar-header navbar-header-transparent navbar-expand-lg border-bottom">
+                    <div class="container-fluid">
+                        <nav
+                            class="navbar navbar-header-left navbar-expand-lg navbar-form nav-search p-0 d-none d-lg-flex">
+                            <h3 class="fw-bold mb-3">Haberleşme Logları</h3>
+                        </nav>
+
+                        <ul class="navbar-nav topbar-nav ms-md-auto align-items-center">
+                            <li class="nav-item topbar-user dropdown hidden-caret">
+                                <a class="dropdown-toggle profile-pic" data-bs-toggle="dropdown" href="#"
+                                    aria-expanded="false">
+                                    <div class="avatar-sm">
+                                        <img src="{{ url_for('static', filename='img/profile.jpg') }}" alt="..."
+                                            class="avatar-img rounded-circle" />
+                                    </div>
+                                    <span class="profile-username">
+                                        <span class="op-7">Merhaba,</span>
+                                        <span class="fw-bold">{{ current_user.username }}</span>
+                                    </span>
+                                </a>
+                                <ul class="dropdown-menu dropdown-user animated fadeIn">
+                                    <div class="dropdown-user-scroll scrollbar-outer">
+                                        <li>
+                                            <div class="user-box">
+                                                <div class="avatar-lg">
+                                                    <img src="{{ url_for('static', filename='img/profile.jpg') }}"
+                                                        alt="image profile" class="avatar-img rounded" />
+                                                </div>
+                                                <div class="u-text">
+                                                    <h4>{{ current_user.username }}</h4>
+                                                    <p class="text-muted">{{ current_user.email }}</p>
+                                                </div>
+                                            </div>
+                                        </li>
+                                        <li>
+                                            <div class="dropdown-divider"></div>
+                                            <a class="dropdown-item" href="{{ url_for('logout') }}">Çıkış Yap</a>
+                                        </li>
+                                    </div>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
+            </div>
+
+            <div class="container">
+                <div class="page-inner">
+                    <!-- Communication Logs Container -->
+                    <div class="communication-logs-container">
+
+                        <!-- Header with Connection Status -->
+                        <div class="logs-header">
+                            <div class="connection-status">
+                                <h5 class="mb-2">Bağlantı Durumu</h5>
+                                <div id="connection-indicators">
+                                    <div class="connection-indicator disconnected">
+                                        <i class="fas fa-circle me-2"></i>
+                                        Henüz bağlantı yok
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="log-controls">
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-outline-primary btn-sm" id="refresh-logs">
+                                        <i class="fas fa-sync-alt"></i> Yenile
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" id="pause-logs">
+                                        <i class="fas fa-pause"></i> Duraklat
+                                    </button>
+                                    <button type="button" class="btn btn-outline-danger btn-sm" id="clear-logs">
+                                        <i class="fas fa-trash"></i> Temizle
+                                    </button>
+                                    <button type="button" class="btn btn-outline-success btn-sm" id="export-logs">
+                                        <i class="fas fa-download"></i> Dışa Aktar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Filter Panel -->
+                        <div class="filter-panel">
+                            <div class="filter-row">
+                                <div class="filter-group">
+                                    <label for="filter-connection">Bağlantı Tipi</label>
+                                    <select class="form-select form-select-sm" id="filter-connection">
+                                        <option value="">Tümü</option>
+                                        <option value="serial">Seri Port</option>
+                                        <option value="tcp">TCP</option>
+                                    </select>
+                                </div>
+                                <div class="filter-group">
+                                    <label for="filter-direction">Yön</label>
+                                    <select class="form-select form-select-sm" id="filter-direction">
+                                        <option value="">Tümü</option>
+                                        <option value="sent">Gönderilen</option>
+                                        <option value="received">Alınan</option>
+                                    </select>
+                                </div>
+                                <div class="filter-group">
+                                    <label for="filter-status">Durum</label>
+                                    <select class="form-select form-select-sm" id="filter-status">
+                                        <option value="">Tümü</option>
+                                        <option value="success">Başarılı</option>
+                                        <option value="error">Hata</option>
+                                    </select>
+                                </div>
+                                <div class="filter-group">
+                                    <label for="filter-search">Arama</label>
+                                    <input type="text" class="form-control form-control-sm" id="filter-search"
+                                        placeholder="Data içeriğinde ara...">
+                                </div>
+                                <div class="filter-group">
+                                    <label>&nbsp;</label>
+                                    <button type="button" class="btn btn-primary btn-sm" id="apply-filters">
+                                        <i class="fas fa-filter"></i> Filtrele
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Log Table -->
+                        <div class="log-table-container">
+                            <div class="table-container">
+                                <table class="log-table">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 140px;">Zaman</th>
+                                            <th style="width: 80px;">Tip</th>
+                                            <th style="width: 120px;">Bağlantı</th>
+                                            <th style="width: 80px;">Yön</th>
+                                            <th style="width: 200px;">Data</th>
+                                            <th style="width: 60px;">Boyut</th>
+                                            <th style="width: 80px;">Durum</th>
+                                            <th style="width: 80px;">Süre</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="log-table-body">
+                                        <!-- Log entries will be populated here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="no-data" id="no-data">
+                                <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                                <p>Henüz haberleşme logu bulunmuyor.</p>
+                            </div>
+
+                            <!-- Pagination -->
+                            <div class="pagination-container" id="pagination-container"
+                                style="padding: 1rem; border-top: 1px solid #444; background: #2d2d2d; color: #ffffff;">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="pagination-info">
+                                        <span id="pagination-info-text">Kayıt bulunamadı</span>
+                                    </div>
+                                    <nav aria-label="Log pagination">
+                                        <ul class="pagination pagination-sm mb-0" id="pagination-nav">
+                                            <!-- Pagination buttons will be generated here -->
+                                        </ul>
+                                    </nav>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Log Details Panel -->
+                        <div class="log-details-panel">
+                            <div id="log-details">
+                                <h5>Log Detayları</h5>
+                                <p class="text-muted">Detayları görmek için bir log kaydı seçin.</p>
+                            </div>
+                        </div>
+
+                        <!-- Connection Management Panel -->
+                        <div class="connection-panel">
+                            <h5 class="mb-3">Bağlantı Yönetimi</h5>
+                            <div class="connection-status-grid" id="connection-status-grid">
+                                <div class="connection-card">
+                                    <h6>Seri Port Bağlantısı</h6>
+                                    <div class="connection-details">
+                                        <div><strong>Tip:</strong> SERIAL</div>
+                                        <div><strong>Port:</strong> Henüz yapılandırılmamış</div>
+                                        <div><strong>Durum:</strong> <span class="text-danger">Bağlı Değil</span></div>
+                                        <div><strong>Son Aktivite:</strong> Hiç</div>
+                                    </div>
+                                </div>
+                                <div class="connection-card">
+                                    <h6>TCP Bağlantısı</h6>
+                                    <div class="connection-details">
+                                        <div><strong>Tip:</strong> TCP</div>
+                                        <div><strong>Adres:</strong> Henüz yapılandırılmamış</div>
+                                        <div><strong>Durum:</strong> <span class="text-danger">Bağlı Değil</span></div>
+                                        <div><strong>Son Aktivite:</strong> Hiç</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Core JS Files -->
+    <script src="{{ url_for('static', filename='js/core/jquery-3.7.1.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/core/popper.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/core/bootstrap.min.js') }}"></script>
+
+    <!-- jQuery Scrollbar -->
+    <script src="{{ url_for('static', filename='js/plugin/jquery-scrollbar/jquery.scrollbar.min.js') }}"></script>
+
+    <!-- Kaiadmin JS -->
+    <script src="{{ url_for('static', filename='js/kaiadmin.min.js') }}"></script>
+
+    <!-- Communication Logs JavaScript -->
+    <script>
+        let currentPage = 1;
+        const perPage = 20;
+
+        $(document).ready(function () {
+            // Initialize communication logs functionality
+            loadCommunicationLogs();
+
+            // Refresh button
+            $('#refresh-logs').on('click', function () {
+                currentPage = 1;
+                loadCommunicationLogs();
+            });
+
+            // Apply filters button
+            $('#apply-filters').on('click', function () {
+                currentPage = 1;
+                loadCommunicationLogs();
+            });
+
+            // Search on enter
+            $('#filter-search').on('keypress', function (e) {
+                if (e.which === 13) {
+                    currentPage = 1;
+                    loadCommunicationLogs();
+                }
+            });
+        });
+
+        function loadCommunicationLogs(page = currentPage) {
+            // Show loading state
+            $('#log-table-body').html('<tr><td colspan="8" class="text-center">Yükleniyor...</td></tr>');
+            $('#pagination-container').hide();
+
+            // Get filter values
+            const filters = {
+                connection_type: $('#filter-connection').val(),
+                direction: $('#filter-direction').val(),
+                status: $('#filter-status').val(),
+                search: $('#filter-search').val(),
+                page: page,
+                per_page: perPage
+            };
+
+            // Build query string
+            const params = new URLSearchParams();
+            Object.keys(filters).forEach(key => {
+                if (filters[key]) {
+                    params.append(key, filters[key]);
+                }
+            });
+
+            // Fetch logs
+            fetch('/api/communication-logs?' + params.toString())
+                .then(response => response.json())
+                .then(data => {
+                    displayLogs(data.logs || []);
+                    displayPagination(data);
+                    currentPage = page;
+                })
+                .catch(error => {
+                    console.error('Error loading logs:', error);
+                    $('#log-table-body').html('<tr><td colspan="8" class="text-center text-danger">Loglar yüklenirken hata oluştu</td></tr>');
+                });
+        }
+
+        function displayLogs(logs) {
+            const tbody = $('#log-table-body');
+            tbody.empty();
+
+            if (logs.length === 0) {
+                tbody.html('<tr><td colspan="8" class="text-center text-muted">Henüz log kaydı bulunmuyor</td></tr>');
+                $('#no-data').show();
+                return;
+            }
+
+            $('#no-data').hide();
+
+            logs.forEach(log => {
+                const row = createLogRow(log);
+                tbody.append(row);
+            });
+
+            // Add click event handlers for log rows
+            $('.log-row').on('click', function () {
+                // Remove previous selection
+                $('.log-row').removeClass('selected');
+                // Add selection to clicked row
+                $(this).addClass('selected');
+
+                // Get log data from the row
+                const logId = $(this).data('log-id');
+                const logData = logs.find(log => log.id === logId);
+
+                if (logData) {
+                    displayLogDetails(logData);
+                }
+            });
+        }
+
+        function displayPagination(data) {
+            const { total, pages, current_page, per_page, has_next, has_prev } = data;
+
+            if (total === 0) {
+                $('#pagination-container').hide();
+                return;
+            }
+
+            $('#pagination-container').show();
+
+            // Update info text
+            const startRecord = ((current_page - 1) * per_page) + 1;
+            const endRecord = Math.min(current_page * per_page, total);
+            $('#pagination-info-text').text(`${startRecord}-${endRecord} / ${total} kayıt gösteriliyor`);
+
+            // Generate pagination buttons
+            const paginationNav = $('#pagination-nav');
+            paginationNav.empty();
+
+            // Previous button
+            if (has_prev) {
+                paginationNav.append(`
+                    <li class="page-item">
+                        <a class="page-link" href="#" onclick="loadCommunicationLogs(${current_page - 1}); return false;">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    </li>
+                `);
+            } else {
+                paginationNav.append(`
+                    <li class="page-item disabled">
+                        <span class="page-link"><i class="fas fa-chevron-left"></i></span>
+                    </li>
+                `);
+            }
+
+            // Page numbers
+            const maxVisiblePages = 5;
+            let startPage = Math.max(1, current_page - Math.floor(maxVisiblePages / 2));
+            let endPage = Math.min(pages, startPage + maxVisiblePages - 1);
+
+            // Adjust start page if we're near the end
+            if (endPage - startPage < maxVisiblePages - 1) {
+                startPage = Math.max(1, endPage - maxVisiblePages + 1);
+            }
+
+            // First page if not visible
+            if (startPage > 1) {
+                paginationNav.append(`
+                    <li class="page-item">
+                        <a class="page-link" href="#" onclick="loadCommunicationLogs(1); return false;">1</a>
+                    </li>
+                `);
+                if (startPage > 2) {
+                    paginationNav.append(`<li class="page-item disabled"><span class="page-link">...</span></li>`);
+                }
+            }
+
+            // Visible page numbers
+            for (let i = startPage; i <= endPage; i++) {
+                if (i === current_page) {
+                    paginationNav.append(`
+                        <li class="page-item active">
+                            <span class="page-link">${i}</span>
+                        </li>
+                    `);
+                } else {
+                    paginationNav.append(`
+                        <li class="page-item">
+                            <a class="page-link" href="#" onclick="loadCommunicationLogs(${i}); return false;">${i}</a>
+                        </li>
+                    `);
+                }
+            }
+
+            // Last page if not visible
+            if (endPage < pages) {
+                if (endPage < pages - 1) {
+                    paginationNav.append(`<li class="page-item disabled"><span class="page-link">...</span></li>`);
+                }
+                paginationNav.append(`
+                    <li class="page-item">
+                        <a class="page-link" href="#" onclick="loadCommunicationLogs(${pages}); return false;">${pages}</a>
+                    </li>
+                `);
+            }
+
+            // Next button
+            if (has_next) {
+                paginationNav.append(`
+                    <li class="page-item">
+                        <a class="page-link" href="#" onclick="loadCommunicationLogs(${current_page + 1}); return false;">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                `);
+            } else {
+                paginationNav.append(`
+                    <li class="page-item disabled">
+                        <span class="page-link"><i class="fas fa-chevron-right"></i></span>
+                    </li>
+                `);
+            }
+        }
+
+        function displayLogDetails(log) {
+            const timestamp = new Date(log.timestamp).toLocaleString('tr-TR');
+            const connectionType = log.connection_type ? log.connection_type.toUpperCase() : 'N/A';
+            const direction = log.direction || 'N/A';
+            const statusText = log.is_error ? 'Hata' : 'Başarılı';
+            const responseTime = log.response_time ? log.response_time.toFixed(1) + 'ms' : '-';
+
+            const detailsHtml = `
+                <h5>Log Detayları <small class="text-muted">#${log.id}</small></h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="text-muted mb-2">Temel Bilgiler</h6>
+                        <table class="table table-sm">
+                            <tr>
+                                <td><strong>Zaman:</strong></td>
+                                <td>${timestamp}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Bağlantı Tipi:</strong></td>
+                                <td>${connectionType}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Bağlantı ID:</strong></td>
+                                <td>${log.connection_id || 'N/A'}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Yön:</strong></td>
+                                <td><span class="${direction.toLowerCase() === 'sent' ? 'direction-sent' : 'direction-received'}">${direction}</span></td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-muted mb-2">Durum & Performans</h6>
+                        <table class="table table-sm">
+                            <tr>
+                                <td><strong>Durum:</strong></td>
+                                <td><span class="${log.is_error ? 'status-error' : 'status-success'}">${statusText}</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Data Boyutu:</strong></td>
+                                <td>${log.data_size || 0} bytes</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Yanıt Süresi:</strong></td>
+                                <td>${responseTime}</td>
+                            </tr>
+                            ${log.user_id ? `
+                            <tr>
+                                <td><strong>Kullanıcı:</strong></td>
+                                <td>${log.username || log.user_id}</td>
+                            </tr>
+                            ` : ''}
+                        </table>
+                        ${log.is_error && log.error_message ? `
+                            <div class="alert alert-danger alert-sm mt-2">
+                                <strong>Hata Mesajı:</strong><br>
+                                <small>${log.error_message}</small>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+                
+                <div class="mt-3">
+                    <ul class="nav nav-tabs" id="data-tabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="ascii-tab" data-bs-toggle="tab" data-bs-target="#ascii-content" type="button" role="tab">ASCII Data</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="hex-tab" data-bs-toggle="tab" data-bs-target="#hex-content" type="button" role="tab">HEX Data</button>
+                        </li>
+                    </ul>
+                    <div class="tab-content" id="data-tab-content">
+                        <div class="tab-pane fade show active" id="ascii-content" role="tabpanel">
+                            <div class="p-3" style="background: #1a1a1a; color: #ffffff; border: 1px solid #444; border-top: none; font-family: 'Courier New', monospace; white-space: pre-wrap; max-height: 200px; overflow-y: auto;">
+${log.data_ascii || 'Veri yok'}
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="hex-content" role="tabpanel">
+                            <div class="p-3" style="background: #1a1a1a; color: #ffffff; border: 1px solid #444; border-top: none; font-family: 'Courier New', monospace; white-space: pre-wrap; max-height: 200px; overflow-y: auto;">
+${log.data_hex || 'Veri yok'}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            $('#log-details').html(detailsHtml);
+        }
+
+        function createLogRow(log) {
+            const timestamp = new Date(log.timestamp).toLocaleString('tr-TR');
+            const connectionType = log.connection_type ? log.connection_type.toUpperCase() : 'N/A';
+            const direction = log.direction || 'N/A';
+            const directionClass = direction.toLowerCase() === 'sent' ? 'direction-sent' : 'direction-received';
+            const status = log.is_error ? 'error' : 'success';
+            const statusClass = log.is_error ? 'status-error' : 'status-success';
+            const statusText = log.is_error ? 'Hata' : 'Başarılı';
+            const dataPreview = log.data_ascii ? log.data_ascii.substring(0, 30) + (log.data_ascii.length > 30 ? '...' : '') : 'N/A';
+            const responseTime = log.response_time ? log.response_time.toFixed(1) + 'ms' : '-';
+
+            return $(`
+          <tr class="log-row" data-log-id="${log.id}">
+            <td>${timestamp}</td>
+            <td>${connectionType}</td>
+            <td>${log.connection_id || 'N/A'}</td>
+            <td><span class="${directionClass}">${direction}</span></td>
+            <td><span class="data-preview">${dataPreview}</span></td>
+            <td>${log.data_size || 0} B</td>
+            <td><span class="${statusClass}">${statusText}</span></td>
+            <td>${responseTime}</td>
+          </tr>
+        `);
+        }
+    </script>
+</body>
+
+</html>
