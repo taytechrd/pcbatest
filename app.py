@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, jsonify, redirect, url_for, s
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
 from functools import wraps
 
@@ -15,6 +15,14 @@ app = Flask(__name__,
 app.config['SECRET_KEY'] = 'pcba-test-system-secret-key'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///pcba_test_new.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# Performance optimizations
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+    'pool_pre_ping': True,
+    'pool_recycle': 300,  # 5 dakika
+    'pool_timeout': 20,
+    'max_overflow': 0
+}
 
 # Uzantıları başlat
 db = SQLAlchemy(app)
@@ -585,7 +593,8 @@ def delete_pcba_model(model_id):
 @app.route('/users')
 @require_permission('manage_users')
 def users():
-    users = User.query.all()
+    # Eager loading ile role bilgisini de getir
+    users = User.query.options(db.joinedload(User.assigned_role)).all()
     return render_template('users.html', users=users)
 
 @app.route('/add-user', methods=['GET', 'POST'])
@@ -821,7 +830,12 @@ def test_results():
     page = request.args.get('page', 1, type=int)
     per_page = 25
     
-    tests = TestResult.query.order_by(TestResult.test_date.desc()).paginate(
+    # Eager loading ile ilişkili verileri de getir
+    tests = TestResult.query.options(
+        db.joinedload(TestResult.pcba_model),
+        db.joinedload(TestResult.test_type),
+        db.joinedload(TestResult.operator)
+    ).order_by(TestResult.test_date.desc()).paginate(
         page=page, per_page=per_page, error_out=False
     )
     
@@ -1497,6 +1511,73 @@ def edit_role(role_id):
     
     return render_template('edit-role-fixed.html', role=role, permissions=permissions,
                          role_permission_ids=role_permission_ids)
+
+# Static file caching
+@app.after_request
+def after_request(response):
+    """Static dosyalar için cache headers ekle"""
+    if request.endpoint == 'static':
+        # Static dosyalar için 1 saat cache
+        response.cache_control.max_age = 3600
+        response.cache_control.public = True
+    return response
+
+# Session management iyileştirmeleri
+@app.before_request
+def before_request():
+    """Her request öncesi çalışacak fonksiyon"""
+    # Session timeout kontrolü (24 saat)
+    session.permanent = True
+    app.permanent_session_lifetime = timedelta(hours=24)
+    
+    # Database connection pool yönetimi
+    if hasattr(db.engine, 'pool'):
+        db.engine.pool.pre_ping = True
+
+# Error Handlers
+@app.errorhandler(404)
+def not_found_error(error):
+    """404 - Sayfa bulunamadı hatası"""
+    return render_template('error.html', 
+                         error_code=404,
+                         error_message="Aradığınız sayfa bulunamadı.",
+                         error_description="Girdiğiniz adres mevcut değil veya kaldırılmış olabilir."), 404
+
+@app.errorhandler(500)
+def internal_error(error):
+    """500 - Sunucu hatası"""
+    db.session.rollback()
+    return render_template('error.html',
+                         error_code=500,
+                         error_message="Sunucu hatası oluştu.",
+                         error_description="Bir hata oluştu. Lütfen daha sonra tekrar deneyin."), 500
+
+@app.errorhandler(403)
+def forbidden_error(error):
+    """403 - Yetkisiz erişim hatası"""
+    return render_template('error.html',
+                         error_code=403,
+                         error_message="Bu sayfaya erişim yetkiniz yok.",
+                         error_description="Bu işlemi gerçekleştirmek için gerekli yetkilere sahip değilsiniz."), 403
+
+@app.errorhandler(Exception)
+def handle_exception(e):
+    """Genel exception handler"""
+    # Veritabanı session'ını temizle
+    db.session.rollback()
+    
+    # Development modunda detaylı hata göster
+    if app.debug:
+        return render_template('error.html',
+                             error_code=500,
+                             error_message=f"Hata: {str(e)}",
+                             error_description="Development modunda detaylı hata bilgisi gösteriliyor."), 500
+    
+    # Production modunda genel hata mesajı
+    return render_template('error.html',
+                         error_code=500,
+                         error_message="Beklenmeyen bir hata oluştu.",
+                         error_description="Sistem yöneticisi ile iletişime geçin."), 500
 
 if __name__ == '__main__':
     init_db()

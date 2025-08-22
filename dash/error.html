@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hata {{ error_code }} - TayTech PCBA Test Sistemi</title>
+    <link rel="icon" href="{{ url_for('static', filename='img/tay.png') }}" type="image/x-icon" />
+    
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/plugins.min.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/kaiadmin.min.css') }}" />
+    
+    <style>
+        .error-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .error-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 3rem;
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+        }
+        .error-code {
+            font-size: 6rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        .error-message {
+            font-size: 1.5rem;
+            color: #333;
+            margin-bottom: 1rem;
+        }
+        .error-description {
+            color: #666;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+        .error-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .btn-home {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 25px;
+            text-decoration: none;
+            transition: transform 0.3s ease;
+        }
+        .btn-home:hover {
+            transform: translateY(-2px);
+            color: white;
+            text-decoration: none;
+        }
+        .btn-back {
+            background: transparent;
+            border: 2px solid #667eea;
+            color: #667eea;
+            padding: 10px 22px;
+            border-radius: 25px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        .btn-back:hover {
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+        }
+        .error-icon {
+            font-size: 4rem;
+            color: #667eea;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="error-page">
+        <div class="error-card">
+            <div class="error-icon">
+                {% if error_code == 404 %}
+                    <i class="fas fa-search"></i>
+                {% elif error_code == 403 %}
+                    <i class="fas fa-lock"></i>
+                {% elif error_code == 500 %}
+                    <i class="fas fa-exclamation-triangle"></i>
+                {% else %}
+                    <i class="fas fa-bug"></i>
+                {% endif %}
+            </div>
+            
+            <div class="error-code">{{ error_code }}</div>
+            
+            <h2 class="error-message">{{ error_message }}</h2>
+            
+            <p class="error-description">{{ error_description }}</p>
+            
+            <div class="error-actions">
+                <a href="/" class="btn-home">
+                    <i class="fas fa-home me-2"></i>
+                    Ana Sayfaya Dön
+                </a>
+                <a href="javascript:history.back()" class="btn-back">
+                    <i class="fas fa-arrow-left me-2"></i>
+                    Geri Dön
+                </a>
+            </div>
+            
+            <div class="mt-4">
+                <small class="text-muted">
+                    TayTech PCBA Test Sistemi v1.2.0
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Core JS Files -->
+    <script src="{{ url_for('static', filename='js/core/jquery-3.7.1.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/core/bootstrap.min.js') }}"></script>
+    
+    <!-- Font Awesome -->
+    <script>
+        // Font Awesome icons için
+        if (typeof FontAwesome !== 'undefined') {
+            FontAwesome.dom.i2svg();
+        }
+    </script>
+</body>
+</html>
