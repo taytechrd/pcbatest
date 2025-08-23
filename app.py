@@ -352,6 +352,141 @@ class ConnectionStatistics(db.Model):
             'avg_response_time': self.avg_response_time
         }
 
+# Automated Test Execution Models
+class TestExecution(db.Model):
+    __tablename__ = 'test_executions'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    test_scenario_id = db.Column(db.Integer, db.ForeignKey('test_scenario.id'), nullable=False)
+    pcba_model_id = db.Column(db.Integer, db.ForeignKey('pcba_model.id'), nullable=False)
+    serial_number = db.Column(db.String(50), nullable=False)
+    status = db.Column(db.String(20), nullable=False, default='PENDING')  # PENDING, RUNNING, COMPLETED, FAILED, CANCELLED
+    start_time = db.Column(db.DateTime, nullable=True)
+    end_time = db.Column(db.DateTime, nullable=True)
+    execution_type = db.Column(db.String(20), nullable=False, default='MANUAL')  # MANUAL, SCHEDULED
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    progress = db.Column(db.Integer, default=0)  # 0-100
+    current_step = db.Column(db.String(100), nullable=True)
+    error_message = db.Column(db.Text, nullable=True)
+    test_data = db.Column(db.JSON, nullable=True)  # Real-time test measurements
+    final_result = db.Column(db.String(20), nullable=True)  # PASS, FAIL
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    test_scenario = db.relationship('TestScenario', backref='executions')
+    pcba_model = db.relationship('PCBAModel', backref='executions')
+    user = db.relationship('User', backref='test_executions')
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'test_scenario_id': self.test_scenario_id,
+            'test_scenario_name': self.test_scenario.scenario_name if self.test_scenario else None,
+            'pcba_model_id': self.pcba_model_id,
+            'pcba_model_name': self.pcba_model.model_name if self.pcba_model else None,
+            'serial_number': self.serial_number,
+            'status': self.status,
+            'start_time': self.start_time.isoformat() if self.start_time else None,
+            'end_time': self.end_time.isoformat() if self.end_time else None,
+            'execution_type': self.execution_type,
+            'user_id': self.user_id,
+            'username': self.user.username if self.user else None,
+            'progress': self.progress,
+            'current_step': self.current_step,
+            'error_message': self.error_message,
+            'test_data': self.test_data,
+            'final_result': self.final_result,
+            'created_at': self.created_at.isoformat() if self.created_at else None
+        }
+
+class ScheduledTest(db.Model):
+    __tablename__ = 'scheduled_tests'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text, nullable=True)
+    test_scenario_id = db.Column(db.Integer, db.ForeignKey('test_scenario.id'), nullable=False)
+    pcba_model_id = db.Column(db.Integer, db.ForeignKey('pcba_model.id'), nullable=False)
+    schedule_type = db.Column(db.String(20), nullable=False)  # ONCE, DAILY, WEEKLY, MONTHLY
+    schedule_time = db.Column(db.Time, nullable=False)  # Time of day to run
+    schedule_days = db.Column(db.String(20), nullable=True)  # For weekly: "1,3,5" (Monday, Wednesday, Friday)
+    schedule_date = db.Column(db.Date, nullable=True)  # For ONCE type
+    next_run = db.Column(db.DateTime, nullable=True)
+    last_run = db.Column(db.DateTime, nullable=True)
+    is_active = db.Column(db.Boolean, default=True)
+    created_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    notification_emails = db.Column(db.Text, nullable=True)  # Comma-separated emails
+    serial_number_prefix = db.Column(db.String(20), nullable=True)  # Auto-generated serial numbers
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    test_scenario = db.relationship('TestScenario', backref='scheduled_tests')
+    pcba_model = db.relationship('PCBAModel', backref='scheduled_tests')
+    creator = db.relationship('User', backref='created_scheduled_tests')
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'description': self.description,
+            'test_scenario_id': self.test_scenario_id,
+            'test_scenario_name': self.test_scenario.scenario_name if self.test_scenario else None,
+            'pcba_model_id': self.pcba_model_id,
+            'pcba_model_name': self.pcba_model.model_name if self.pcba_model else None,
+            'schedule_type': self.schedule_type,
+            'schedule_time': self.schedule_time.strftime('%H:%M') if self.schedule_time else None,
+            'schedule_days': self.schedule_days,
+            'schedule_date': self.schedule_date.isoformat() if self.schedule_date else None,
+            'next_run': self.next_run.isoformat() if self.next_run else None,
+            'last_run': self.last_run.isoformat() if self.last_run else None,
+            'is_active': self.is_active,
+            'created_by': self.created_by,
+            'creator_name': self.creator.username if self.creator else None,
+            'notification_emails': self.notification_emails,
+            'serial_number_prefix': self.serial_number_prefix,
+            'created_at': self.created_at.isoformat() if self.created_at else None
+        }
+
+class TestConfiguration(db.Model):
+    __tablename__ = 'test_configurations'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    key = db.Column(db.String(50), unique=True, nullable=False)
+    value = db.Column(db.Text, nullable=False)
+    description = db.Column(db.Text, nullable=True)
+    data_type = db.Column(db.String(20), nullable=False, default='STRING')  # STRING, INTEGER, BOOLEAN, JSON, FLOAT
+    category = db.Column(db.String(50), nullable=False, default='GENERAL')  # GENERAL, TIMEOUT, RETRY, NOTIFICATION, LOGGING
+    is_system = db.Column(db.Boolean, default=False)  # System configs cannot be deleted
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'key': self.key,
+            'value': self.value,
+            'description': self.description,
+            'data_type': self.data_type,
+            'category': self.category,
+            'is_system': self.is_system,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None
+        }
+    
+    def get_typed_value(self):
+        """Return value converted to appropriate type"""
+        if self.data_type == 'INTEGER':
+            return int(self.value)
+        elif self.data_type == 'FLOAT':
+            return float(self.value)
+        elif self.data_type == 'BOOLEAN':
+            return self.value.lower() in ('true', '1', 'yes', 'on')
+        elif self.data_type == 'JSON':
+            import json
+            return json.loads(self.value)
+        else:
+            return self.value
+
 # Permission decorator
 def require_permission(permission_name):
     """Decorator to require specific permission for route access"""
