@@ -1,1628 +1,773 @@
 <!DOCTYPE html>
-<html lang=E ht>
-  <head>
-   ml>tp-eq-UA-Compatible" ntent="IE=edg" />
-    <titayTech - Zamanlaş Testler</ti
-<h  <meta
-     tml lant="width=devng="tr"> initiae=1.0, shrink-tot=no"
-     ="viewport"
- />
-    <l"icon" href=s/img/tay.png" pe="image/png" />
-  <head>
-    <!-- Fonts and icons --    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <titlpt src="assets/js/e>Tain/webfont/webfont.minyTech - Zampt>
-    <sanlanmış Testler</title>
-      WebFont.load({
-      <meta { families: ["Publ400,500,600,700"]
-        custo      content="width=device-width, initial-scale=1.0, shrink-to-fit=no"
-          fa   name [
-           ="viewportsome 5 Sol"
-            "Font egular",
-          "Fsome 5 Brands
-     simple-line-icons",
-   ],
-          urlscss/fontn.css"],
-        },
-        active:   nction () {
- />essionStorags = true;
-    
-      });
-        ript>
+<html lang="tr">
 
-    <!-- <lS Files -->
-  ink rek rel="styl="icet" href="ason"s/css/bootstrap hin.css" />ref="assets/img/tay.png" type="image/png" />
-<link rylesheetassets/css/plug" />
-    <lstylesheet" href="ass/css/kaiadmin.min.css" 
-    <link rel="stylesheet!-- Fontsssets/css and icon" />
-    
-    s -->
-      .schedule-card  
-        border: 1px <scripte9ecef;
-   s    transition:rc=" 0.3s assets/js/plugin/webfont/webfont.min.js"></script>
-      }
-      
-      .    <scricard.actipt>
-        bo   WebFont: #28a745;
-        .load({d: liradient(135deg, fff9 0%, #ffffff 1
-      }
-      
-        chedule-cargoogle:ive {
-        {order-color: #6c75 families: ["Public Sans:300,400,500,600,700"] },
-        backg  cud: linear-gradienstom: {, #f8f9fa 0%, #%);
-     ty: 0.7;
-      }
-      
-ule-indic
-        widt          families: [
-        height:      
-        bo   r-rad   "Font 
-        display: Awesom-block;
-       e 5 Solid",t: 8px;
-      }
-      
-              e-indicato  active {
-        backgr "Fontolor: #28a745;
-        Awesomeon: pulse 2s 5 Rinite;egular",
-      }
-      
-            ule-indicator.inactive {
-         "Font und-color: #6c757d;
-Awesome 5 Brands",
-      
-      @keyfr      ulse {
-        0% {      "simple}
-        50%-line-icons 0.5; }
-        100",{ opacity: 1; }
-      
-      
-        ],ule-type-badg
-        font-size: 0.75       urls: ["assets/css/fonts.min.css"],
-        padding:     rem 0.5rem;
-      },
-      
-      .n   activtime {
-        fone: functi 'Courion () { monospace;
- background: fa;
-        padding.5rem;
-        adius: 0.25rem;
- ont-size: 0.875rem;
-      }
-      
-      .form-se    se{
-        backgrssion #f8f9fa;
-    Storage.fo-radius: 0.5rem;nts = true;
-        padding:   }rem;
-      ,ttom: 1rem
-      }
-      
-  );.schedule-days-ctor {
-        dne;
-      }
-    </
-     script>ays-selecto
-      display: 
-      }
-      
-.day-checkbox
-        margin: 0.25rem;
-      }
-     <!-- CSS Files -->
-    <linktetime-input {
- rel="styleslay: none;heet" href="assets/css/bootstrap.min.css" />
-      }
-      
-   <link relime-inpu="stylesheet" href="assets/css/plugins.min.css" />
-        dis    : block;
-      }<link rel="stylesheet" href="assets/css/kaiadmin.min.css" />
-    </style>
-  </hea   <link rel="stylesheet" href="assets/css/demo.css" />
-  <body>
-    <di    "wrapper">
-   <!-- Sideba
-      <div class=   <styl" data-backe>color="dark">
-        <div class     .schelogo">
-          dule-card Header --> {
-          <div clas  borgo-header" data-bacderound-color="dark: 1px solid #e9ecef;
-            <a hrtra"/" cnsiti"logo">
- on:          <imgall 0.3s ease;
-                src="asscursimg/tay.png"or: pointer;
-      }        alt="Tay"
-                clasnavbar-brand"
-            hei"
-          
-          
-            <div cl  toggle">
-          class="btn btn-ggle-sidebar
-                <i class=    .sch-right"></ed
-          ule-card:hon>
-        ove   <buttonr {ss="btngle sidenav-toggler">
-                <box-shadowg-menu-left"></i>: 0 4px 12px rgba(0,0,0,0.1);
-              </butto   transform: translateY(-2px);
-            </div>
-        }<button class="ttoggler mo
-              <i cl  more-vertical-alt"></i>
-            </but  .schedule-card.active {
-          </div>
-         borderEnd Logo-color: -->
-       #28a745
-        <div ;ass="sidebar-pper scrollbar scroner">
-       lass="sidebar-conte
-            <ul c      nav nav-secondary background: linear-gradient(135deg, #f8fff9 0%, #ffffff 100%);
-              <li }="nav-item">
-  href="/" class="apsed" aria-expanfalse">
-              <i clasfa-home"></i>
-                 <p>hboard</p>
-     </a>
-            </li>
-            <li class=v-section">
-                <sp .scheds="sidebar-minule-cn">
-      ard       .ina class="fa fa-ctive {s-h"></i>
-     /span>
-              <h4ss="te-section"eri</h4
-              </li>
- border-c     <li class="nolor: #">
-          dc3545;href="/tution">
-           <i class="fas fa-play-c</i>
-        bac       <p>Test Çakground: linear-gradient(135deg, #fff8f8 0%, #ffffff 100%);
-                </a>        opacity: 0.7;
-              </ }
-          li class="n">
-             <a href="/st-monitoring
-                    fas fa-des/i>
-                 >Test İzlemep>
-               
-              </  .status-badge {
-        font  <li cl-size: 0.7tem">
-       5rem     <a href=";lts">
-           <i class="fas ine"></i>
-           <p>Test ları</p>
-           a>
-            </li>
-    li class="nav-
-               scheduts" class="active">
-        pa     dding: 4px 8"fas fa-clpx;i>
-                     borderanmış Testle-radius: 12px;
-                </a>
-                 }
-               ss="nav-item">
-               .st href=atueports">
-  s-badge.a       <i clctive {a-file-alt"></i>
-                     backrlar</p>
-    ground-     </a>
-     colo     </li>
-  r: #d4ed    <li class="nav-secdaon">
-   ;        <span class=ar-mini-ico
-                  <i class=    fa-ellipsis-  ></i>
-              color:an>
-          #155  <h4 class="t724;n">Yöneti
-           
-              <lilass="nav-item">
-             <-toggle="cse" href="#user>
-               ss="fas fa</i>
-          ullanıcı Y
-              <span class="caran>
-     </a>
-         <div ass="collapseanagement">
-              <ul clav-collapse"
-                    }>
-                    <a hre/users">
-              <span class=-item">llanıcı Listesi</sp
-                     
-                  . </li>
-      statu         <lis
-           -badge.i   <a href=nacti-user">
-  ve {                ss="sub-item"Kullanıcpan>
-                    </a
-                    background-color: #f8d7da;
-                       >
-       color          <a : #72"/role-management1c24;
-                        <s}class="sub-item"l Yönetimi<
-                    a>
-                  </l
-                    .n>
-     ext-       </div>
-   run {    </
-                 font-si"nav-item">ze: 0.875rem;
-        c       <a daol-bs-toggle=or:llapse" href #6c7stManagement57d;
-               }ass="fas fa-cogs"
-                  <p>Tes 
-                .nespan class="caret">xt-run>
- n.overdue {   </a>
-             <div clapse" id="testMana
-              <ul class="nav na">
-         li>
-                 <a hrefst-types">
-                   <spanlass="sub-item">Tespan>
-           </a>
-        co       lor: #dc3545;
-                    <li>
-        font-weight   <a href: 500;enarios">
-                 }      <span class="subtem">Test Senaryoan>
-          </a>
-        </li>
-               <li>
-                 <a href=cba-models
-                        <span c tem">PCBAdelle
-                    </a>
-        
-             ul>
-               
-              </li>     .schedule-type {
-              <   class="nav-ite  >
-                <a href="/communicadisn-logs">
-         play: inl<i class="finefa-exchange-alt"-b/i>
-              lock;leşme Logları<
-                </  
-                li>
-        paddi <li clasng:nav-section" 2px 8px;
-                      backs="sidebar-mini-iground-color: #e9ecef;
-                       bord"fa fa-er-radis-h">ius: 4px;
-                    font-size: 0.75rem;
-                <    lass="text-section   font-r</h4>
-    wei       </li>ght: 500;
-              <li text-tranv-item">
-        sform   <a data: uppercas="collae;href="#submenu">
-                  <i cla   "fas fa-  }"></i>
-         <p>Set
-             lass=/span>
-         >
-              <div s="collaps"submen
-                  <ul classv nav-collap
-                    .schedule-type.daily {
-                    back hrefgr/user-settioun">
-                 d-c    <span class="olor: #c">User Settings</space5ff;
-                   co </a>
-      lor:          </li#0056b3;
-                    <li   }
-                    href="/ettings">
-             .schedule-t<span classype.b-item">Sweeem Settings</span>
- kly                  </{
-              </li>
-         <li>
-                  <a hreest-configu">
-                <span class="subTest Configuraan>
-             </a>
-            <>
-               >
-             </div>
-              </li>
-    backgrou</ul>
-          <nd-color: #fff3cd;
-        </div>     color: #856404;
-      }>
-      - End Sid
-      
-      <div class=      panel">
-  .div class="main-h">
-    v cl"main-header-logo"
-            <!--   -->
-            <div ss="logo-hebackground-color=
-              <a href  /" class=   .s">
-            chedulmg
-        e-ty      src=pessets/img/tay.png.intdule-type.once {
-                   lt="TayTech Logobackground-c24;
-                 }"navb
-                  ight="35"
-       />
-           >
-              v class="nae">
-         tton c"btn btn- toggle-sidebar">
-      <i clasu-right"></
-            c   </button>
-       backgda  <button cl;btn-toggle sidenav
-                <i cla="gg-menu-l></i>
-      </button>
-         </di
-           <buttar-toggler more">
-                   .foax-"gg-mowidth: 6cal-alt"></i>
- 0r           </bm-m  a
-       l .modal-di
-            <!-- alog { colorder -->
-          </: #rou155724;
-          <!-- Nav  ndHeader -->
-  -}av
-            class=ar-header navbheader-transparent nand-lg border-"
-       
-            <div    "container-fluid">
-              <nacolor: #dinput {
-                cl   }torvbar navbar {r-left navbar-evbar-form nav-seone d-lg-flex"
-               
-                <    class="input-group diay: flex;
-                    ;v clasoup-prepend">
-           <button type="sulass="btn btn-seape-1">
-                class="fa fa-search-icon"></i>
-         </button>
-             </
-                   input
-          flex-wraype="text"
-                 p"Zamanlaa..."
-                clarm-control"
-               id="searuled"
-             />
-                
-              </nav    }
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>Zamanlanmış Testler - TayTech PCBA Test Sistemi</title>
+    <meta content="width=device-width, initial-scale=1.0, shrink-to-fit=no" name="viewport" />
+    <link rel="icon" href="{{ url_for('static', filename='img/tay.png') }}" type="image/x-icon" />
 
-              <ul ar-nav topbamd-auto a-items-center">
-      .day      <li class="nav-item topbar--cer dropheckbox {en-caret">
-              <a
-             clown-togglefile-pic"
-                    data-bs-toggl   s-sspown"
-           lay: n   href= #"
-      4e    aria-expanded=alse"
-           >
-            <div catar-sm">
-              mg
-              src="assets/img/png"
-               alt="..
-                          ass="avatar-img rounbed-circle"
-     l {             
-                pad </div>
-      ding: 8px 12px;an class="file-username">
-  rder: 2p            <span x sol="op-7i9Merhaba,</spece
-         f;      <span claold">{{t_user.usernf current_user 'Kullanıcı' }}</n>
-                  </span>
-         </a
-    bo       rdcursor: lass="dropdownpointer-m;down-user animated 
-               <di"dropdown-u scrollbarr">
-                li>
-                   <divss="user-box
-                 font     <div class=-radi;:-lg">
-           500;        <
-                       border-coc="assets/img/user.lte;
-              }7d;      alt"image profil
-                       }    clvatar-img rounded
-  h            ed           />
-ul               e-    actioniv>
-           s {       class="u-text
-                        <h4urrent_user.usernamerrent_user llanıcı'
-                     d      <p class=isplayxuted">;rrent_user.emailcurrent_user @examplem' }}</p>
-                <"text-muted">Rol: {{rent_user.role.titlnt_user e'Operator' }}</p>
-                          </gav>
-             p: 8px     </div>
-;         
-o                {8r  <li>
-       ig               <dn-iteass="dropdown-ms: cene></div>
-          m;;         <a cpdown-item"/user-settings">>
-                <div class=opdown-div>
-                      <a cl"dropdown-item="/logout">a>
-               </li>
-                   }>
-           </ul>
-      </li>
-           </ul>
-  </div>
-         
-          <!-- End Na
-        </div>
-
-<div class=er">
-       <div class="page-i">
-          
-              cla   x align-itemign-items-md-center column f-md-row pt-2 pb-4"
-              .     cle-actions .olor
-              <div      font-size: 0  5rem;
-                   paddis="fw-bold mb-3">Zng: 4px 8p Testlex;   >
-               fon6 class="op-7 tatik testamanlame yönetim
-               
-              <d class="ms-md py-md-0">
-           <butto"btn bess btn-round me-2" idrefreshSchedules"
-                  <i c    .loa fa-sync">ading-o   
-                </
-           n class="n-primary btn-round"addScheduleBtn">
-                       .ls="fa fa-plusa  ci> Yeni Zlass=ama
-            "nav-se bacb>
-           ff;
-           
-
-            <!--tatistics Cards -
-            <div class=          >
-              <div class="col  d-3">
-                <div cl="si"card card-stats cardde-ell">ipsis-hb></i>
-                 ar-  <i-ass="card-body">ic/span>
-                    <d       s="ron">ssgn-items-center">="text-sectioemleri</h4>
-                /li>  <div claem""col-icon">>
-     <a              href=  /class="icon-big li>"-center icon-succe>-shadow
-                          <i class="f   ef-clock"></i>
-="/test-mo          nito</div>
-       ">     </div>
-           <div class=l col-stats ms-3 m>
-                <div classumbers">
-                     ass="carategory">Aktifar</p>
-                 h4 class="ca" id="aceCount">0</h4>
-                        </div>
-         </a          </div>>
-                    </div>
-                     <
-                </div>
-               <l v>
-                     "ns="col-md-3">
-     av-i       <div<i ass="card cactive">rd-ro
-                  <div class       body">
-              <i cla<div class="row assgn-items-cen="s >
-               <p>Teock">v class="col-sre>
-                        <       f=""icon-bi/sctxt-center icon-primary  İzmanlanmdow-small">
-     ış lem           ftests">s="fas-calendar-chec/i>
-                 div>
-                 
-                  <div class=col col-stats ms-3
-                    <div class="n">
-                  class="card-cat Hafta</p>
-        class="card-titleisWeekCount
-                        i/div>
-             >i      <a div>
-         hta-cem="/t</div>
-                  </div>
- est-rehar      </div>
-   t-sule"></i</div>>
-  ts">">      <div class="col    <">
-     p>Test     <d/p>s="card card card-">
-           v clas"card-body">
-               <dclass="row align-iter">
-                    lass="col-ico
-                           class="iext-center icon-ng bubble-shadowmall">
-                 <i class="faa-caler-day">
-                        <li class    ="nav-section" <>
-                      </div>
-                     >div class="col  ms-3 ms-sm-0">
-                        <   st Sen="numbersar   <li clam"yoları</p>>>
-                              lass="card-categor   Bugün</p>
-                  <h4 class=d-title"todayCount">0
-                        </div>
-                </div
-                    </d     CBA Modelleri</
-                  </div>           </a>
-                </        </li         <i class=       -microchip">    <a      "/pcba-model       <l     ss="nav-item         <i clas   <as fa-list-alta hreftest-scenarios">
-              </div             <li   s="fas fa-plug">< <a hclass=em">ctions">
-              <div cla  ="col-md-3">            <pğlantı Yönetimi</p>
-                <          "card card-stats card-r </l">
-                i>  ss="nav-="cardp>y">
-                 <div clagn-items-cen
-                        iv class="col-                     "fas fa-user    <a /user
-                           v class="ic       text-cente <p    lanıcdary bubble-shadı Yönell">
-                timi</p> class="fas fa-pe"></i>
-            </div>
-                    </div>
-             <div cl-stats ms-3 ms-s
-   i            t       <div   ass="numbers">
-               </a>       <p class="car">Pasif</p>
-           class="card-titl">0</h4>
-                 /div>
-            </div>
-                         >
-        li        </div>
-    class="n    </div>av-item </a
-              </div>
-    <       </div>
-/   
-            <!-- Scheduled  ests List -->
-            <div c </d="row">
-        iv    <div class="col-12">     >
-                       </d>"card">
-           <div class=r">
-         <div class="d-flexitems-cent
-                <h4 card-titlemış Testler</h4>
-              iv class="ms-
-                     <div "btn-group" rolegroup">
-                     <inpue="rad class="btn-chame="filte" id="filter" value="all" checked
-      <!-             - E <label clasndiv>ar ---outline-primary>sm" fAll">Tümü</lab
-                   
-                <input type="ass="btneck" name="rType" id="ctive" value="
-                          <label lass="mbtn btn-outline-succais btn-sm" forn-panref="tive">/" class="elgo">
-                          
-                          <i ou   <img"radio" class=heck" name="" id=ctive" valuee">
-              abel class="btn-outline-seco" for="filterIe">Pasif</label>
-                     nd-coliv>
-     o     /          </da>gle s"></i>
-                iden</div>
-   ar">butto      </divn
-            ><div cla"card-body">
-             <div id=ledTestsGrid" crow">
-                  - Scheduled tests waded here -->
-         </di
-                    
-              bar   <!-- -gg-moreules message toggler mor-vertical-e">"></i>
-                    <div id="  SchedulesMes    " class   </b-center py-5" utton>isplay: none;">
-            <i class="fock fa-3x text-mutedi>
-            <h5 class="teenüz zamanlan test yok</h5>
-           ext-muted">Ymanlama oluurmak için "Yeni Zambutonunu kullan
-                      <butto   lass="b       primary" id="</d irstSchedule  <i clas
-                        <i class=    <!-plus me-2">- v>İlk Zamanlamabar-huştur
-        eadontaine    </button>
-    r-fer-trar-form </div>
-  nav-searchn     </div>
-  e d-lg        </div>-flex"
-              </di                    <i class="fa faiv c ch search-icon"><  s="input-g      <nav clanst navbar navbar-vbarer-left navbar-expan-expand-l-bottom
-            </div>                       ton>
-              v>
-              
-
-        <foote    ass="footer">
-    </div <div class=>fluid d-flex justtent-betwee
-            <di       ="copyright">
-              2024, TayTech PCBA <inputmi
-      /div>
-     iv>
-        </foot
-      </div>
-    </d                type="tex "
-       <but         placeh   e="submi.."
-    <!-- Add/Edit Sc       Modal -->
-    <d      t" "modal fade" i classeduleModa="form-conx="-1" class="bden="true">
-   tn <div class  tn-al-dialogsearch-lg">
-        pe-1   <cs="modal-content">lass="input-groupdid">
-          <div c   s="moda        ">
-         <a <h5 clase-"modal-titlepic"uleModalTitle"i Zamanlama<
-            <button typ    utton" class=  tn-close" data-b   ismiss="m  al"></bu    data-bs-t"#"
-          </div>
-            iv class="modal   og">
-          ="<form id="schdroleForm">
-    pdoexp    <inputanype="hidden" ded="falswleId" name="schn"
-              
-                   Basic Information -           alt="..."                       h           rofile.jpg"  class=" />user dtoggle prrdden-caret
-              <div       "form-section               cla-user-scroollbar-outer">
-                  6 class="fw-bold mb    <lss="fas fa-infoe-2"></i>Temeler</h6>
-                
-                     class="                ="user-box     ss   s="lass="dropdop-7">   ar-i,</span>me n-user animat}}</span
-                        lass="col-md-6"                v class="avatar-lg>
-                            ss="form-group">
-  <img/               <label for=imcheduleName">Zamg/profrodı *</label>
-file"            <ine="text"form-control" id="me" name=uleNamered>
-          </div>
-              v>
-               <div clasmd-6">
-                <div classgroup">
-            <label for="scheduleTe">Test Senaryosu *label>
-              <seles="form-control"scheduleTestScenario"schedulquir
-                          ption value="">   t senaryosu seçin...         
-        ss=           "avataed>
-        "name }}</h </div4
-                  </di                   <p class="tex    />"">{{ current_user.emau-tex 'admit">>{{ curcom' }}</p>
-                <  rent_          
-                
-                 div class="row">
-                  <div cl   </dil-md-6">
-   v>              <dass="formroup">
-                <label for="ePcbaModel">PCBA Model
-              select claontrol" id="scdel" name="scheePcbaModel" re
-                        <option        ">PCBA mo    seçin...</opti     <li>
-                      </sel                   </div>
-                         >
-                  </div>
-          </ul>   <div   i>="col-md-6">
-                    <div clas   </ul>  oup">
-                      <lab    </ "scheduleN     cationE     ">Bildir    ss="taları</label>
-d                     <inp-item" hrtext" class="efrm-control" id="s=   <dfileification">Pros" 
-         fil</a>i            name=v   aduleNotifss="dropdowns" placeholder-div ll1@example.com,er"></d@example.com"iv>
-   i>       </        <sdiv>ar --s="form-text >-muted">Virgülle aarak birdenzla e-posta gbilirsiniz</smal
-                  >s="piv>
-              age-heade>
-        r"bs m"na/div>
-         v-home">
-           
-              <!-- Schedule  onfiguration -->   >bol        <a href=d mb
-              <div c         m-section">
-                <h6 class="fw      -3">b-3">="icon"fas fa-calen-homZamanla<"></i>Zaman/h3>ı</h6>
-      
-                <di"row">
-           <div c-md-6">
-            <div claoup">
-               abel for="scamanlama Ti*</label>
-                    <selecs="form-cont" id="suleType" namecheduleType" require
-                            ion value="">Z  /li>"></i> seçin...</opti
-                                 </le="ONCE">Biri>>
-             option value="ük</option>
-                 option valueY">Haftalık</
-                     <option e="MONTHLY"ion>
-             </select>
-             </di
-                   <div>
-    li cl         <div asass=s=ol-md-6""nav-i-right"></i
-                    <div class=          p">
-                      <label ssr="scheduleTime="na>Zamanlabel>
-              anmış Testlput type="terv" class="form-a>Pasol" id="if</label>" name="sc" require
-                    </div>
-        >   </div>
-       </div>
-          
-           <!-- Date/Time for-->
-             ss="datetime-it" id="datetimn">
-              ss="form-group>
-          <labelor="scheduTarih ve /label>
-                  <inpype="datetime-lo class="forl" id="scheme" name="scheduleDateTim
-                  </d     </div>
-                </div>
-   </d          
-       iv" but  <!-- Days for onEKLY -->
-una tıklayın/p>iv class="schede-days-s id="daysSon">
-        class=el">Günler *</labe
-                    <   lass="d-fle     <-wrap">
-     i class        <div class=buas fcheck day-checkbox">
-      a-plus">        <input </i> Y"form-check-inputettype="checkonx" value="1"  cl"day1" ass=a OcheduleDays">
-luşturtn btn          <la-primary"="form-check-label"  oncwCrea">Pazartesi</label>teMod>
-                    </div> tton>
-                    <div    ss="form-check       </dix">
-         input class="-input"ckbox" value="2"y2" name="schedu>
-                label clas"foreck-label" foy2">Salı</label>
-            </div>
-         <div class=k day-chec
-                       v>ooter css="form-checloter">conype="checkbox" tent-bet" id="day3" name=wn">temiays">
-                    <labelorm-check-label" day3">Çarşamba</label>
-    </div       > </div>
-         iv class=check day-checkbox">
-                 <input ="form-check-in type="check="4" id=" name="sche
-                      <label class="form      " for="day4">P</label>
-                    <
-                    <div class "form-check d Ve  eckbox">
-            n 1.4.    <input cl0"form-check-input" kboxue="5" i"day5" nam"scheduleDays">
-               <l"form-check-labey5">Cuma</la>
-                v>
-                 <div class="fcheckbox">
-          <input rm-check-input" typ"checkbox" value="6id="day6" nscheduleDa
-              <       <label cla    form-check-label20for="day6">Cumarteilabel>
-            </div>
-              <div crm-check day-checkbo>
-                  put class="form-cput" type="checkbox" id="da name="scheys">
-      v>te            <label r>"form-check-label" fPazar</label>
-        </div>
-      </di </div>
-           </div>
-     </div>
-     
-                 </Status div
-              <div c       orm-section">24, TayTech Pdiv cright">
-            <h6 class="fw-bo-3"><i class="f-togglon me-2"></i>Duru
-                
-           e/Edit iv class="form-Modal -orm-switch">
-->      <input class="forput" type="chec"scheduleIsAcname="scheduleIve" checked>
-                  dlabel class="form-check-iviv " for="schclass="mctive"> class="contrm-modal" id="scheduleain-l" tabindex="-flu
-                     amanlama aktif
-     <           div   el>
-                     <opclas value="{{   enari{% for scens=cenario"m enario_name }}</option <d/opt_scenarios %}
-               /div>
-            </     
-            div>
-          <div {% iiid deal-footer">
-        r"> <button type="alTion" class="tle">Yeniecondary" data-bs-dis on>Zamodal">İptal<ama Oluş
-            <butttur</he="button" class=5n-primaeduleBtn">
-     classe me-2"></i>Kayde
-            </button>
-          </div>
-          div>
-      </div>
-     cdiv>
-
-    <!t>   Core JS Fi
-    <script src="as  ts/js/core/jqu  y-3.7.1.min       script>
-    <scr    src="assets/js/core/p   er.min.js  </script>
-    <scr vt src="as>/bootstrap.min.js
-
-    <!-- jQuerbar -->
- src="alugin/jquery-scroar/jquery.scrolljs"></sc
-           <      </div>
-    <!-- Sweet Al    -->
-    <scri   src="assets/j <plugin/sweetald  /sweetale clasn.js"></script>s=v>
-
-    <!--       in JS -->
-    <script src="ass  "coiadmin.min.j"></script
-                <label    l-mddivuleType" class="f clasabel">Zamanlama Tüs="m</label>
+    <!-- Fonts and icons -->
+    <script src="{{ url_for('static', filename='js/plugin/webfont/webfont.min.js') }}"></script>
     <script>
-      b(document-3">  <selnction () {ect class="fo id="scype" name=ype" required oncleScheduleTypeChange>
-        let testS         = [];
-          value="odels = [];
-   ">.</optiocheduledTests =n>
-        let editingS          = null;
-      </di    </ <opct>">
-               ialize page
-           </  tialData();
-            "fay0" clasorm-label"el">Pzt</la>Gün   </labeeckbox" id="l>e="0"
- <      // Event handlers                          lab      <inp       = "checkbox""da cl value="1">
- ass       #addSchedul       ddFirstSchedule').cn() {
-openScheduleModal();
-        })                ="  nput type=" <divor="dalass="day1checkbox" id= claa" value="2">
-        
-        $('    reshSchedules    lick(function() {
-    ss="day-ldScheduledTests(a/    <d=">S for="day2" cal</labeliabel">Çar</le="3">
-        });
-             <label fo3" class="dabel">Pelabel>
-          '#saveS   luleBtn').click(l class="fo{
-          saveSchedrm-te-muted">ırarak birden faze-posta adresi gireiniz</small>
-        });
-              </d>
-        $('#sc    eType').change(fion() {
-          ptions();
-      
-        
-        $     ut[name="fil <div class.change(function() {= </divcheck">" name="is_aecked>
-       <  filterScheduledlabes();
-        });
- l clch 
-        $('#seaechScheduled')k-la=input', functio"isActive">
-          searchSc       Tests(  Aktif
-        });
-        
-     </labeltion loadInit>ata(
-          //          os
-         {
-       /api/test/scenarios',
-            method: '    
-               <ess: function/div>{
-           if (response.ess) {
-            testScenarse.tesenario
-      <         populabutton tontrios();
-  y typepeton"}
-       c" class="btn btlass="bny" onclick="s-seSchedule()">Kaydeconbutton>
-          });
-              </dary" data-bs-dmodal">İptal>
-          /        <BA models
-   /div>ajax({
- url: '/apa-models'
-                       T',
-           <b: function(respon) {
-            if (respcess) {
-       pcbaModels = .pcba_models;
-            PcbaModels();
-  }
-            }
-    </d   });
-          iv>
-    <!--  // Load sche Load tests
-      ing OoadScheduledT  spinnerally-hidd  ordükleniyor...</span>er text-primary ngole="status">
--sp     }
-      inne <div class=r">div>splem yapılıyor.an class
-        function populateTestScen   os() {
-     </div>st select = $uleTestScenario');
-  ect.empty().append('<o value="">Test senseçin...ion>');
-          
-    terios.forEach(scenar
-         selappen value="${scenari>${scenarioname}</option>
-          }
-        }
-      
-       ion popudels()
-          const select   $('#schedulePcb =S Files -->
-          se <rc="asse().append('<option vats/js/core/j-3.7.1seçin...</optio.m');
-     in.js>
-          p <scripsrc="rEach(model assetbos/js/corer.motsin.js"><"></s
-            select.append(  <scric="alue="${model.id}ssets/jll.part_number}baoption>`);
-     r -->y.scrollba"></script>
-        }
- !-- Kaia-->
-        functio   <script sledTests() {ets/js/kaiin.min.js"><>
-      $.aja{
-       url: '/api/scheduts',
-         d: 'GET',
-          s: function(response) {
-    <script>if (responsess) {
-     scheduledTests = reduled_
-  e     dule    displadTeheduledTests();
- st             upd];stics();
-         }
+        WebFont.load({
+            google: { families: ["Public Sans:300,400,500,600,700"] },
+            custom: {
+                families: [
+                    "Font Awesome 5 Solid",
+                    "Font Awesome 5 Regular",
+                    "Font Awesome 5 Brands",
+                    "simple-line-icons",
+                ],
+                urls: ["{{ url_for('static', filename='css/fonts.min.css') }}"],
             },
-      le    errorrrentFiltn(xhr, status,errror) {
-               =ole.error('Faischeduled tests:', er
-              swal('    le, 'Zamanlanmış t edler yüklenirken hita oluştu.', 'error');i  <scric="assets/jl;
-   }
-          });
-  
-        
-     }); unction displaySched    /q  rend{
-          const grerScheduledueduledTestsery-scrize hane pagdlersts();
-            nst noMessage   $hedulesMessage')
-          
-          if     eduledTests.l// Lo('inpue {
-            griduempty();
-  led tests t[Message.show();
-    n   PIurn;
-      
-          
-      fu  noMessage.hinction loa{esponse.schs) {eduled_sts;
-                lse {message);
-         let html = 
-          schedu     sts.  rEach(schedule })              renderScheduamanlanmdTeststler yüklenemedi: 's();
-            html += createS     . Card(schedule);
- howE     });
-       rr 
-      or(  rid.html(html);
-      u }
-nctioış testler yüklen() {oluştu')
-        function createScheduleCard(schedule) {
-          const statusClass = schedule.is_active ? 'active' : 'inactive';
-          const nextRun = schedule.next_run ? formatDateTime(schedule.next_run) : 'Belirsiz';
-          const lastRun = schedule.last_run ? formatDateTime(schedule.last_run) : 'Henüz çalışmadı';
-          
-          return `
-            <div class="col-md-6 col-lg-4 mb-4" data-schedule-id="${schedule.id}">
-              <div class="card schedule-card ${statusClass}">
-                <div class="card-header">
-                  <div class="d-flex justify-content-between align-items-center">
-                    <h6 class="card-title mb-0">
-                      <span class="schedule-indicator ${statusClass}"></span>
-                      ${schedule.name}
-                    </h6>
-                    <div class="dropdown">
-                      <button class="btn btn-sm btn-outline-secondary dropdown-toggle" 
-                              type="button" data-bs-toggle="dropdown">
-                        <i class="fa fa-ellipsis-v"></i>
-                      </button>
-                      <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="#" onclick="editSchedule(${schedule.id})">
-                          <i class="fa fa-edit me-2"></i>Düzenle</a></li>
-                        <li><a class="dropdown-item" href="#" onclick="toggleSchedule(${schedule.id})">
-                          <i class="fa fa-${schedule.is_active ? 'pause' : 'play'} me-2"></i>
-                          ${schedule.is_active ? 'Duraklat' : 'Aktifleştir'}</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item text-danger" href="#" onclick="deleteSchedule(${schedule.id})">
-                          <i class="fa fa-trash me-2"></i>Sil</a></li>
-                      </ul>
-                    </div>
-                  </div>
-                  <span class="badge schedule-type-badge bg-${getScheduleTypeBadgeColor(schedule.schedule_type)}">
-                    ${getScheduleTypeText(schedule.schedule_type)}
-                  </span>
-                </div>
-                
-                <div class="card-body">
-                  <div class="mb-2">
-                    <small class="text-muted">Test Senaryosu:</small><br>
-                    <strong>${schedule.test_scenario_name || 'N/A'}</strong>
-                  </div>
-                  
-                  <div class="mb-2">
-                    <small class="text-muted">PCBA Model:</small><br>
-                    <strong>${schedule.pcba_model_name || 'N/A'}</strong>
-                  </div>
-                  
-                  <div class="mb-2">
-                    <small class="text-muted">Sonraki Çalışma:</small><br>
-                    <div class="next-run-time">${nextRun}</div>
-                  </div>
-                  
-                  ${schedule.schedule_type === 'WEEKLY' && schedule.schedule_days ? 
-                    `<div class="mb-2">
-                      <small class="text-muted">Günler:</small><br>
-                      <span class="badge bg-secondary">${formatScheduleDays(schedule.schedule_days)}</span>
-                    </div>` : ''}
-                </div>
-                
-                <div class="card-footer">
-                  <small class="text-muted">
-                    <i class="fa fa-user me-1"></i>${schedule.created_by || 'N/A'} • 
-                    <i class="fa fa-clock me-1"></i>Son: ${lastRun}
-                  </small>
-                </div>
-              </div>
-            </div>
-          `;
-        }
-        
-        function getScheduleTypeBadgeColor(type) {
-          switch(type) {
-            case 'ONCE': return 'info';
-            case 'DAILY': return 'success';
-            case 'WEEKLY': return 'warning';
-            case 'MONTHLY': return 'primary';
-            default: return 'secondary';
-          }
-        }
-        
-        function getScheduleTypeText(type) {
-          switch(type) {
-            case 'ONCE': return 'Bir Kez';
-            case 'DAILY': return 'Günlük';
-            case 'WEEKLY': return 'Haftalık';
-            case 'MONTHLY': return 'Aylık';
-            default: return type;
-          }
-        }
-        
-        function formatScheduleDays(days) {
-          const dayNames = ['', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
-          return days.split(',').map(d => dayNames[parseInt(d.trim())]).join(', ');
-        }
-        
-        function formatDateTime(dateTimeStr) {
-          const date = new Date(dateTimeStr);
-          return date.toLocaleString('tr-TR', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-          });
-        }
-        
-        function updateStatistics() {
-          const active = scheduledTests.filter(s => s.is_active).length;
-          const inactive = scheduledTests.filter(s => !s.is_active).length;
-          
-          // Calculate this week and today counts
-          const now = new Date();
-          const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay() + 1));
-          const startOfDay = new Date();
-          startOfDay.setHours(0, 0, 0, 0);
-          
-          let thisWeek = 0;
-          let today = 0;
-          
-          scheduledTests.forEach(schedule => {
-            if (schedule.is_active && schedule.next_run) {
-              const nextRun = new Date(schedule.next_run);
-              
-              if (nextRun >= startOfWeek) {
-                thisWeek++;
-              }
-              
-              if (nextRun >= startOfDay && nextRun < new Date(startOfDay.getTime() + 24*60*60*1000)) {
-                today++;
-              }
-            }
-          });
-          
-          $('#activeCount').text(active);
-          $('#inactiveCount').text(inactive);
-          $('#thisWeekCount').text(thisWeek);
-          $('#todayCount').text(today);
-        }
-        
-        function openScheduleModal(scheduleId = null) {
-          editingScheduleId = scheduleId;
-          
-          if (scheduleId) {
-            // Edit mode
-            const schedule = scheduledTests.find(s => s.id === scheduleId);
-            if (schedule) {
-              $('#scheduleModalTitle').text('Zamanlamayı Düzenle');
-              populateScheduleForm(schedule);
-            }
-          } else {
-            // Add mode
-            $('#scheduleModalTitle').text('Yeni Zamanlama');
-            resetScheduleForm();
-          }
-          
-          $('#scheduleModal').modal('show');
-        }
-        
-        function populateScheduleForm(schedule) {
-          $('#scheduleId').val(schedule.id);
-          $('#scheduleName').val(schedule.name);
-          $('#scheduleTestScenario').val(schedule.test_scenario_id);
-          $('#schedulePcbaModel').val(schedule.pcba_model_id);
-          $('#scheduleType').val(schedule.schedule_type);
-          $('#scheduleTime').val(schedule.schedule_time);
-          $('#scheduleNotificationEmails').val(schedule.notification_emails);
-          $('#scheduleIsActive').prop('checked', schedule.is_active);
-          
-          if (schedule.schedule_type === 'WEEKLY' && schedule.schedule_days) {
-            const days = schedule.schedule_days.split(',');
-            days.forEach(day => {
-              $(`#day${day.trim()}`).prop('checked', true);
-            });
-          }
-          
-          toggleScheduleOptions();
-        }
-        
-        function resetScheduleForm() {
-          $('#scheduleForm')[0].reset();
-          $('#scheduleId').val('');
-          $('#scheduleIsActive').prop('checked', true);
-          $('input[name="scheduleDays"]').prop('checked', false);
-          toggleScheduleOptions();
-        }
-        
-        function toggleScheduleOptions() {
-          const scheduleType = $('#scheduleType').val();
-          
-          $('.datetime-input').removeClass('show');
-          $('.schedule-days-selector').removeClass('show');
-          
-          if (scheduleType === 'ONCE') {
-            $('#datetimeSection').addClass('show');
-          } else if (scheduleType === 'WEEKLY') {
-            $('#daysSection').addClass('show');
-          }
-        }
-        
-        function saveSchedule() {
-          const formData = {
-            name: $('#scheduleName').val(),
-            test_scenario_id: parseInt($('#scheduleTestScenario').val()),
-            pcba_model_id: parseInt($('#schedulePcbaModel').val()),
-            schedule_type: $('#scheduleType').val(),
-            schedule_time: $('#scheduleTime').val(),
-            notification_emails: $('#scheduleNotificationEmails').val(),
-            is_active: $('#scheduleIsActive').is(':checked')
-          };
-          
-          // Validate required fields
-          if (!formData.name || !formData.test_scenario_id || !formData.pcba_model_id || 
-              !formData.schedule_type || !formData.schedule_time) {
-            swal('Hata!', 'Lütfen tüm gerekli alanları doldurun.', 'error');
-            return;
-          }
-          
-          // Handle schedule-specific fields
-          if (formData.schedule_type === 'ONCE') {
-            const dateTime = $('#scheduleDateTime').val();
-            if (!dateTime) {
-              swal('Hata!', 'Lütfen tarih ve saat seçin.', 'error');
-              return;
-            }
-            formData.next_run = dateTime;
-          } else if (formData.schedule_type === 'WEEKLY') {
-            const selectedDays = [];
-            $('input[name="scheduleDays"]:checked').each(function() {
-              selectedDays.push($(this).val());
-            });
-            
-            if (selectedDays.length === 0) {
-              swal('Hata!', 'Lütfen en az bir gün seçin.', 'error');
-              return;
-            }
-            
-            formData.schedule_days = selectedDays.join(',');
-          }
-          
-          const url = editingScheduleId ? 
-            `/api/scheduled-tests/${editingScheduleId}` : 
-            '/api/scheduled-tests';
-          const method = editingScheduleId ? 'PUT' : 'POST';
-          
-          $.ajax({
-            url: url,
-            method: method,
-            contentType: 'application/json',
-            data: JSON.stringify(formData),
-            success: function(response) {
-              if (response.success) {
-                swal('Başarılı!', response.message, 'success');
-                $('#scheduleModal').modal('hide');
-                loadScheduledTests();
-              } else {
-                swal('Hata!', response.message, 'error');
-              }
+            active: function () {
+                sessionStorage.fonts = true;
             },
-            error: function(xhr, status, error) {
-              swal('Hata!', 'İşlem sırasında bir hata oluştu.', 'error');
-            }
-          });
-        }
-        
-        function filterScheduledTests() {
-          const filterType = $('input[name="filterType"]:checked').val();
-          const cards = $('#scheduledTestsGrid .col-md-6');
-          
-          cards.each(function() {
-            const card = $(this);
-            const isActive = card.find('.schedule-card').hasClass('active');
-            
-            let show = true;
-            if (filterType === 'active' && !isActive) {
-              show = false;
-            } else if (filterType === 'inactive' && isActive) {
-              show = false;
-            }
-            
-            if (show) {
-              card.show();
-            } else {
-              card.hide();
-            }
-          });
-        }
-        
-        function searchScheduledTests(searchTerm) {
-          const cards = $('#scheduledTestsGrid .col-md-6');
-          
-          if (!searchTerm) {
-            cards.show();
-            filterScheduledTests(); // Reapply filter
-            return;
-          }
-          
-          cards.each(function() {
-            const card = $(this);
-            const cardText = card.text().toLowerCase();
-            
-            if (cardText.includes(searchTerm.toLowerCase())) {
-              card.show();
-            } else {
-              card.hide();
-            }
-          });
-        }
-        
-        // Global functions for card actions
-        window.editSchedule = function(scheduleId) {
-          openScheduleModal(scheduleId);
-        };
-        
-        window.toggleSchedule = function(scheduleId) {
-          $.ajax({
-            url: `/api/scheduled-tests/${scheduleId}/toggle`,
-            method: 'POST',
-            success: function(response) {
-              if (response.success) {
-                swal('Başarılı!', response.message, 'success');
-                loadScheduledTests();
-              } else {
-                swal('Hata!', response.message, 'error');
-              }
-            },
-            error: function(xhr, status, error) {
-              swal('Hata!', 'İşlem sırasında bir hata oluştu.', 'error');
-            }
-          });
-        };
-        
-        window.deleteSchedule = function(scheduleId) {
-          swal({
-            title: 'Emin misiniz?',
-            text: 'Bu zamanlamayı silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.',
-            type: 'warning',
-            buttons: {
-              cancel: {
-                visible: true,
-                text: 'İptal',
-                className: 'btn btn-danger'
-              },
-              confirm: {
-                text: 'Evet, Sil',
-                className: 'btn btn-success'
-              }
-            }
-          }).then((willDelete) => {
-            if (willDelete) {
-              $.ajax({
-                url: `/api/scheduled-tests/${scheduleId}`,
-                method: 'DELETE',
-                success: function(response) {
-                  if (response.success) {
-                    swal('Silindi!', response.message, 'success');
-                    loadScheduledTests();
-                  } else {
-                    swal('Hata!', response.message, 'error');
-                  }
-                },
-                error: function(xhr, status, error) {
-                  swal('Hata!', 'Silme işlemi sırasında bir hata oluştu.', 'error');
-                }
-              });
-            }
-          });
-        };
-        
-        // Auto-refresh every 30 seconds
-        setInterval(function() {
-          loadScheduledTests();
-        }, 30000);
-      });
+        });
     </script>
-  </body>
-</html>          })
-     always(function
-            hide
-          });
-  
 
-      //  smptyStateched = $('#erptyState');
-   Sainer = $('#schcheduledussContainer');
-        // FiltdTs() {ts = scheduled;
-        if tFilter === 'ac
-          filteredTest      leduledTeset filteretest =       consttive);
-        } e rentFi= 'inactiveduledTe'sts.filt)test.is_active)
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/plugins.min.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/kaiadmin.min.css') }}" />
+
+    <!-- Custom CSS for Scheduled Tests -->
+    <style>
+        .schedule-card {
+            border: 1px solid #e9ecef;
+            transition: all 0.3s ease;
         }
-         fu  filteredTestsnction== 0) {
-    er.hide();
-          
+
+        .schedule-card.active {
+            border-color: #28a745;
+            background: linear-gradient(135deg, #f8fff9 0%, #ffffff 100%);
         }
-                emptySta
-        container.show    if (filter  Tests.len  duledTests =
-            yState.hide();
-  if (res
-          h
-        
-      }
-hedule card
-   renderScheduleCard(te= test.is_'active' : 'inacve';
-   nst statusT= test.is_active 'Aktif' : 'Pasif';
- onst statusBadgeClst.is_active ? toLowerCa'acte' : 'inacve';se
-        const scheduleT       c= {
-          'WEEKLY': 'Haftalık'ı'
-  'ONCEY': 'Gt.schedule_type] |ünlük',chedule_type 'Belirsi
-he      const last  const ne.last_run ? new Date(txdule  t_run).toLocaleStri  'INTnext) : 'Henüz çalışma_run
-        : '';
-   
-        return `">
-        <div clard sc">
-      <h5          hedclass="   <div ce mb-0">${test.namelaule-
-                card ${stlass="statu>ybadge ${statu-cadgeClass}">${staontent-ben aan>
-             lign-div>
-                   </v>r>rio_name || 'iyor'}</strong
-                  <small <div c     -mut"m">PCBA Modelb-2">all><br>
-            <strpcba_model_| 'Bilinmiyor'}</
-                </div>         ong>${test.test
-            di  "mmuted">Sonrb-2">aki Çalışma:r>xtRun}</span>
-       </div>şma: $small>e ? 'Pasif Yaptif Yap'"></i>
-               }">use' :on>r" onclick="del"></i>
- etche            div>
-        </buttdulev>
-      (${tesitliv>
-          e="Si>
-        `;
- l">
 
-      functi  / Show crteModal() {
-       eateduleId = nul
-        $('#scheduleMo      le'eset();
-       ).text heduleId').val('        <anlama Oluştu     's="fas fplay     <button class='}>tn-sm btn-out
-        $('#isA  $('leTypeChang#scprop('checked', trheduleFo                   imdiass="fas fa-p Çalıştır
-        $('#schedul        hmodal('shoandleS            utton class=sm btn-ouk="runSw(${test.id})
-      }
-
-      //         claseule(id) {
-        const uledTestnd(t => t.id === i
-        if (!tes   return;
-        
-   fs="fiditingScheeModalduleIdon id;('Zamanlamayı D
-       
-       me') //fod')rm.val(.val(test.st.id)
-        $('#testSc;ario').val(test.tesscenario_
-        $('#pcbl(test.pcba_model_id);
- #scheduleType'edule_type);est.schedule_tiails |m| ''
-        $('#isActive        $checked'('#notificactive);
-       als').val(test.nficatio
-        handleSche // HaneChange();
-          $('.day-c        conrop('csdays = tfalse);
-  est.    days.forschedule_d> {
-  ays.spl  $(`#day${day.prop('checked',
- dl       });e schtest.schedule_
-        }'show');
-  
-
-      function handleS // Handlle hange() {
-type changest sched $('#scheduleType').
-        
-        // Hide    heonditionalduleMo
-        $('#timeSettings    e();de();
-         (scheduleTypONngs').sCE'));
-           {teTimeContai
-  '#tim} else if (scheduleILY') {
-          $imeSet).show()
-          $('#wee;EEKLY') {how();
- se if (schedType ==VAL') {
-       $('#inettings').
+        .schedule-card:hover {
+            border-color: #6c757d;
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            opacity: 0.7;
         }
-   }
 
-  / SaveSchedarn;
-        
-        co veduormData = new FormDleule() {;
-        consty(); {};
-          const selected     = [];
-           cthecked').each(fuon()his).val());
- {   });(',');
-        }oolve = ean$('#ise').is(':chd');
-       
-        showLoa  dataitingScheduleI 'POST';
-    
-        $.ajax(
-          metho    ethod,(data)
-        }) howSuc{cess(respo;
-            lchedueModledal').modal
-          } else { or(response.   l
-          
-        .fail(funcon() {
-    t}man hideLoading();
-lama kaen);
-      }) {
-        showLoase) {
-            i(responseduledTee.succ
-          else {e);
-          })
-          .fail(functi   ) {');
-       () {
-         ng();
-         
-          r    n;
-        } }inizden emin misi
-u zamanlanmış tesetT500);
-        imeout}se.message);
-     }
-          })
-fail(function() {
-            showError('T   (()else {ırken hau');
-      });
-      }
-  // Delete schedule
- function deleteSche
-        const t = scheduledTests.find> t.id === id);
-        ) return;
-        diğinizden emin)) {
-         n;
-     
-        
-        sho    ding();
-        
-          url: `/d-tests/${id
-    if    method: (!confi'
-            showSuccess(re  onse.
-    message);
-            show      response.message);
-    })poad}tu');
-        
-        .alwa) {
+        .schedule-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        .schedule-indicator.active {
+            background-color: #28a745;
+            animation: pulse 2s infinite;
+        }
+
+        .schedule-indicator.inactive {
+            background-color: #6c757d;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .schedule-type-badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+        }
+
+        .next-runtime {
+            font-family: 'Courier New', monospace;
+            background: #f8f9fa;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.875rem;
+        }
+
+        .form-section {
+            background: #f8f9fa;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .schedule-days-selector {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrapper">
+        <!-- Sidebar -->
+        <div class="sidebar" data-background-color="dark">
+            <div class="sidebar-logo">
+                <div class="logo-header" data-background-color="dark">
+                    <a href="{{ url_for('dashboard') }}" class="logo">
+                        <img src="{{ url_for('static', filename='img/tay.png') }}" alt="navbar brand"
+                            class="navbar-brand" height="20" />
+                    </a>
+                    <div class="nav-toggle">
+                        <button class="btn btn-toggle toggle-sidebar">
+                            <i class="gg-menu-right"></i>
+                        </button>
+                        <button class="btn btn-toggle sidenav-toggler">
+                            <i class="gg-menu-left"></i>
+                        </button>
+                    </div>
+                    <button class="topbar-toggler more">
+                        <i class="gg-more-vertical-alt"></i>
+                    </button>
+                </div>
+            </div>   
+         <div class="sidebar-wrapper scrollbar scrollbar-inner">
+        <div class="sidebar-content">
+          <ul class="nav nav-secondary">
+            <li class="nav-item">
+              <a href="/">
+                <i class="fas fa-home"></i>
+                <p>Dashboard</p>
+              </a>
+            </li>
+            <li class="nav-section">
+              <span class="sidebar-mini-icon">
+                <i class="fa fa-ellipsis-h"></i>
+              </span>
+              <h4 class="text-section">Test İşlemleri</h4>
+            </li>
+            <li class="nav-item">
+              <a href="/test-execution">
+                <i class="fas fa-play-circle"></i>
+                <p>Test Çalıştır</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="/test-monitoring">
+                <i class="fas fa-desktop"></i>
+                <p>Test İzleme</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="/test-results">
+                <i class="fas fa-chart-line"></i>
+                <p>Test Sonuçları</p>
+              </a>
+            </li>
+            <li class="nav-item active">
+              <a href="/scheduled-tests">
+                <i class="fas fa-clock"></i>
+                <p>Zamanlanmış Testler</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="/communication-logs">
+                <i class="fas fa-exchange-alt"></i>
+                <p>Haberleşme Logları</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="/reports">
+                <i class="fas fa-file-alt"></i>
+                <p>Raporlar</p>
+              </a>
+            </li>
+            <li class="nav-section">
+              <span class="sidebar-mini-icon">
+                <i class="fa fa-ellipsis-h"></i>
+              </span>
+              <h4 class="text-section">Yönetim</h4>
+            </li>
+            {% if current_user.is_authenticated and current_user.role == 'admin' %}
+            <li class="nav-item">
+              <a data-bs-toggle="collapse" href="#userManagement">
+                <i class="fas fa-users"></i>
+                <p>Kullanıcı Yönetimi</p>
+                <span class="caret"></span>
+              </a>
+              <div class="collapse show" id="userManagement">
+                <ul class="nav nav-collapse">
+                  <li>
+                    <a href="/users">
+                      <span class="sub-item">Kullanıcı Listesi</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a href="/add-user">
+                      <span class="sub-item">Yeni Kullanıcı</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a href="/role-management">
+                      <span class="sub-item">Rol Yönetimi</span>
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </li>
+            {% endif %}
+            {% if current_user.is_authenticated and current_user.role == 'admin' %}
+            <li class="nav-item">
+              <a data-bs-toggle="collapse" href="#testManagement">
+                <i class="fas fa-cogs"></i>
+                <p>Test Yönetimi</p>
+                <span class="caret"></span>
+              </a>
+              <div class="collapse" id="testManagement">
+                <ul class="nav nav-collapse">
+                  <li>
+                    <a href="/test-types">
+                      <span class="sub-item">Test Tipleri</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a href="/test-scenarios">
+                      <span class="sub-item">Test Senaryoları</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a href="/pcba-models">
+                      <span class="sub-item">PCBA Modelleri</span>
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </li>
+            {% endif %}
+            <li class="nav-item">
+              <a href="/connections">
+                <i class="fas fa-plug"></i>
+                <p>Bağlantı Yönetimi</p>
+              </a>
+            </li>
+            <li class="nav-section">
+              <span class="sidebar-mini-icon">
+                <i class="fa fa-ellipsis-h"></i>
+              </span>
+              <h4 class="text-section">Ayarlar</h4>
+            </li>
+            <li class="nav-item">
+              <a data-bs-toggle="collapse" href="#submenu">
+                <i class="fas fa-cog"></i>
+                <p>Settings</p>
+                <span class="caret"></span>
+              </a>
+              <div class="collapse" id="submenu">
+                <ul class="nav nav-collapse">
+                  <li>
+                    <a href="/user-settings">
+                      <span class="sub-item">User Settings</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a href="/system-settings">
+                      <span class="sub-item">System Settings</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a href="/test-parameters">
+                      <span class="sub-item">Test Parameters</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a href="/test-configuration">
+                      <span class="sub-item">Test Configuration</span>
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+        </div>
+
+        <!-- Main Panel -->
+        <div class="main-panel">
+            <div class="main-header">
+                <div class="main-header-logo">
+                    <div class="logo-header" data-background-color="dark">
+                        <a href="{{ url_for('dashboard') }}" class="logo">
+                            <img src="{{ url_for('static', filename='img/tay.png') }}" alt="navbar brand"
+                                class="navbar-brand" height="20" />
+                        </a>
+                        <div class="nav-toggle">
+                            <button class="btn btn-toggle toggle-sidebar">
+                                <i class="gg-menu-right"></i>
+                            </button>
+                            <button class="btn btn-toggle sidenav-toggler">
+                                <i class="gg-menu-left"></i>
+                            </button>
+                        </div>
+                        <button class="topbar-toggler more">
+                            <i class="gg-more-vertical-alt"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Navbar Header -->
+                <nav class="navbar navbar-header navbar-header-transparent navbar-expand-lg border-bottom">
+                    <div class="container-fluid">
+                        <nav
+                            class="navbar navbar-header-left navbar-expand-lg navbar-form nav-search p-0 d-none d-lg-flex">
+                            <h3 class="fw-bold mb-3">Zamanlanmış Testler</h3>
+                        </nav>
+
+                        <ul class="navbar-nav topbar-nav ms-md-auto align-items-center">
+                            <li class="nav-item topbar-user dropdown hidden-caret">
+                                <a class="dropdown-toggle profile-pic" data-bs-toggle="dropdown" href="#"
+                                    aria-expanded="false">
+                                    <div class="avatar-sm">
+                                        <img src="{{ url_for('static', filename='img/profile.jpg') }}" alt="..."
+                                            class="avatar-img rounded-circle" />
+                                    </div>
+                                    <span class="profile-username">
+                                        <span class="op-7">Merhaba,</span>
+                                        <span class="fw-bold">{{ current_user.username }}</span>
+                                    </span>
+                                </a>
+                                <ul class="dropdown-menu dropdown-user animated fadeIn">
+                                    <div class="dropdown-user-scroll scrollbar-outer">
+                                        <li>
+                                            <div class="user-box">
+                                                <div class="avatar-lg">
+                                                    <img src="{{ url_for('static', filename='img/profile.jpg') }}"
+                                                        alt="image profile" class="avatar-img rounded" />
+                                                </div>
+                                                <div class="u-text">
+                                                    <h4>{{ current_user.username }}</h4>
+                                                    <p class="text-muted">{{ current_user.email }}</p>
+                                                </div>
+                                            </div>
+                                        </li>
+                                        <li>
+                                            <div class="dropdown-divider"></div>
+                                            <a class="dropdown-item" href="{{ url_for('logout') }}">Çıkış Yap</a>
+                                        </li>
+                                    </div>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
+            </div>
+
+            <div class="container">
+                <div class="page-inner">
+                    <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
+                        <div>
+                            <h3 class="fw-bold mb-3">Zamanlanmış Testler</h3>
+                            <h6 class="op-7 mb-2">Otomatik test çalıştırma zamanlamalarını yönetin</h6>
+                        </div>
+                        <div class="ms-md-auto py-2 py-md-0">
+                            <button class="btn btn-primary btn-round" data-bs-toggle="modal"
+                                data-bs-target="#addScheduleModal">
+                                <i class="fa fa-plus"></i>
+                                Yeni Zamanlama
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Scheduled Tests List -->
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <div class="d-flex align-items-center">
+                                        <h4 class="card-title">Aktif Zamanlamalar</h4>
+                                        <button class="btn btn-primary btn-round ms-auto" id="refreshSchedules">
+                                            <i class="fa fa-refresh"></i>
+                                            Yenile
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table id="schedulesTable" class="display table table-striped table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>Durum</th>
+                                                    <th>Test Adı</th>
+                                                    <th>Zamanlama Tipi</th>
+                                                    <th>Sonraki Çalışma</th>
+                                                    <th>Son Çalışma</th>
+                                                    <th>Oluşturan</th>
+                                                    <th style="width: 10%">İşlemler</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <!-- Scheduled tests will be loaded here -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <footer class="footer">
+                <div class="container-fluid d-flex justify-content-center">
+                    <div class="copyright">
+                        2025, made with <i class="fa fa-heart heart text-danger"></i> by Taytech
+                    </div>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Add Schedule Modal -->
+    <div class="modal fade" id="addScheduleModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title">
+                        <span class="fw-mediumbold">Yeni</span>
+                        <span class="fw-light">Zamanlama</span>
+                    </h5>
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="addScheduleForm">
+                        <div class="form-section">
+                            <h6 class="fw-bold mb-3">Test Bilgileri</h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="testType">Test Tipi</label>
+                                        <select class="form-select" id="testType" name="test_type" required>
+                                            <option value="">Test tipi seçin</option>
+                                            <!-- Options will be loaded dynamically -->
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="testScenario">Test Senaryosu</label>
+                                        <select class="form-select" id="testScenario" name="test_scenario" required>
+                                            <option value="">Test senaryosu seçin</option>
+                                            <!-- Options will be loaded dynamically -->
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <h6 class="fw-bold mb-3">Zamanlama Ayarları</h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="scheduleType">Zamanlama Tipi</label>
+                                        <select class="form-select" id="scheduleType" name="schedule_type" required>
+                                            <option value="">Zamanlama tipi seçin</option>
+                                            <option value="once">Bir Kez</option>
+                                            <option value="daily">Günlük</option>
+                                            <option value="weekly">Haftalık</option>
+                                            <option value="monthly">Aylık</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="scheduleTime">Çalışma Saati</label>
+                                        <input type="time" class="form-control" id="scheduleTime" name="schedule_time"
+                                            required />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row schedule-days-selector" id="weeklyDaysSelector">
+                                <div class="col-md-12">
+                                    <label class="form-label">Çalışma Günleri</label>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="1" id="monday"
+                                                name="schedule_days">
+                                            <label class="form-check-label" for="monday">Pazartesi</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="2" id="tuesday"
+                                                name="schedule_days">
+                                            <label class="form-check-label" for="tuesday">Salı</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="3" id="wednesday"
+                                                name="schedule_days">
+                                            <label class="form-check-label" for="wednesday">Çarşamba</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="4" id="thursday"
+                                                name="schedule_days">
+                                            <label class="form-check-label" for="thursday">Perşembe</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="5" id="friday"
+                                                name="schedule_days">
+                                            <label class="form-check-label" for="friday">Cuma</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="6" id="saturday"
+                                                name="schedule_days">
+                                            <label class="form-check-label" for="saturday">Cumartesi</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="0" id="sunday"
+                                                name="schedule_days">
+                                            <label class="form-check-label" for="sunday">Pazar</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label for="scheduleDescription">Açıklama (Opsiyonel)</label>
+                                        <textarea class="form-control" id="scheduleDescription" name="description"
+                                            rows="3" placeholder="Zamanlama hakkında açıklama..."></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">İptal</button>
+                    <button type="button" class="btn btn-primary" id="saveSchedule">Kaydet</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Core JS Files -->
+    <script src="{{ url_for('static', filename='js/core/jquery-3.7.1.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/core/popper.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/core/bootstrap.min.js') }}"></script>
+
+    <!-- jQuery Scrollbar -->
+    <script src="{{ url_for('static', filename='js/plugin/jquery-scrollbar/jquery.scrollbar.min.js') }}"></script>
+
+    <!-- Datatables -->
+    <script src="{{ url_for('static', filename='js/plugin/datatables/datatables.min.js') }}"></script>
+
+    <!-- Kaiadmin JS -->
+    <script src="{{ url_for('static', filename='js/kaiadmin.min.js') }}"></script>
+
+    <!-- Custom JS for Scheduled Tests -->
+    <script>
+        $(document).ready(function () {
+            // Initialize DataTable
+            $('#schedulesTable').DataTable({
+                pageLength: 10,
+                responsive: true,
+                order: [[3, 'asc']], // Sort by next runtime
+                columnDefs: [
+                    { orderable: false, targets: [6] } // Disable sorting for actions column
+                ]
+            });
+
+            // Load test types and scenarios
+            loadTestTypes();
+            loadTestScenarios();
+
+            // Schedule type change handler
+            $('#scheduleType').change(function () {
+                const scheduleType = $(this).val();
+                if (scheduleType === 'weekly') {
+                    $('#weeklyDaysSelector').show();
+                } else {
+                    $('#weeklyDaysSelector').hide();
+                }
+            });
+
+            // Save schedule
+            $('#saveSchedule').click(function () {
+                const formData = new FormData($('#addScheduleForm')[0]);
+                
+                // Collect selected days for weekly schedule
+                if ($('#scheduleType').val() === 'weekly') {
+                    const selectedDays = [];
+                    $('input[name="schedule_days"]:checked').each(function () {
+                        selectedDays.push($(this).val());
+                    });
+                    formData.set('schedule_days', selectedDays.join(','));
+                }
+
+                $.ajax({
+                    url: '/api/scheduled-tests',
+                    method: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        $('#addScheduleModal').modal('hide');
+                        $('#addScheduleForm')[0].reset();
+                        loadScheduledTests();
+                        showNotification('Zamanlama başarıyla oluşturuldu!', 'success');
+                    },
+                    error: function (xhr) {
+                        const error = xhr.responseJSON?.error || 'Bir hata oluştu';
+                        showNotification(error, 'error');
+                    }
+                });
+            });
+
+            // Refresh schedules
+            $('#refreshSchedules').click(function () {
+                loadScheduledTests();
+            });
+
+            // Load initial data
+            loadScheduledTests();
         });
-      }
 
-      hidRefresh schedul
-      function re  ScheduleuledTests()dT
-        loadScheesnse) {ss) {rken hata
-  /   / $('#loadingOverla Ut   n sho
-      wLoading   ility fu}
+        function loadTestTypes() {
+            $.get('/api/test-types', function (data) {
+                const select = $('#testType');
+                select.empty().append('<option value="">Test tipi seçin</option>');
+                data.forEach(function (testType) {
+                    select.append(`<option value="${testType.id}">${testType.name}</option>`);
+                });
+            });
+        }
 
-      function     Loading() {
-        $('#lo BaşarıshowEvermessage);lay').hide()rror  Zamanlama sili    .fa       (respon
-      }
-);
-     ript>
-  html></body>
- }
-    <
-          ale    oa: ' + mwError(messa  }n{
-     o  altificatiou can impleoast nottion here
- 
-ssagan e) {implement a 
-    
-       unction showSuccess rm  .done(funct(ame}" zamanlamasını
-            hideLoading();.alw       ction() {
-      =sti şef =r(re '/test-moniti ing';
-           çse. to test monitexecution_
-                  window.l id) alıştırmak isted
-                // Redire            showLoadisponsnesponse.mg(  essag {
-       led-te)showSuc {
-     est    if (respons/$`)
-          .done(f
-        $.post(`  pi/sc    if (! // Run schedule nuleNow(id) {
-          .always(fun          Error('Durum değirilirken hata olu
-      functi      showError(respo
-              sh   uccess(response.messa   ;
-              load  done(function(r
-        $.led-testtoggle`)
-        
-gg    function togglele schedule active s
-     hata 
-        })ays(func
-       
-          s
-                      
-          if (respon
-  data  .done(fu: tion(responsJSON        .str content      urlplicati: /json',url   const method   tingScheduleIdscheests/${editing : '/api/schts';
- 
-        c     url   
-        // Convert che     data.dule_days = selectedDay
-           ys.push(
-          data[ke (let type alu=== 'We;
-        }[key, valufays
-         formData.entries())
-        // Handle we
-      // Convert form da    rm')[0];
-          form.rep
-    f (!form.checkV
-        co $('#schedu
-     
-      $('#timeSettings').
-       if (schedule
-        $('#dateTimeConinte $alSettings').hide();
-      if (te t.schedule_t     $('#scecific fiehedul   $(
-        $('#weeklyDays')   $('#
-        $('# edas fa-${
-     </div>               title="${test.is_    ve ? 'warnin"toggleSchedug' c{test.id})" 
-    ess'}" 
+        function loadTestScenarios() {
+            $.get('/api/test-scenarios', function (data) {
+                const select = $('#testScenario');
+                select.empty().append('<option value="">Test senaryosu seçin</option>');
+                data.forEach(function (scenario) {
+                    select.append(`<option value="${scenario.id}">${scenario.name}</option>`);
+                });
+            });
+        }
 
-       ary" onclick="hedule(t.id})" title="-outline-${test.is_
-              <i class="faclass="btn btit"></i>
-                  <b       </butto
-                          class="b   btn-sm btn-outli   <div c        <sdule-actionsmall     s="text-m<div >Son Çaclass="las
-       
-       span class="next-rtRunClass}
-          <small c
-                <div clas:</small>
-             v>heduv class="ms="text-mutb-2">
-    le_t          <small ime ? `<smaxt-muted ms->${test.schedule_time}>` : ''}
-                </
-itert              mb-2">    Text}</span>
-  
-             <dib-2">TypeClass}">${sche
-          <span "schedule-type
- 
-       <div class="ca
-     <div class="col col-l
- ? new Daonst isOverdue = testER(tesue ? 'ovtun && new Date.next_rVA)_run) < ne.toLocaleString('L': TypeClrlik',
-        const         asss = isest.schedul
-     
-        const stat     / Render individua tmlntainer.html(html += render   eduleCard(test);
-          nmdTests.forEach(tl = '';
-    ction(resp
-          .do    // FilFet('/api/scheduled-teis)sts() {
-        sho.val();
-      lter"]').chate en() {
-  currentFilter = $(
-        loadScheduleollnt).ready(function
-    <!-- jQuer    <didiv cv modaverlay">
-      class="loa
-    <div class="load        >  " id="load     <input class=    ="notck-input" type=ils" name" id="i=tion_emails
-                <im</la  <e="emaildivlass="form-c class="m " class="formildirim E-postaları<el>
-   
- bel            <label fo>xt texficationEmait-muted">10 dakika arası değer gall>
-   
-                    e="class="for6">inutes" min="1"ax="1440" value="60"
-           <label for="day6" classay-label">Paz</la>"interval
-              ontrol" id=tervalMinutes" nam
-       " class="forput type="number" m-lab (Dakika)</la
-                    <label for=      valM  <div id="        Settings" class= <! Intervle="display: none;">al Settings
-              
-           <input tyeckbox" clascheckbox" id="="day-checkbox" id=""5">
-                            <labheckbox" clasel folass="day-la">Cmt</
-                  <inp    <itype="ch<label for=ecky4" class="day-lbox" clcheckbox" id="
-          
-                  <input       dis-kbox" cselec"day-checkbox" id=tor"3" v>play">
-                  <inp  l cpe="chlass class="day-chec
-                    v>ass="mb-3" sty
-              <iv id="wee/div    d="schTime" ntion -->
-     ame="next_
-              -- Weekly
-                 <di   </div>v    <in"datetime-localp claut="form-c typ      e" cl ms="form-conteSettime-input" idingstio  <oime" name="schedupe_time">
-                    iv input typclass="co  v>d="dateTimeConta" style="disnone;">
-                    div class="mbel for="scheleDateTimes="fTarih ve Saat</la
-                             display: none Settings -->
-                t            "mb-3<div cionn "="c"" class="f>orm-labat</label>
+        function loadScheduledTests() {
+            $.get('/api/scheduled-tests', function (data) {
+                const tbody = $('#schedulesTable tbody');
+                tbody.empty();
 
-ro-md-6">           <labelor="schedul
- w">        <div
-val va"           ONTERVAL">Belirli CEferlik<la</option>
-      /option>ption>
-        
-       <op     <optiotionn vaILY"WEEKLY">Haftalık<">Günoption>
- 
-   v>
-      -6</div>
-                    </select>
-          bufor mode}
-       l ittpcba_models %}
-  class="             {% e    <form-selton ="{{ modtyd="pcbaM{{ model.part_number }} odel" odel.model_naname}</option>
-       =vpcba_model_id" re class=
-                             "mb-3pe" ion value=class="foz...</option>
-  rm-lCBA Modeli *</label>
-         =    <h    <label for="pcbaMoladclass="btn-close"-ssflmoddalsmiss="modal"><-title" id="scal-content">exmodal-dialog" 
-          </div>       <jus
-          <div cla   "modal-bod </e="">Seçinizd  </div>
-                      e="   <f heduleForhiddenm">d="scheduleIdname="id">enario_id" required>
-      *<      <//labeform-controriol" id="uleName" namerequired>" name=
-                  t" id="testSce
-                  <d<select class=iv cl         ">io" class="form-label">ryosu *</label>
-                        iv cl    <labelass=""testSccol-md  ">
-     <d    lass="row">
-               <itext"
-               div class=<inp>orm-label">Za
-            <label for="schuleName" class=
-           it   </li>scheduledTetd">İlk zamanlaed">Henüz nizi oluşturmaksive">tamış Zamanlama Olu test iner" c>
-            la"btclass="texn bb-3"></i>
-        t">lass="text
-              <i class   n-outlclock fa-3x teforts tyle="will be loa="filtre -edisplaynone;">
-            </div>-center
-            <div id=       <!--" class      <!-ate -->
-   Schedul    ests Grid      <label cla
-      </        </buttodiv>d="filterInae" valu
-                    radio     </div>" class="b  ext-ek" name="statusnd">Aktif</label>
-               <inpu
-             <div class="class="btn btn-bgrline-success"oup"upfilterActiv">
-                                           <l  el class="btn b<inpu"radiose="stcondary"er" id="filterActive for="fi"active">
- crAll">Tümü</labelass=eck" nam"statusFil id="filterAll" v"all" checke
-">ss              <="put type="radi        <"btn-check" div clc-al"col-md-6 tt"></i>
-               
-                     class="fas fa-plus"></em">  ctiomanlama Oluş="cheduledTestrow mbn Bn btn-primary" onclicar - <eateModal()
-                </b            <di btn-infv ts-2" onclicton class=cl    "col-md-6">
-                <button          <div c/ul>
-  
-           </     <a href="#       <i class="icon  <"#
-           ">Test İmleri</a>
-            i class="
-        
-                       ss="separatorow-rir">
-        <ul       <i class="icclass="
-        <h3 class=
-  conta     <div<div classinerinner">
+                data.forEach(function (schedule) {
+                    const statusIndicator = schedule.is_active
+                        ? '<span class="schedule-indicator active"></span>Aktif'
+                        : '<span class="schedule-indicator inactive"></span>Pasif';
 
-        <div c
-          <!  </nav>
-              ="dropdown-div"><"/logout">/div>Çıka>
-           
-                  <a claropdown-item
-             <
-                          <div    </div
-                              alt=                           src=   <   class="dropdown-menu   mg        rou          <span class="fw    d">{{ current_ucle"
-             s        <span       />="profilername">
-      
-           r        <c="asse    iv>
-               img
-     </lass="avatar-sdiv>lass="ign-inav-item toptems-center
-                                   
-    <ul ="navbar-nav topav ms-md-
-     
-              </      <!av class="nav--  navbar-headNavb    eader -->
-      o Header -->
-           <button clas     <i class="gg-
-             /  </button>n btn
-        >div class="ton clasg"gg-menu-rile""></i>
-      >gle-sidebar">
-             <i class
-           n btn-toggle 
-      r= height="20"
-     "k  ss="navbar-  srd"
-        c="a">tay.brand"
-       png"
-              a
-           
-          <div class="m   <d-header" daiv cr-logo">
-     la     <!-- class= "main-hear -->
-          der">    <       
-           <p>Haberleşme Logl
-                  <i c       <s fa-commena href="/c        tion-logs">
-      <li                     s="fa f    ion">Yönetim</<span cl"></i>
-       sideba   <h4 class="text-se  </span>
-    r-mini-
-                <i cl
-              <li cl  </a>
-       
-   a-desktop"></i
-                          <li </ass="nava>
-    "    <p/te">ştırma</p>
-   
-               <i class="ay-circle"></
-           <li class=
-                <i class=
-        left      <p>Dashboard<   <i class="fas fa-: 0; ></i>
-              position:       
-                <   ref="/">
-          h tid-contt:ent:"nav-ite cen 10;ent">
-          <l    i  l class="navry">
- 
-        inaldex: ton>
-       9999;vclass="sidebar-wrapper >ollbar scrollbar-inner">
-       <div class="sideb
-        <dign-ader -->
-     
-          <!-- Eni0 rgba(0,ter;
-0     }="topbar-toggleore-vertical-alt</i>
-      
-              <i        gg-m   <
-            </d               r"> class="gg-left"></i>
-  
-           
-   ,0 .loading-spinnerht"></i>-toggle sidenav-t
-             </button classbutton
-   text-al     ign: cente"gg-r  b>
-      <i         <bclauttonord {s=",%px;ggle toggle-ar">
-      
- }">TayTech </a>ass="nav-togg
-           </span>
-    <tyle>"text-white fw-bold
-              <  </h         /ead>">="/="" clc="a20ssets/i-brand"
- mg/tay.pnass=
-                alt="navba                       
-                claass="sidebar" dground-color="dor="dar
-      <   <!-- Logo Heaogo-header" data-bader -di
-          <div cl"sidebar-logo">
-   
-    <div-- Sidebar -- class="wra     p
-    adding: ;);
-        dickground: whitspl
-        jus
-        bath: 100%;
-op: 0;  colorkground-coloy-l#007babel {
-   
-      .day-checkbox:checked          font-sizus: 6px;
-      } transition: alddx-width: 120a;
-        c
+                    const scheduleTypeBadge = getScheduleTypeBadge(schedule.schedule_type);
+                    const nextRuntime = schedule.next_runtime
+                        ? `<span class="next-runtime">${formatDateTime(schedule.next_runtime)}</span>`
+                        : '-';
+                    const lastRuntime = schedule.last_runtime
+                        ? formatDateTime(schedule.last_runtime)
+                        : 'Henüz çalışmadı';
+
+                    const row = `
+                        <tr>
+                            <td>${statusIndicator}</td>
+                            <td>${schedule.test_name}</td>
+                            <td>${scheduleTypeBadge}</td>
+                            <td>${nextRuntime}</td>
+                            <td>${lastRuntime}</td>
+                            <td>${schedule.created_by}</td>
+                            <td>
+                                <div class="form-button-action">
+                                    <button type="button" class="btn btn-link btn-primary btn-lg"
+                                        onclick="toggleSchedule(${schedule.id}, ${schedule.is_active})"
+                                        title="${schedule.is_active ? 'Durdur' : 'Başlat'}">
+                                        <i class="fa fa-${schedule.is_active ? 'pause' : 'play'}"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-link btn-danger"
+                                        onclick="deleteSchedule(${schedule.id})" title="Sil">
+                                        <i class="fa fa-times"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                    tbody.append(row);
+                });
+
+                // Reinitialize DataTable
+                $('#schedulesTable').DataTable().destroy();
+                $('#schedulesTable').DataTable({
+                    pageLength: 10,
+                    responsive: true,
+                    order: [[3, 'asc']],
+                    columnDefs: [
+                        { orderable: false, targets: [6] }
+                    ]
+                });
+            });
+        }
+
+        function getScheduleTypeBadge(type) {
+            const badges = {
+                'once': '<span class="badge badge-info schedule-type-badge">Bir Kez</span>',
+                'daily': '<span class="badge badge-success schedule-type-badge">Günlük</span>',
+                'weekly': '<span class="badge badge-warning schedule-type-badge">Haftalık</span>',
+                'monthly': '<span class="badge badge-primary schedule-type-badge">Aylık</span>'
+            };
+            return badges[type] || '<span class="badge badge-secondary schedule-type-badge">Bilinmiyor</span>';
+        }
+
+        function formatDateTime(dateTimeString) {
+            const date = new Date(dateTimeString);
+            return date.toLocaleString('tr-TR', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function toggleSchedule(scheduleId, isActive) {
+            const action = isActive ? 'pause' : 'resume';
+            $.ajax({
+                url: `/api/scheduled-tests/${scheduleId}/${action}`,
+                method: 'POST',
+                success: function (response) {
+                    loadScheduledTests();
+                    const message = isActive ? 'Zamanlama durduruldu' : 'Zamanlama başlatıldı';
+                    showNotification(message, 'success');
+                },
+                error: function (xhr) {
+                    const error = xhr.responseJSON?.error || 'Bir hata oluştu';
+                    showNotification(error, 'error');
+                }
+            });
+        }
+
+        function deleteSchedule(scheduleId) {
+            if (confirm('Bu zamanlamayı silmek istediğinizden emin misiniz?')) {
+                $.ajax({
+                    url: `/api/scheduled-tests/${scheduleId}`,
+                    method: 'DELETE',
+                    success: function (response) {
+                        loadScheduledTests();
+                        showNotification('Zamanlama silindi', 'success');
+                    },
+                    error: function (xhr) {
+                        const error = xhr.responseJSON?.error || 'Bir hata oluştu';
+                        showNotification(error, 'error');
+                    }
+                });
+            }
+        }
+
+        function showNotification(message, type) {
+            // You can implement your notification system here
+            // For now, using simple alert
+            if (type === 'success') {
+                alert('✅ ' + message);
+            } else {
+                alert('❌ ' + message);
+            }
+        }
+    </script>
+</body>
+
+</html>

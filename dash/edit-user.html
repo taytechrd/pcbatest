@@ -65,11 +65,11 @@
         </div>
         <!-- End Logo Header -->
       </div>
-      <div class="sidebar-wrapper scrollbar scrollbar-inner">
+                        <div class="sidebar-wrapper scrollbar scrollbar-inner">
         <div class="sidebar-content">
           <ul class="nav nav-secondary">
             <li class="nav-item">
-              <a href="/" class="collapsed" aria-expanded="false">
+              <a href="/">
                 <i class="fas fa-home"></i>
                 <p>Dashboard</p>
               </a>
@@ -81,15 +81,33 @@
               <h4 class="text-section">Test İşlemleri</h4>
             </li>
             <li class="nav-item">
-              <a href="/test-operations">
+              <a href="/test-execution">
                 <i class="fas fa-play-circle"></i>
                 <p>Test Çalıştır</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="/test-monitoring">
+                <i class="fas fa-desktop"></i>
+                <p>Test İzleme</p>
               </a>
             </li>
             <li class="nav-item">
               <a href="/test-results">
                 <i class="fas fa-chart-line"></i>
                 <p>Test Sonuçları</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="/scheduled-tests">
+                <i class="fas fa-clock"></i>
+                <p>Zamanlanmış Testler</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="/communication-logs">
+                <i class="fas fa-exchange-alt"></i>
+                <p>Haberleşme Logları</p>
               </a>
             </li>
             <li class="nav-item">
@@ -104,8 +122,8 @@
               </span>
               <h4 class="text-section">Yönetim</h4>
             </li>
-            {% if current_user.is_authenticated and current_user.has_permission('manage_users') %}
-            <li class="nav-item active">
+            {% if current_user.is_authenticated and current_user.role == 'admin' %}
+            <li class="nav-item">
               <a data-bs-toggle="collapse" href="#userManagement">
                 <i class="fas fa-users"></i>
                 <p>Kullanıcı Yönetimi</p>
@@ -123,18 +141,16 @@
                       <span class="sub-item">Yeni Kullanıcı</span>
                     </a>
                   </li>
-                  {% if current_user.has_permission('manage_user_permissions') %}
                   <li>
                     <a href="/role-management">
                       <span class="sub-item">Rol Yönetimi</span>
                     </a>
                   </li>
-                  {% endif %}
                 </ul>
               </div>
             </li>
             {% endif %}
-            {% if current_user.is_authenticated and current_user.has_permission('manage_test_types') %}
+            {% if current_user.is_authenticated and current_user.role == 'admin' %}
             <li class="nav-item">
               <a data-bs-toggle="collapse" href="#testManagement">
                 <i class="fas fa-cogs"></i>
@@ -197,14 +213,19 @@
                       <span class="sub-item">Test Parameters</span>
                     </a>
                   </li>
+                  <li>
+                    <a href="/test-configuration">
+                      <span class="sub-item">Test Configuration</span>
+                    </a>
+                  </li>
                 </ul>
               </div>
             </li>
           </ul>
         </div>
       </div>
-    </div>
-    <!-- End Sidebar -->
+      </div>
+      <!-- End Sidebar -->
 
     <div class="main-panel">
       <div class="main-header">
