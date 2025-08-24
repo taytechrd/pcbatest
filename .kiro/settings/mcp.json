@@ -6,7 +6,20 @@
         "-y",
         "@executeautomation/playwright-mcp-server"
       ],
-      "env": {}
+      "env": {},
+      "disabled": false,
+      "autoApprove": [
+        "playwright_navigate",
+        "playwright_screenshot",
+        "playwright_fill",
+        "playwright_fill",
+        "playwright_click",
+        "playwright_evaluate",
+        "playwright_evaluate",
+        "playwright_get_visible_text",
+        "playwright_close",
+        "playwright_get_visible_html"
+      ]
     }
   }
 }

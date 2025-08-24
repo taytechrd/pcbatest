@@ -1,0 +1,151 @@
+/* Horizontal Overflow Düzeltmeleri */
+
+/* Ana container sınırlaması */
+.main-panel {
+  max-width: 100% !important;
+  overflow-x: hidden !important;
+}
+
+.container {
+  max-width: 100% !important;
+  overflow-x: hidden !important;
+  padding-left: 15px !important;
+  padding-right: 15px !important;
+}
+
+/* Row ve column sınırlamaları */
+.row {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  max-width: 100% !important;
+}
+
+[class*="col-"] {
+  padding-left: 10px !important;
+  padding-right: 10px !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Card sınırlamaları */
+.card {
+  max-width: 100% !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+  margin-bottom: 20px !important;
+}
+
+.card-body {
+  overflow-x: auto !important;
+  overflow-y: auto !important;
+  max-height: 400px !important;
+  padding: 15px !important;
+}
+
+/* Alt paneller için özel düzenlemeler */
+.col-md-6 .card {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+.col-md-12 .card {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+/* Tablo responsive */
+.table-responsive {
+  max-width: 100% !important;
+  overflow-x: auto !important;
+}
+
+.table {
+  width: 100% !important;
+  table-layout: auto !important;
+}
+
+.table th, 
+.table td {
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  max-width: 150px !important;
+  padding: 8px !important;
+}
+
+/* Button düzenlemeleri */
+.btn-block {
+  width: 100% !important;
+  margin-bottom: 10px !important;
+  font-size: 14px !important;
+  padding: 8px 12px !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+/* Responsive düzenlemeler */
+@media screen and (max-width: 1200px) {
+  .col-md-6 {
+    flex: 0 0 48% !important;
+    max-width: 48% !important;
+  }
+  
+  .card-body {
+    padding: 12px !important;
+    max-height: 350px !important;
+  }
+  
+  .table th, 
+  .table td {
+    max-width: 120px !important;
+    font-size: 13px !important;
+  }
+}
+
+@media screen and (max-width: 992px) {
+  .col-md-6 {
+    flex: 0 0 100% !important;
+    max-width: 100% !important;
+  }
+  
+  .card-body {
+    padding: 10px !important;
+    max-height: 300px !important;
+  }
+  
+  .table th, 
+  .table td {
+    max-width: 100px !important;
+    font-size: 12px !important;
+  }
+  
+  .btn-block {
+    font-size: 12px !important;
+    padding: 6px 10px !important;
+  }
+}
+
+/* Scrollbar styling */
+.card-body::-webkit-scrollbar,
+.table-responsive::-webkit-scrollbar {
+  width: 6px !important;
+  height: 6px !important;
+}
+
+.card-body::-webkit-scrollbar-track,
+.table-responsive::-webkit-scrollbar-track {
+  background: #f1f1f1 !important;
+  border-radius: 3px !important;
+}
+
+.card-body::-webkit-scrollbar-thumb,
+.table-responsive::-webkit-scrollbar-thumb {
+  background: #c1c1c1 !important;
+  border-radius: 3px !important;
+}
+
+.card-body::-webkit-scrollbar-thumb:hover,
+.table-responsive::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8 !important;
+}
