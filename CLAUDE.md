@@ -64,7 +64,7 @@ pip install -r requirements.txt
 python app.py
 
 # Access the application:
-# http://localhost:5000 - Main dashboard
+# http://localhost:9002 - Main dashboard
 # Login: admin / admin123
 ```
 
