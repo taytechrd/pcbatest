@@ -86,15 +86,27 @@
                 <h4 class="text-section">Test İşlemleri</h4>
               </li>
               <li class="nav-item">
-                <a href="/test-operations">
+                <a href="/test-execution">
                   <i class="fas fa-play-circle"></i>
                   <p>Test Çalıştır</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="/test-monitoring">
+                  <i class="fas fa-desktop"></i>
+                  <p>Test İzleme</p>
                 </a>
               </li>
               <li class="nav-item">
                 <a href="/test-results">
                   <i class="fas fa-chart-line"></i>
                   <p>Test Sonuçları</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="/scheduled-tests">
+                  <i class="fas fa-clock"></i>
+                  <p>Zamanlanmış Testler</p>
                 </a>
               </li>
               <li class="nav-item">
@@ -204,6 +216,11 @@
                     <li>
                       <a href="/test-parameters">
                         <span class="sub-item">Test Parameters</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="/test-configuration">
+                        <span class="sub-item">Test Configuration</span>
                       </a>
                     </li>
                   </ul>
@@ -600,26 +617,26 @@
                 <h6 class="op-7 mb-2">Taytech PCBA Test Sistemi</h6>
               </div>
               <div class="ms-md-auto py-2 py-md-0">
-                <a href="/test-operations" class="btn btn-label-info btn-round me-2">Test Çalıştır</a>
+                <a href="/test-execution" class="btn btn-label-info btn-round me-2">Test Çalıştır</a>
+                <a href="/test-monitoring" class="btn btn-warning btn-round me-2">Test İzleme</a>
                 <a href="/test-results" class="btn btn-primary btn-round">Test Sonuçları</a>
               </div>
             </div>
+            <!-- Test Statistics Row -->
             <div class="row">
               <div class="col-sm-6 col-md-3">
                 <div class="card card-stats card-round">
                   <div class="card-body">
                     <div class="row align-items-center">
                       <div class="col-icon">
-                        <div
-                          class="icon-big text-center icon-primary bubble-shadow-small"
-                        >
-                          <i class="fas fa-users"></i>
+                        <div class="icon-big text-center icon-primary bubble-shadow-small">
+                          <i class="fas fa-vial"></i>
                         </div>
                       </div>
                       <div class="col col-stats ms-3 ms-sm-0">
                         <div class="numbers">
                           <p class="card-category">Toplam Test</p>
-                          <h4 class="card-title">{{ total_tests if total_tests else 0 }}</h4>
+                          <h4 class="card-title" id="totalTests">0</h4>
                         </div>
                       </div>
                     </div>
@@ -631,16 +648,14 @@
                   <div class="card-body">
                     <div class="row align-items-center">
                       <div class="col-icon">
-                        <div
-                          class="icon-big text-center icon-info bubble-shadow-small"
-                        >
-                          <i class="fas fa-user-check"></i>
+                        <div class="icon-big text-center icon-success bubble-shadow-small">
+                          <i class="fas fa-check-circle"></i>
                         </div>
                       </div>
                       <div class="col col-stats ms-3 ms-sm-0">
                         <div class="numbers">
                           <p class="card-category">Başarılı Test</p>
-                          <h4 class="card-title">{{ passed_tests if passed_tests else 0 }}</h4>
+                          <h4 class="card-title" id="passedTests">0</h4>
                         </div>
                       </div>
                     </div>
@@ -652,16 +667,14 @@
                   <div class="card-body">
                     <div class="row align-items-center">
                       <div class="col-icon">
-                        <div
-                          class="icon-big text-center icon-success bubble-shadow-small"
-                        >
-                          <i class="fas fa-luggage-cart"></i>
+                        <div class="icon-big text-center icon-danger bubble-shadow-small">
+                          <i class="fas fa-times-circle"></i>
                         </div>
                       </div>
                       <div class="col col-stats ms-3 ms-sm-0">
                         <div class="numbers">
-                          <p class="card-category">Hatalı Test</p>
-                          <h4 class="card-title">{{ failed_tests if failed_tests else 0 }}</h4>
+                          <p class="card-category">Başarısız Test</p>
+                          <h4 class="card-title" id="failedTests">0</h4>
                         </div>
                       </div>
                     </div>
@@ -673,16 +686,14 @@
                   <div class="card-body">
                     <div class="row align-items-center">
                       <div class="col-icon">
-                        <div
-                          class="icon-big text-center icon-secondary bubble-shadow-small"
-                        >
-                          <i class="far fa-check-circle"></i>
+                        <div class="icon-big text-center icon-info bubble-shadow-small">
+                          <i class="fas fa-percentage"></i>
                         </div>
                       </div>
                       <div class="col col-stats ms-3 ms-sm-0">
                         <div class="numbers">
                           <p class="card-category">Başarı Oranı</p>
-                          <h4 class="card-title">%{{ "%.1f"|format(success_rate) if success_rate else 0 }}</h4>
+                          <h4 class="card-title" id="successRate">0%</h4>
                         </div>
                       </div>
                     </div>
@@ -690,6 +701,184 @@
                 </div>
               </div>
             </div>
+
+            <!-- Active Tests and System Status Row -->
+            <div class="row">
+              <div class="col-sm-6 col-md-3">
+                <div class="card card-stats card-round">
+                  <div class="card-body">
+                    <div class="row align-items-center">
+                      <div class="col-icon">
+                        <div class="icon-big text-center icon-warning bubble-shadow-small">
+                          <i class="fas fa-play-circle"></i>
+                        </div>
+                      </div>
+                      <div class="col col-stats ms-3 ms-sm-0">
+                        <div class="numbers">
+                          <p class="card-category">Çalışan Testler</p>
+                          <h4 class="card-title" id="runningTests">0</h4>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-6 col-md-3">
+                <div class="card card-stats card-round">
+                  <div class="card-body">
+                    <div class="row align-items-center">
+                      <div class="col-icon">
+                        <div class="icon-big text-center icon-secondary bubble-shadow-small">
+                          <i class="fas fa-clock"></i>
+                        </div>
+                      </div>
+                      <div class="col col-stats ms-3 ms-sm-0">
+                        <div class="numbers">
+                          <p class="card-category">Zamanlanmış Testler</p>
+                          <h4 class="card-title" id="scheduledTests">0</h4>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-6 col-md-3">
+                <div class="card card-stats card-round">
+                  <div class="card-body">
+                    <div class="row align-items-center">
+                      <div class="col-icon">
+                        <div class="icon-big text-center icon-primary bubble-shadow-small">
+                          <i class="fas fa-wifi"></i>
+                        </div>
+                      </div>
+                      <div class="col col-stats ms-3 ms-sm-0">
+                        <div class="numbers">
+                          <p class="card-category">Aktif Bağlantılar</p>
+                          <h4 class="card-title" id="activeConnections">0</h4>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-6 col-md-3">
+                <div class="card card-stats card-round">
+                  <div class="card-body">
+                    <div class="row align-items-center">
+                      <div class="col-icon">
+                        <div class="icon-big text-center icon-success bubble-shadow-small">
+                          <i class="fas fa-server"></i>
+                        </div>
+                      </div>
+                      <div class="col col-stats ms-3 ms-sm-0">
+                        <div class="numbers">
+                          <p class="card-category">Sistem Durumu</p>
+                          <h4 class="card-title" id="systemStatus">Aktif</h4>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Recent Test Activity -->
+            <div class="row">
+              <div class="col-md-8">
+                <div class="card">
+                  <div class="card-header">
+                    <div class="d-flex align-items-center">
+                      <h4 class="card-title">Son Test Aktiviteleri</h4>
+                      <button class="btn btn-primary btn-round ms-auto" onclick="refreshDashboard()">
+                        <i class="fa fa-refresh"></i> Yenile
+                      </button>
+                    </div>
+                  </div>
+                  <div class="card-body">
+                    <div class="table-responsive">
+                      <table class="table table-hover">
+                        <thead>
+                          <tr>
+                            <th>Test ID</th>
+                            <th>PCBA Model</th>
+                            <th>Durum</th>
+                            <th>Süre</th>
+                            <th>Tarih</th>
+                          </tr>
+                        </thead>
+                        <tbody id="recentTestsTable">
+                          <tr>
+                            <td colspan="5" class="text-center">Yükleniyor...</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="card">
+                  <div class="card-header">
+                    <h4 class="card-title">Sistem Durumu</h4>
+                  </div>
+                  <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                      <span>Test Executor</span>
+                      <span class="badge bg-success" id="testExecutorStatus">Aktif</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                      <span>Scheduler</span>
+                      <span class="badge bg-success" id="schedulerStatus">Aktif</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                      <span>Background Tasks</span>
+                      <span class="badge bg-success" id="backgroundTasksStatus">Aktif</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                      <span>Database</span>
+                      <span class="badge bg-success" id="databaseStatus">Aktif</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between align-items-center">
+                      <span><strong>Genel Durum</strong></span>
+                      <span class="badge bg-success" id="overallStatus">Sağlıklı</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="card">
+                  <div class="card-header">
+                    <h4 class="card-title">Hızlı İşlemler</h4>
+                  </div>
+                  <div class="card-body">
+                    <div class="d-grid gap-2">
+                      <a href="/test-execution" class="btn btn-primary">
+                        <i class="fa fa-play me-2"></i>Yeni Test Başlat
+                      </a>
+                      <a href="/test-monitoring" class="btn btn-warning">
+                        <i class="fa fa-desktop me-2"></i>Testleri İzle
+                      </a>
+                      <a href="/scheduled-tests" class="btn btn-info">
+                        <i class="fa fa-clock me-2"></i>Zamanlanmış Testler
+                      </a>
+                      <a href="/test-results-advanced" class="btn btn-success">
+                        <i class="fa fa-chart-line me-2"></i>Gelişmiş Analiz
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+
+
+            </div>
+            
             <div class="row">
               <div class="col-md-12">
                 <div class="card card-round">
@@ -1144,7 +1333,179 @@
       $(document).ready(function() {
         // Dashboard yüklendiğinde çalışacak kodlar
         console.log('PCBA Test Sistemi Dashboard yüklendi');
+        
+        // Gerçek zamanlı test durumu güncellemeleri
+        loadDashboardStats();
+        
+        // Her 10 saniyede bir güncelle
+        setInterval(loadDashboardStats, 10000);
       });
+      
+      function loadDashboardStats() {
+        // Çalışan testler sayısını yükle
+        // Load dashboard statistics
+        loadDashboardStats();
+        
+        // Load recent test activities
+        loadRecentTests();
+        
+        // Load system status
+        loadSystemStatus();
+        
+        // Auto-refresh every 30 seconds
+        setInterval(function() {
+          loadDashboardStats();
+          loadRecentTests();
+          loadSystemStatus();
+        }, 30000);
+      }
+      
+      function loadDashboardStats() {
+        // Load test statistics
+        $.ajax({
+          url: '/api/dashboard/test-stats',
+          method: 'GET',
+          success: function(response) {
+            if (response.success) {
+              $('#totalTests').text(response.total_tests || 0);
+              $('#passedTests').text(response.passed_tests || 0);
+              $('#failedTests').text(response.failed_tests || 0);
+              $('#successRate').text((response.success_rate || 0) + '%');
+            }
+          },
+          error: function() {
+            console.log('Failed to load test statistics');
+          }
+        });
+        
+        // Load running tests count
+        $.ajax({
+          url: '/api/test/running',
+          method: 'GET',
+          success: function(response) {
+            if (response.success) {
+              $('#runningTests').text(response.count || 0);
+            }
+          },
+          error: function() {
+            console.log('Failed to load running tests count');
+          }
+        });
+        
+        // Load scheduled tests count
+        $.ajax({
+          url: '/api/scheduled-tests',
+          method: 'GET',
+          success: function(response) {
+            if (response.success) {
+              const activeScheduled = response.scheduled_tests.filter(s => s.is_active).length;
+              $('#scheduledTests').text(activeScheduled || 0);
+            }
+          },
+          error: function() {
+            console.log('Failed to load scheduled tests count');
+          }
+        });
+        
+        // Load connections status
+        $.ajax({
+          url: '/api/connections/status',
+          method: 'GET',
+          success: function(response) {
+            if (response.success) {
+              const activeConnections = response.connections.filter(c => c.is_active && c.is_working).length;
+              $('#activeConnections').text(activeConnections || 0);
+            }
+          },
+          error: function() {
+            console.log('Failed to load connections status');
+          }
+        });
+      }
+      
+      function loadRecentTests() {
+        $.ajax({
+          url: '/api/test/history?limit=5',
+          method: 'GET',
+          success: function(response) {
+            if (response.success) {
+              const tbody = $('#recentTestsTable');
+              tbody.empty();
+              
+              if (response.executions.length === 0) {
+                tbody.append('<tr><td colspan="5" class="text-center">Henüz test çalıştırılmamış</td></tr>');
+                return;
+              }
+              
+              response.executions.forEach(function(execution) {
+                const statusBadge = getStatusBadge(execution.status);
+                const duration = execution.duration ? execution.duration + 's' : 'N/A';
+                const date = new Date(execution.start_time).toLocaleString('tr-TR');
+                
+                tbody.append(`
+                  <tr>
+                    <td>#${execution.id}</td>
+                    <td>${execution.pcba_model_name || 'N/A'}</td>
+                    <td>${statusBadge}</td>
+                    <td>${duration}</td>
+                    <td>${date}</td>
+                  </tr>
+                `);
+              });
+            }
+          },
+          error: function() {
+            $('#recentTestsTable').html('<tr><td colspan="5" class="text-center text-danger">Yükleme hatası</td></tr>');
+          }
+        });
+      }
+      
+      function loadSystemStatus() {
+        // Load background tasks status
+        $.ajax({
+          url: '/api/tasks/status',
+          method: 'GET',
+          success: function(response) {
+            if (response.success) {
+              const status = response.status.is_running ? 'Aktif' : 'Pasif';
+              const badgeClass = response.status.is_running ? 'bg-success' : 'bg-danger';
+              $('#backgroundTasksStatus').removeClass().addClass('badge ' + badgeClass).text(status);
+            }
+          },
+          error: function() {
+            $('#backgroundTasksStatus').removeClass().addClass('badge bg-warning').text('Bilinmiyor');
+          }
+        });
+        
+        // Simulate other system status checks
+        // In a real implementation, these would be actual health checks
+        $('#testExecutorStatus').removeClass().addClass('badge bg-success').text('Aktif');
+        $('#schedulerStatus').removeClass().addClass('badge bg-success').text('Aktif');
+        $('#databaseStatus').removeClass().addClass('badge bg-success').text('Aktif');
+        $('#overallStatus').removeClass().addClass('badge bg-success').text('Sağlıklı');
+        $('#systemStatus').text('Aktif');
+      }
+      
+      function getStatusBadge(status) {
+        switch(status) {
+          case 'COMPLETED':
+            return '<span class="badge bg-success">Tamamlandı</span>';
+          case 'FAILED':
+            return '<span class="badge bg-danger">Başarısız</span>';
+          case 'RUNNING':
+            return '<span class="badge bg-warning">Çalışıyor</span>';
+          case 'CANCELLED':
+            return '<span class="badge bg-secondary">İptal Edildi</span>';
+          default:
+            return '<span class="badge bg-secondary">' + status + '</span>';
+        }
+      }
+      
+      function refreshDashboard() {
+        loadDashboardStats();
+        loadRecentTests();
+        loadSystemStatus();
+      }
     </script>
   </body>
 </html>

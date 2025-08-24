@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="tr">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>TayTech - Test Çalıştırma</title>
+    <meta
+      content="width=device-width, initial-scale=1.0, shrink-to-fit=no"
+      name="viewport"
+    />
+    <link rel="icon" href="assets/img/tay.png" type="image/png" />
+
+    <!-- Fonts and icons -->
+    <script src="assets/js/plugin/webfont/webfont.min.js"></script>
+    <script>
+      WebFont.load({
+        google: { families: ["Public Sans:300,400,500,600,700"] },
+        custom: {
+          families: [
+            "Font Awesome 5 Solid",
+            "Font Awesome 5 Regular",
+            "Font Awesome 5 Brands",
+            "simple-line-icons",
+          ],
+          urls: ["assets/css/fonts.min.css"],
+        },
+        active: function () {
+          sessionStorage.fonts = true;
+        },
+      });
+    </script>
+
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="assets/css/plugins.min.css" />
+    <link rel="stylesheet" href="assets/css/kaiadmin.min.css" />
+
+    <!-- CSS Just for demo purpose, don't include it in your project -->
+    <link rel="stylesheet" href="assets/css/demo.css" />
+    
+    <style>
+      .test-card {
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+      }
+      
+      .test-card:hover {
+        border-color: #1572e8;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(21, 114, 232, 0.15);
+      }
+      
+      .test-card.selected {
+        border-color: #1572e8;
+        background-color: #f8f9ff;
+      }
+      
+      .running-test {
+        border-left: 4px solid #28a745;
+        background-color: #f8fff9;
+      }
+      
+      .progress-container {
+        position: relative;
+        margin: 10px 0;
+      }
+      
+      .test-status {
+        font-size: 0.875rem;
+        font-weight: 500;
+      }
+      
+      .test-parameters {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 15px;
+        margin-top: 15px;
+      }
+      
+      .parameter-badge {
+        background-color: #e3f2fd;
+        color: #1976d2;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        margin: 2px;
+        display: inline-block;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrapper">
+      <!-- Sidebar -->
+      <div class="sidebar" data-background-color="dark">
+        <div class="sidebar-logo">
+          <!-- Logo Header -->
+          <div class="logo-header" data-background-color="dark">
+            <a href="/" class="logo">
+              <img
+                src="assets/img/tay.png"
+                alt="TayTech Logo"
+                class="navbar-brand"
+                height="35"
+              />
+            </a>
+            <div class="nav-toggle">
+              <button class="btn btn-toggle toggle-sidebar">
+                <i class="gg-menu-right"></i>
+              </button>
+              <button class="btn btn-toggle sidenav-toggler">
+                <i class="gg-menu-left"></i>
+              </button>
+            </div>
+            <button class="topbar-toggler more">
+              <i class="gg-more-vertical-alt"></i>
+            </button>
+          </div>
+          <!-- End Logo Header -->
+        </div>
+        <div class="sidebar-wrapper scrollbar scrollbar-inner">
+          <div class="sidebar-content">
+            <ul class="nav nav-secondary">
+              <li class="nav-item">
+                <a href="/" class="collapsed" aria-expanded="false">
+                  <i class="fas fa-home"></i>
+                  <p>Dashboard</p>
+                </a>
+              </li>
+              <li class="nav-section">
+                <span class="sidebar-mini-icon">
+                  <i class="fa fa-ellipsis-h"></i>
+                </span>
+                <h4 class="text-section">Test İşlemleri</h4>
+              </li>
+              <li class="nav-item">
+                <a href="/test-execution" class="active">
+                  <i class="fas fa-play-circle"></i>
+                  <p>Test Çalıştır</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="/test-monitoring">
+                  <i class="fas fa-desktop"></i>
+                  <p>Test İzleme</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="/test-results">
+                  <i class="fas fa-chart-line"></i>
+                  <p>Test Sonuçları</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="/scheduled-tests">
+                  <i class="fas fa-clock"></i>
+                  <p>Zamanlanmış Testler</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="/reports">
+                  <i class="fas fa-file-alt"></i>
+                  <p>Raporlar</p>
+                </a>
+              </li>
+              <li class="nav-section">
+                <span class="sidebar-mini-icon">
+                  <i class="fa fa-ellipsis-h"></i>
+                </span>
+                <h4 class="text-section">Yönetim</h4>
+              </li>
+              <li class="nav-item">
+                <a data-bs-toggle="collapse" href="#userManagement">
+                  <i class="fas fa-users"></i>
+                  <p>Kullanıcı Yönetimi</p>
+                  <span class="caret"></span>
+                </a>
+                <div class="collapse" id="userManagement">
+                  <ul class="nav nav-collapse">
+                    <li>
+                      <a href="/users">
+                        <span class="sub-item">Kullanıcı Listesi</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="/add-user">
+                        <span class="sub-item">Yeni Kullanıcı</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="/role-management">
+                        <span class="sub-item">Rol Yönetimi</span>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </li>
+              <li class="nav-item">
+                <a data-bs-toggle="collapse" href="#testManagement">
+                  <i class="fas fa-cogs"></i>
+                  <p>Test Yönetimi</p>
+                  <span class="caret"></span>
+                </a>
+                <div class="collapse" id="testManagement">
+                  <ul class="nav nav-collapse">
+                    <li>
+                      <a href="/test-types">
+                        <span class="sub-item">Test Tipleri</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="/test-scenarios">
+                        <span class="sub-item">Test Senaryoları</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="/pcba-models">
+                        <span class="sub-item">PCBA Modelleri</span>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </li>
+              <li class="nav-item">
+                <a href="/communication-logs">
+                  <i class="fas fa-exchange-alt"></i>
+                  <p>Haberleşme Logları</p>
+                </a>
+              </li>
+              <li class="nav-section">
+                <span class="sidebar-mini-icon">
+                  <i class="fa fa-ellipsis-h"></i>
+                </span>
+                <h4 class="text-section">Ayarlar</h4>
+              </li>
+              <li class="nav-item">
+                <a data-bs-toggle="collapse" href="#submenu">
+                  <i class="fas fa-cog"></i>
+                  <p>Settings</p>
+                  <span class="caret"></span>
+                </a>
+                <div class="collapse" id="submenu">
+                  <ul class="nav nav-collapse">
+                    <li>
+                      <a href="/user-settings">
+                        <span class="sub-item">User Settings</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="/system-settings">
+                        <span class="sub-item">System Settings</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="/test-configuration">
+                        <span class="sub-item">Test Configuration</span>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <!-- End Sidebar -->
+
+      <div class="main-panel">
+        <div class="main-header">
+          <div class="main-header-logo">
+            <!-- Logo Header -->
+            <div class="logo-header" data-background-color="dark">
+              <a href="/" class="logo">
+                <img
+                  src="assets/img/tay.png"
+                  alt="TayTech Logo"
+                  class="navbar-brand"
+                  height="35"
+                />
+              </a>
+              <div class="nav-toggle">
+                <button class="btn btn-toggle toggle-sidebar">
+                  <i class="gg-menu-right"></i>
+                </button>
+                <button class="btn btn-toggle sidenav-toggler">
+                  <i class="gg-menu-left"></i>
+                </button>
+              </div>
+              <button class="topbar-toggler more">
+                <i class="gg-more-vertical-alt"></i>
+              </button>
+            </div>
+            <!-- End Logo Header -->
+          </div>
+          <!-- Navbar Header -->
+          <nav
+            class="navbar navbar-header navbar-header-transparent navbar-expand-lg border-bottom"
+          >
+            <div class="container-fluid">
+              <nav
+                class="navbar navbar-header-left navbar-expand-lg navbar-form nav-search p-0 d-none d-lg-flex"
+              >
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <button type="submit" class="btn btn-search pe-1">
+                      <i class="fa fa-search search-icon"></i>
+                    </button>
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Test ara..."
+                    class="form-control"
+                  />
+                </div>
+              </nav>
+
+              <ul class="navbar-nav topbar-nav ms-md-auto align-items-center">
+                <li class="nav-item topbar-user dropdown hidden-caret">
+                  <a
+                    class="dropdown-toggle profile-pic"
+                    data-bs-toggle="dropdown"
+                    href="#"
+                    aria-expanded="false"
+                  >
+                    <div class="avatar-sm">
+                      <img
+                        src="assets/img/user.png"
+                        alt="..."
+                        class="avatar-img rounded-circle"
+                      />
+                    </div>
+                    <span class="profile-username">
+                      <span class="op-7">Merhaba,</span>
+                      <span class="fw-bold">{{ current_user.username if current_user else 'Kullanıcı' }}</span>
+                    </span>
+                  </a>
+                  <ul class="dropdown-menu dropdown-user animated fadeIn">
+                    <div class="dropdown-user-scroll scrollbar-outer">
+                      <li>
+                        <div class="user-box">
+                          <div class="avatar-lg">
+                            <img
+                              src="assets/img/user.png"
+                              alt="image profile"
+                              class="avatar-img rounded"
+                            />
+                          </div>
+                          <div class="u-text">
+                            <h4>{{ current_user.username if current_user else 'Kullanıcı' }}</h4>
+                            <p class="text-muted">{{ current_user.email if current_user else 'email@example.com' }}</p>
+                            <p class="text-muted">Rol: {{ current_user.role.title() if current_user else 'Operator' }}</p>
+                          </div>
+                        </div>
+                      </li>
+                      <li>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="/user-settings">Profilim</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="/logout">Çıkış</a>
+                      </li>
+                    </div>
+                  </ul>
+                </li>
+              </ul>
+            </div>
+          </nav>
+          <!-- End Navbar -->
+        </div>
+
+        <div class="container">
+          <div class="page-inner">
+            <div
+              class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4"
+            >
+              <div>
+                <h3 class="fw-bold mb-3">Test Çalıştırma</h3>
+                <h6 class="op-7 mb-2">Manuel test çalıştırma ve gerçek zamanlı izleme</h6>
+              </div>
+              <div class="ms-md-auto py-2 py-md-0">
+                <button class="btn btn-success btn-round me-2" id="refreshRunningTests">
+                  <i class="fa fa-sync"></i> Yenile
+                </button>
+                <a href="/test-monitoring" class="btn btn-primary btn-round">
+                  <i class="fa fa-desktop"></i> Test İzleme
+                </a>
+              </div>
+            </div>
+
+            <div class="row">
+              <!-- Test Başlatma Formu -->
+              <div class="col-md-8">
+                <div class="card">
+                  <div class="card-header">
+                    <div class="card-title">
+                      <i class="fas fa-play-circle me-2"></i>Yeni Test Başlat
+                    </div>
+                  </div>
+                  <div class="card-body">
+                    <form id="testExecutionForm">
+                      <div class="row">
+                        <div class="col-md-6">
+                          <div class="form-group">
+                            <label for="testScenario">Test Senaryosu <span class="text-danger">*</span></label>
+                            <select class="form-select" id="testScenario" name="test_scenario_id" required>
+                              <option value="">Test senaryosu seçin...</option>
+                              {% for scenario in test_scenarios %}
+                              <option value="{{ scenario.id }}" 
+                                      data-parameters="{{ scenario.test_parameters | tojson | e }}">
+                                {{ scenario.scenario_name }}
+                              </option>
+                              {% endfor %}
+                            </select>
+                            <small class="form-text text-muted">Çalıştırılacak test senaryosunu seçin</small>
+                          </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                          <div class="form-group">
+                            <label for="pcbaModel">PCBA Modeli <span class="text-danger">*</span></label>
+                            <select class="form-select" id="pcbaModel" name="pcba_model_id" required>
+                              <option value="">PCBA modeli seçin...</option>
+                              {% for model in pcba_models %}
+                              <option value="{{ model.id }}" 
+                                      data-scenario-id="{{ model.test_scenario_id }}">
+                                {{ model.model_name }} ({{ model.part_number }})
+                              </option>
+                              {% endfor %}
+                            </select>
+                            <small class="form-text text-muted">Test edilecek PCBA modelini seçin</small>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div class="form-group">
+                        <label for="serialNumber">Seri Numarası <span class="text-danger">*</span></label>
+                        <input
+                          type="text"
+                          class="form-control"
+                          id="serialNumber"
+                          name="serial_number"
+                          placeholder="Örn: PCB001-20241215-001"
+                          required
+                          maxlength="50"
+                        />
+                        <small class="form-text text-muted">Test edilecek kartın benzersiz seri numarası</small>
+                      </div>
+                      
+                      <!-- Test Parametreleri Önizleme -->
+                      <div id="testParametersPreview" class="test-parameters" style="display: none;">
+                        <h6><i class="fas fa-cogs me-2"></i>Test Parametreleri</h6>
+                        <div id="parametersContent"></div>
+                      </div>
+                      
+                      <div class="card-action">
+                        <button type="submit" class="btn btn-success" id="startTestBtn">
+                          <i class="fa fa-play me-2"></i>Test Başlat
+                        </button>
+                        <button type="reset" class="btn btn-secondary">
+                          <i class="fa fa-undo me-2"></i>Temizle
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Çalışan Testler -->
+              <div class="col-md-4">
+                <div class="card">
+                  <div class="card-header">
+                    <div class="card-title">
+                      <i class="fas fa-running me-2"></i>Çalışan Testler
+                      <span class="badge badge-success ms-2" id="runningTestsCount">0</span>
+                    </div>
+                  </div>
+                  <div class="card-body">
+                    <div id="runningTestsList">
+                      <div class="text-center text-muted py-3">
+                        <i class="fas fa-clock fa-2x mb-2"></i>
+                        <p>Şu anda çalışan test yok</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Son Testler -->
+                <div class="card mt-3">
+                  <div class="card-header">
+                    <div class="card-title">
+                      <i class="fas fa-history me-2"></i>Son Testlerim
+                    </div>
+                  </div>
+                  <div class="card-body">
+                    {% if recent_executions %}
+                      {% for execution in recent_executions %}
+                      <div class="d-flex justify-content-between align-items-center mb-2 p-2 border rounded">
+                        <div>
+                          <div class="fw-bold">{{ execution.serial_number }}</div>
+                          <small class="text-muted">{{ execution.test_scenario.scenario_name if execution.test_scenario else 'N/A' }}</small>
+                        </div>
+                        <div class="text-end">
+                          {% if execution.status == 'COMPLETED' %}
+                            {% if execution.final_result == 'PASS' %}
+                              <span class="badge badge-success">PASS</span>
+                            {% else %}
+                              <span class="badge badge-danger">FAIL</span>
+                            {% endif %}
+                          {% elif execution.status == 'RUNNING' %}
+                            <span class="badge badge-warning">RUNNING</span>
+                          {% elif execution.status == 'FAILED' %}
+                            <span class="badge badge-danger">ERROR</span>
+                          {% else %}
+                            <span class="badge badge-secondary">{{ execution.status }}</span>
+                          {% endif %}
+                          <br>
+                          <small class="text-muted">{{ execution.created_at.strftime('%d.%m %H:%M') }}</small>
+                        </div>
+                      </div>
+                      {% endfor %}
+                    {% else %}
+                      <div class="text-center text-muted py-3">
+                        <i class="fas fa-history fa-2x mb-2"></i>
+                        <p>Henüz test çalıştırmadınız</p>
+                      </div>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <footer class="footer">
+          <div class="container-fluid d-flex justify-content-between">
+            <div class="copyright">
+              2024, TayTech PCBA Test Sistemi
+            </div>
+          </div>
+        </footer>
+      </div>
+    </div>
+
+    <!--   Core JS Files   -->
+    <script src="assets/js/core/jquery-3.7.1.min.js"></script>
+    <script src="assets/js/core/popper.min.js"></script>
+    <script src="assets/js/core/bootstrap.min.js"></script>
+
+    <!-- jQuery Scrollbar -->
+    <script src="assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js"></script>
+
+    <!-- Sweet Alert -->
+    <script src="assets/js/plugin/sweetalert/sweetalert.min.js"></script>
+
+    <!-- Kaiadmin JS -->
+    <script src="assets/js/kaiadmin.min.js"></script>
+
+    <script>
+      $(document).ready(function () {
+        let runningTestsInterval;
+        
+        // Test senaryosu değiştiğinde parametreleri göster
+        $('#testScenario').change(function() {
+          const selectedOption = $(this).find('option:selected');
+          const parameters = selectedOption.data('parameters');
+          
+          if (parameters && Object.keys(parameters).length > 0) {
+            showTestParameters(parameters);
+          } else {
+            $('#testParametersPreview').hide();
+          }
+          
+          // PCBA model seçimini filtrele
+          filterPCBAModels();
+        });
+        
+        // PCBA modeli değiştiğinde uyumluluğu kontrol et
+        $('#pcbaModel').change(function() {
+          const selectedScenarioId = $('#testScenario').val();
+          const selectedModelScenarioId = $(this).find('option:selected').data('scenario-id');
+          
+          if (selectedScenarioId && selectedModelScenarioId && 
+              selectedScenarioId != selectedModelScenarioId) {
+            swal("Uyarı!", "Seçilen PCBA modeli bu test senaryosu ile uyumlu değil. Lütfen uyumlu bir model seçin.", "warning");
+          }
+        });
+        
+        // Test başlatma formu
+        $('#testExecutionForm').on('submit', function(e) {
+          e.preventDefault();
+          
+          const formData = {
+            test_scenario_id: parseInt($('#testScenario').val()),
+            pcba_model_id: parseInt($('#pcbaModel').val()),
+            serial_number: $('#serialNumber').val().trim()
+          };
+          
+          // Validasyon
+          if (!formData.test_scenario_id || !formData.pcba_model_id || !formData.serial_number) {
+            swal("Hata!", "Lütfen tüm alanları doldurun.", "error");
+            return;
+          }
+          
+          // Test başlat
+          startTest(formData);
+        });
+        
+        // Çalışan testleri yenile butonu
+        $('#refreshRunningTests').click(function() {
+          loadRunningTests();
+        });
+        
+        // Sayfa yüklendiğinde çalışan testleri yükle
+        loadRunningTests();
+        
+        // Otomatik yenileme (5 saniyede bir)
+        runningTestsInterval = setInterval(loadRunningTests, 5000);
+        
+        function showTestParameters(parameters) {
+          let html = '';
+          
+          Object.keys(parameters).forEach(paramName => {
+            const param = parameters[paramName];
+            html += `<span class="parameter-badge">${paramName.toUpperCase()}</span>`;
+          });
+          
+          $('#parametersContent').html(html);
+          $('#testParametersPreview').show();
+        }
+        
+        function filterPCBAModels() {
+          const selectedScenarioId = $('#testScenario').val();
+          
+          $('#pcbaModel option').each(function() {
+            const option = $(this);
+            const modelScenarioId = option.data('scenario-id');
+            
+            if (option.val() === '') {
+              return; // Skip empty option
+            }
+            
+            if (!selectedScenarioId || modelScenarioId == selectedScenarioId) {
+              option.show();
+            } else {
+              option.hide();
+            }
+          });
+          
+          // Reset selection if current selection is not compatible
+          const currentSelection = $('#pcbaModel').val();
+          if (currentSelection) {
+            const currentModelScenarioId = $('#pcbaModel option:selected').data('scenario-id');
+            if (selectedScenarioId && currentModelScenarioId != selectedScenarioId) {
+              $('#pcbaModel').val('');
+            }
+          }
+        }
+        
+        function startTest(formData) {
+          $('#startTestBtn').prop('disabled', true).html('<i class="fa fa-spinner fa-spin me-2"></i>Başlatılıyor...');
+          
+          $.ajax({
+            url: '/api/test/start',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(formData),
+            success: function(response) {
+              if (response.success) {
+                swal("Başarılı!", `Test başlatıldı. Execution ID: ${response.execution_id}`, "success");
+                
+                // Formu temizle
+                $('#testExecutionForm')[0].reset();
+                $('#testParametersPreview').hide();
+                
+                // Çalışan testleri yenile
+                loadRunningTests();
+              } else {
+                swal("Hata!", response.message, "error");
+              }
+            },
+            error: function(xhr, status, error) {
+              swal("Hata!", "Test başlatılırken bir hata oluştu.", "error");
+            },
+            complete: function() {
+              $('#startTestBtn').prop('disabled', false).html('<i class="fa fa-play me-2"></i>Test Başlat');
+            }
+          });
+        }
+        
+        function loadRunningTests() {
+          $.ajax({
+            url: '/api/test/running',
+            method: 'GET',
+            success: function(response) {
+              if (response.success) {
+                displayRunningTests(response.running_tests);
+                $('#runningTestsCount').text(response.count);
+              }
+            },
+            error: function(xhr, status, error) {
+              console.error('Failed to load running tests:', error);
+            }
+          });
+        }
+        
+        function displayRunningTests(tests) {
+          const container = $('#runningTestsList');
+          
+          if (tests.length === 0) {
+            container.html(`
+              <div class="text-center text-muted py-3">
+                <i class="fas fa-clock fa-2x mb-2"></i>
+                <p>Şu anda çalışan test yok</p>
+              </div>
+            `);
+            return;
+          }
+          
+          let html = '';
+          tests.forEach(test => {
+            const progressPercent = test.progress || 0;
+            const statusClass = getStatusClass(test.status);
+            
+            html += `
+              <div class="running-test mb-3 p-3 border rounded">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                  <div>
+                    <div class="fw-bold">${test.serial_number}</div>
+                    <small class="text-muted">${test.test_scenario_name || 'N/A'}</small>
+                  </div>
+                  <div class="text-end">
+                    <span class="badge ${statusClass}">${test.status}</span>
+                    <br>
+                    <button class="btn btn-sm btn-outline-danger mt-1" onclick="stopTest(${test.id})">
+                      <i class="fa fa-stop"></i>
+                    </button>
+                  </div>
+                </div>
+                
+                <div class="progress-container">
+                  <div class="d-flex justify-content-between align-items-center mb-1">
+                    <small class="test-status">${test.current_step || 'Initializing'}</small>
+                    <small class="text-muted">${progressPercent}%</small>
+                  </div>
+                  <div class="progress" style="height: 6px;">
+                    <div class="progress-bar bg-success" role="progressbar" 
+                         style="width: ${progressPercent}%" 
+                         aria-valuenow="${progressPercent}" 
+                         aria-valuemin="0" 
+                         aria-valuemax="100">
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="mt-2">
+                  <a href="/test-monitoring?execution_id=${test.id}" class="btn btn-sm btn-primary">
+                    <i class="fa fa-eye"></i> Detay
+                  </a>
+                </div>
+              </div>
+            `;
+          });
+          
+          container.html(html);
+        }
+        
+        function getStatusClass(status) {
+          switch(status) {
+            case 'RUNNING': return 'badge-warning';
+            case 'COMPLETED': return 'badge-success';
+            case 'FAILED': return 'badge-danger';
+            case 'CANCELLED': return 'badge-secondary';
+            default: return 'badge-info';
+          }
+        }
+        
+        // Global function for stopping tests
+        window.stopTest = function(executionId) {
+          swal({
+            title: "Test Durdur",
+            text: "Bu testi durdurmak istediğinizden emin misiniz?",
+            type: "warning",
+            buttons: {
+              cancel: {
+                visible: true,
+                text: "İptal",
+                className: "btn btn-danger"
+              },
+              confirm: {
+                text: "Evet, Durdur",
+                className: "btn btn-success"
+              }
+            }
+          }).then((willStop) => {
+            if (willStop) {
+              $.ajax({
+                url: `/api/test/stop/${executionId}`,
+                method: 'POST',
+                success: function(response) {
+                  if (response.success) {
+                    swal("Başarılı!", "Test durduruldu.", "success");
+                    loadRunningTests();
+                  } else {
+                    swal("Hata!", response.message, "error");
+                  }
+                },
+                error: function(xhr, status, error) {
+                  swal("Hata!", "Test durdurulurken bir hata oluştu.", "error");
+                }
+              });
+            }
+          });
+        };
+        
+        // Sayfa kapatılırken interval'i temizle
+        $(window).on('beforeunload', function() {
+          if (runningTestsInterval) {
+            clearInterval(runningTestsInterval);
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

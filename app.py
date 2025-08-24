@@ -5,6 +5,10 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta
 import os
 from functools import wraps
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.cron import CronTrigger
+import atexit
+import threading
 
 # Flask uygulaması oluştur
 app = Flask(__name__, 
@@ -1102,6 +1106,43 @@ def test_results():
                          failed_tests=failed_tests,
                          success_rate=success_rate)
 
+@app.route('/scheduled-tests')
+@login_required
+@require_permission('view_scheduled_tests')
+def scheduled_tests():
+    return render_template('scheduled-tests.html')
+
+# ============================================================================
+# AUTOMATED TEST EXECUTION ROUTES
+# ============================================================================
+
+@app.route('/test-execution')
+@login_required
+@require_permission('start_manual_tests')
+def test_execution():
+    """Test execution page for manual test runs"""
+    # Get active test scenarios and PCBA models
+    test_scenarios = TestScenario.query.filter_by(is_active=True).all()
+    pcba_models = PCBAModel.query.filter_by(is_active=True).all()
+    
+    # Get user's recent test executions
+    recent_executions = TestExecution.query.filter_by(user_id=current_user.id)\
+        .order_by(TestExecution.created_at.desc())\
+        .limit(5).all()
+    
+    return render_template('test-execution.html',
+                         test_scenarios=test_scenarios,
+                         pcba_models=pcba_models,
+                         recent_executions=recent_executions)
+
+@app.route('/test-monitoring')
+@login_required
+@require_permission('view_test_executions')
+def test_monitoring():
+    """Test monitoring page for real-time test tracking"""
+    return render_template('test-monitoring.html')
+
+
 @app.route('/reports')
 @login_required
 def reports():
@@ -1206,7 +1247,7 @@ def api_test_results():
 
 @app.route('/api/dashboard-stats')
 @login_required
-def api_dashboard_stats():
+def api_dashboard_stats_old():
     total_tests = TestResult.query.count()
     passed_tests = TestResult.query.filter_by(test_status='PASS').count()
     failed_tests = TestResult.query.filter_by(test_status='FAIL').count()
@@ -1949,6 +1990,2524 @@ def export_communication_logs():
     else:
         return jsonify({'success': False, 'message': 'Unsupported export format'})
 
+# ============================================================================
+# AUTOMATED TEST EXECUTION API ENDPOINTS
+# ============================================================================
+
+@app.route('/api/test/start', methods=['POST'])
+@login_required
+@require_permission('start_manual_tests')
+def api_start_test():
+    """Start a manual test execution with connection management"""
+    try:
+        data = request.get_json()
+        
+        # Validate required fields
+        required_fields = ['test_scenario_id', 'pcba_model_id', 'serial_number']
+        for field in required_fields:
+            if not data.get(field):
+                return jsonify({'success': False, 'message': f'Missing required field: {field}'})
+        
+        # Check connection status before starting test
+        connection_status = check_test_equipment_connections()
+        if not connection_status['success']:
+            return jsonify({
+                'success': False, 
+                'message': f'Cannot start test: {connection_status["message"]}',
+                'error_type': 'CONNECTION_ERROR'
+            })
+        
+        # Log connection check
+        log_communication_event(
+            connection_id=connection_status.get('connection_id'),
+            event_type='CONNECTION_CHECK',
+            direction='SYSTEM',
+            message='Connection verified before test start',
+            status='SUCCESS'
+        )
+        
+        # Start the test
+        result = test_executor_service.start_manual_test(
+            test_scenario_id=data['test_scenario_id'],
+            pcba_model_id=data['pcba_model_id'],
+            serial_number=data['serial_number'],
+            user_id=current_user.id,
+            connection_id=connection_status.get('connection_id')
+        )
+        
+        return jsonify(result)
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Failed to start test: {str(e)}'})
+
+@app.route('/api/test/status/<int:execution_id>')
+@login_required
+@require_permission('view_test_executions')
+def api_get_test_status(execution_id):
+    """Get current test execution status"""
+    try:
+        result = test_executor_service.get_test_status(execution_id)
+        return jsonify(result)
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Failed to get test status: {str(e)}'})
+
+@app.route('/api/test/stop/<int:execution_id>', methods=['POST'])
+@login_required
+@require_permission('stop_tests')
+def api_stop_test(execution_id):
+    """Stop a running test execution"""
+    try:
+        result = test_executor_service.stop_test(execution_id)
+        return jsonify(result)
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Failed to stop test: {str(e)}'})
+
+@app.route('/api/test/running')
+@login_required
+@require_permission('view_test_executions')
+def api_get_running_tests():
+    """Get list of currently running tests"""
+    try:
+        result = test_executor_service.get_running_tests()
+        return jsonify(result)
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Failed to get running tests: {str(e)}'})
+
+@app.route('/api/test/history')
+@login_required
+@require_permission('view_test_executions')
+def api_get_test_history():
+    """Get test execution history with pagination and filtering"""
+    try:
+        # Get query parameters
+        page = request.args.get('page', 1, type=int)
+        per_page = min(request.args.get('per_page', 20, type=int), 100)
+        status_filter = request.args.get('status', '')
+        scenario_filter = request.args.get('scenario_id', '', type=str)
+        model_filter = request.args.get('model_id', '', type=str)
+        user_filter = request.args.get('user_id', '', type=str)
+        date_from = request.args.get('date_from', '')
+        date_to = request.args.get('date_to', '')
+        
+        # Build query
+        query = TestExecution.query
+        
+        # Apply filters
+        if status_filter:
+            query = query.filter(TestExecution.status == status_filter)
+        
+        if scenario_filter:
+            query = query.filter(TestExecution.test_scenario_id == int(scenario_filter))
+        
+        if model_filter:
+            query = query.filter(TestExecution.pcba_model_id == int(model_filter))
+        
+        if user_filter:
+            query = query.filter(TestExecution.user_id == int(user_filter))
+        
+        if date_from:
+            try:
+                from_date = datetime.strptime(date_from, '%Y-%m-%d')
+                query = query.filter(TestExecution.created_at >= from_date)
+            except ValueError:
+                pass
+        
+        if date_to:
+            try:
+                to_date = datetime.strptime(date_to, '%Y-%m-%d')
+                # Add one day to include the entire day
+                to_date = to_date + timedelta(days=1)
+                query = query.filter(TestExecution.created_at < to_date)
+            except ValueError:
+                pass
+        
+        # Order by creation date (newest first)
+        query = query.order_by(TestExecution.created_at.desc())
+        
+        # Paginate
+        executions = query.paginate(
+            page=page, 
+            per_page=per_page, 
+            error_out=False
+        )
+        
+        return jsonify({
+            'success': True,
+            'executions': [execution.to_dict() for execution in executions.items],
+            'pagination': {
+                'page': page,
+                'per_page': per_page,
+                'total': executions.total,
+                'pages': executions.pages,
+                'has_next': executions.has_next,
+                'has_prev': executions.has_prev
+            }
+        })
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Failed to get test history: {str(e)}'})
+
+@app.route('/api/test/scenarios')
+@login_required
+@require_permission('view_test_scenarios')
+def api_get_test_scenarios():
+    """Get list of active test scenarios for test execution"""
+    try:
+        scenarios = TestScenario.query.filter_by(is_active=True).all()
+        
+        return jsonify({
+            'success': True,
+            'scenarios': [{
+                'id': scenario.id,
+                'name': scenario.scenario_name,
+                'description': scenario.description,
+                'parameters': scenario.test_parameters
+            } for scenario in scenarios]
+        })
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Failed to get test scenarios: {str(e)}'})
+
+@app.route('/api/test/pcba-models')
+@login_required
+@require_permission('view_pcba_models')
+def api_get_pcba_models():
+    """Get list of active PCBA models for test execution"""
+    try:
+        models = PCBAModel.query.filter_by(is_active=True).all()
+        
+        return jsonify({
+            'success': True,
+            'models': [{
+                'id': model.id,
+                'name': model.model_name,
+                'part_number': model.part_number,
+                'description': model.description,
+                'test_scenario_id': model.test_scenario_id,
+                'test_scenario_name': model.test_scenario.scenario_name if model.test_scenario else None
+            } for model in models]
+        })
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Failed to get PCBA models: {str(e)}'})
+
+@app.route('/api/test/monitoring')
+@login_required
+@require_permission('view_test_executions')
+def api_test_monitoring():
+    """Get comprehensive test monitoring data"""
+    try:
+        # Get all test executions from last 24 hours
+        from datetime import datetime, timedelta
+        since = datetime.utcnow() - timedelta(hours=24)
+        
+        all_executions = TestExecution.query.filter(
+            TestExecution.created_at >= since
+        ).order_by(TestExecution.created_at.desc()).all()
+        
+        # Count by status
+        counts = {
+            'running': len([e for e in all_executions if e.status == 'RUNNING']),
+            'completed': len([e for e in all_executions if e.status == 'COMPLETED']),
+            'failed': len([e for e in all_executions if e.status in ['FAILED', 'CANCELLED']]),
+            'avg_duration': 0
+        }
+        
+        # Calculate average duration for completed tests
+        completed_tests = [e for e in all_executions if e.status == 'COMPLETED' and e.end_time and e.start_time]
+        if completed_tests:
+            total_duration = sum([(e.end_time - e.start_time).total_seconds() for e in completed_tests])
+            counts['avg_duration'] = round(total_duration / len(completed_tests), 1)
+        
+        # Get active tests (running or recently completed)
+        active_executions = [e for e in all_executions if e.status in ['RUNNING', 'COMPLETED', 'FAILED'] and 
+                           (datetime.utcnow() - e.created_at).total_seconds() < 3600]  # Last hour
+        
+        active_tests = []
+        for execution in active_executions:
+            duration = 0
+            if execution.start_time:
+                end_time = execution.end_time or datetime.utcnow()
+                duration = (end_time - execution.start_time).total_seconds()
+            
+            # Simulate real-time data for running tests
+            real_time_data = {}
+            if execution.status == 'RUNNING' and execution.test_data:
+                # Extract current measurements from test_data
+                test_data = execution.test_data
+                if isinstance(test_data, dict):
+                    for key, value in test_data.items():
+                        if isinstance(value, dict) and 'measured' in value:
+                            real_time_data[key] = value
+            
+            active_tests.append({
+                'id': execution.id,
+                'serial_number': execution.serial_number,
+                'status': execution.status,
+                'progress': execution.progress,
+                'current_step': execution.current_step,
+                'start_time': execution.start_time.isoformat() if execution.start_time else None,
+                'duration': duration,
+                'test_scenario_name': execution.test_scenario.scenario_name if execution.test_scenario else None,
+                'operator_name': execution.user.username if execution.user else None,
+                'error_message': execution.error_message,
+                'passed_steps': len([k for k, v in (execution.test_data or {}).items() 
+                                   if isinstance(v, dict) and v.get('status') == 'PASS']),
+                'failed_steps': len([k for k, v in (execution.test_data or {}).items() 
+                                   if isinstance(v, dict) and v.get('status') == 'FAIL']),
+                'real_time_data': real_time_data,
+                'final_result': execution.final_result
+            })
+        
+        return jsonify({
+            'success': True,
+            'counts': counts,
+            'active_tests': active_tests
+        })
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Failed to get monitoring data: {str(e)}'})
+
+@app.route('/api/dashboard/stats')
+@login_required
+def api_dashboard_stats():
+    """Get dashboard statistics for real-time updates"""
+    try:
+        from datetime import datetime, timedelta
+        
+        # Today's date range
+        today = datetime.utcnow().date()
+        today_start = datetime.combine(today, datetime.min.time())
+        today_end = datetime.combine(today, datetime.max.time())
+        
+        # Count today's completed tests
+        today_completed = TestExecution.query.filter(
+            TestExecution.status == 'COMPLETED',
+            TestExecution.end_time >= today_start,
+            TestExecution.end_time <= today_end
+        ).count()
+        
+        # Count today's failed tests
+        today_failed = TestExecution.query.filter(
+            TestExecution.status.in_(['FAILED', 'CANCELLED']),
+            TestExecution.created_at >= today_start,
+            TestExecution.created_at <= today_end
+        ).count()
+        
+        # Count scheduled tests (active ones)
+        scheduled_tests = ScheduledTest.query.filter_by(is_active=True).count()
+        
+        return jsonify({
+            'success': True,
+            'today_completed': today_completed,
+            'today_failed': today_failed,
+            'scheduled_tests': scheduled_tests
+        })
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Failed to get dashboard stats: {str(e)}'})
+
+# ============================================================================
+# SCHEDULED TESTS API ENDPOINTS
+# ============================================================================
+
+@app.route('/api/scheduled-tests')
+@login_required
+@require_permission('view_scheduled_tests')
+def api_get_scheduled_tests():
+    """Get all scheduled tests"""
+    try:
+        scheduled_tests = ScheduledTest.query.order_by(ScheduledTest.created_at.desc()).all()
+        
+        tests_data = []
+        for test in scheduled_tests:
+            tests_data.append({
+                'id': test.id,
+                'name': test.name,
+                'test_scenario_id': test.test_scenario_id,
+                'test_scenario_name': test.test_scenario.scenario_name if test.test_scenario else None,
+                'pcba_model_id': test.pcba_model_id,
+                'pcba_model_name': test.pcba_model.part_number if test.pcba_model else None,
+                'schedule_type': test.schedule_type,
+                'schedule_time': test.schedule_time.strftime('%H:%M') if test.schedule_time else None,
+                'schedule_days': test.schedule_days,
+                'next_run': test.next_run.isoformat() if test.next_run else None,
+                'last_run': test.last_run.isoformat() if test.last_run else None,
+                'is_active': test.is_active,
+                'created_by': test.creator.username if test.creator else None,
+                'notification_emails': test.notification_emails,
+                'created_at': test.created_at.isoformat() if test.created_at else None
+            })
+        
+        return jsonify({
+            'success': True,
+            'scheduled_tests': tests_data
+        })
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Failed to get scheduled tests: {str(e)}'})
+
+@app.route('/api/scheduled-tests', methods=['POST'])
+@login_required
+@require_permission('manage_scheduled_tests')
+def api_create_scheduled_test():
+    """Create a new scheduled test"""
+    try:
+        data = request.get_json()
+        
+        # Validate required fields
+        required_fields = ['name', 'test_scenario_id', 'pcba_model_id', 'schedule_type']
+        for field in required_fields:
+            if field not in data or not data[field]:
+                return jsonify({'success': False, 'message': f'Missing required field: {field}'})
+        
+        # Validate schedule_type
+        valid_types = ['ONCE', 'DAILY', 'WEEKLY', 'INTERVAL']
+        if data['schedule_type'] not in valid_types:
+            return jsonify({'success': False, 'message': f'Invalid schedule_type. Must be one of: {valid_types}'})
+        
+        # Parse schedule_time
+        schedule_time = None
+        if 'schedule_time' in data and data['schedule_time']:
+            try:
+                from datetime import time
+                time_parts = data['schedule_time'].split(':')
+                schedule_time = time(int(time_parts[0]), int(time_parts[1]))
+            except:
+                return jsonify({'success': False, 'message': 'Invalid schedule_time format. Use HH:MM'})
+        
+        # Calculate next_run
+        next_run = None
+        if data['schedule_type'] == 'ONCE' and 'next_run' in data:
+            try:
+                next_run = datetime.fromisoformat(data['next_run'].replace('Z', '+00:00'))
+            except:
+                return jsonify({'success': False, 'message': 'Invalid next_run format'})
+        elif schedule_time:
+            # Calculate next run for recurring tests
+            now = datetime.utcnow()
+            next_run = now.replace(
+                hour=schedule_time.hour,
+                minute=schedule_time.minute,
+                second=0,
+                microsecond=0
+            )
+            if next_run <= now:
+                if data['schedule_type'] == 'DAILY':
+                    next_run += timedelta(days=1)
+                elif data['schedule_type'] == 'WEEKLY':
+                    next_run += timedelta(days=7)
+        
+        # Create scheduled test
+        scheduled_test = ScheduledTest(
+            name=data['name'],
+            test_scenario_id=data['test_scenario_id'],
+            pcba_model_id=data['pcba_model_id'],
+            schedule_type=data['schedule_type'],
+            schedule_time=schedule_time,
+            schedule_days=data.get('schedule_days', ''),
+            next_run=next_run,
+            is_active=data.get('is_active', True),
+            created_by=current_user.id,
+            notification_emails=data.get('notification_emails', '')
+        )
+        
+        db.session.add(scheduled_test)
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Scheduled test created successfully',
+            'scheduled_test_id': scheduled_test.id
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': f'Failed to create scheduled test: {str(e)}'})
+
+@app.route('/api/scheduled-tests/<int:test_id>', methods=['PUT'])
+@login_required
+@require_permission('manage_scheduled_tests')
+def api_update_scheduled_test(test_id):
+    """Update an existing scheduled test"""
+    try:
+        scheduled_test = ScheduledTest.query.get_or_404(test_id)
+        data = request.get_json()
+        
+        # Update fields
+        if 'name' in data:
+            scheduled_test.name = data['name']
+        if 'test_scenario_id' in data:
+            scheduled_test.test_scenario_id = data['test_scenario_id']
+        if 'pcba_model_id' in data:
+            scheduled_test.pcba_model_id = data['pcba_model_id']
+        if 'schedule_type' in data:
+            scheduled_test.schedule_type = data['schedule_type']
+        if 'schedule_time' in data and data['schedule_time']:
+            try:
+                from datetime import time
+                time_parts = data['schedule_time'].split(':')
+                scheduled_test.schedule_time = time(int(time_parts[0]), int(time_parts[1]))
+            except:
+                return jsonify({'success': False, 'message': 'Invalid schedule_time format'})
+        if 'schedule_days' in data:
+            scheduled_test.schedule_days = data['schedule_days']
+        if 'is_active' in data:
+            scheduled_test.is_active = data['is_active']
+        if 'notification_emails' in data:
+            scheduled_test.notification_emails = data['notification_emails']
+        
+        # Recalculate next_run if schedule changed
+        if any(field in data for field in ['schedule_type', 'schedule_time', 'schedule_days']):
+            if scheduled_test.schedule_type != 'ONCE' and scheduled_test.schedule_time:
+                now = datetime.utcnow()
+                next_run = now.replace(
+                    hour=scheduled_test.schedule_time.hour,
+                    minute=scheduled_test.schedule_time.minute,
+                    second=0,
+                    microsecond=0
+                )
+                if next_run <= now:
+                    if scheduled_test.schedule_type == 'DAILY':
+                        next_run += timedelta(days=1)
+                    elif scheduled_test.schedule_type == 'WEEKLY':
+                        next_run += timedelta(days=7)
+                scheduled_test.next_run = next_run
+        
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Scheduled test updated successfully'
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': f'Failed to update scheduled test: {str(e)}'})
+
+@app.route('/api/scheduled-tests/<int:test_id>', methods=['DELETE'])
+@login_required
+@require_permission('manage_scheduled_tests')
+def api_delete_scheduled_test(test_id):
+    """Delete a scheduled test"""
+    try:
+        scheduled_test = ScheduledTest.query.get_or_404(test_id)
+        
+        # Delete from database
+        db.session.delete(scheduled_test)
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Scheduled test deleted successfully'
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': f'Failed to delete scheduled test: {str(e)}'})
+
+@app.route('/api/scheduled-tests/<int:test_id>/toggle', methods=['POST'])
+@login_required
+@require_permission('manage_scheduled_tests')
+def api_toggle_scheduled_test(test_id):
+    """Toggle active status of a scheduled test"""
+    try:
+        scheduled_test = ScheduledTest.query.get_or_404(test_id)
+        
+        # Toggle active status
+        scheduled_test.is_active = not scheduled_test.is_active
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': f'Scheduled test {"activated" if scheduled_test.is_active else "deactivated"}',
+            'is_active': scheduled_test.is_active
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': f'Failed to toggle scheduled test: {str(e)}'})
+
+@app.route('/api/scheduled-tests/<int:test_id>/run', methods=['POST'])
+@login_required
+@require_permission('manage_scheduled_tests')
+def api_run_scheduled_test_now(test_id):
+    """Run a scheduled test immediately"""
+    try:
+        scheduled_test = ScheduledTest.query.get_or_404(test_id)
+        
+        # Create test execution record
+        execution = TestExecution(
+            test_scenario_id=scheduled_test.test_scenario_id,
+            pcba_model_id=scheduled_test.pcba_model_id,
+            serial_number=f"MANUAL_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}",
+            status='RUNNING',
+            start_time=datetime.utcnow(),
+            execution_type='MANUAL',
+            user_id=current_user.id,
+            progress=0,
+            current_step='Initializing'
+        )
+        
+        db.session.add(execution)
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': f'Scheduled test "{scheduled_test.name}" started manually',
+            'execution_id': execution.id
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': f'Failed to run scheduled test: {str(e)}'})
+
+# ============================================================================
+# ADVANCED TEST RESULTS API ENDPOINTS
+# ============================================================================
+
+@app.route('/api/test-results-advanced', methods=['GET'])
+@login_required
+@require_permission('view_test_results')
+def api_get_advanced_test_results():
+    """Get test results with advanced filtering and analytics"""
+    try:
+        # Get filter parameters
+        status = request.args.get('status')
+        pcba_model_id = request.args.get('pcba_model_id', type=int)
+        test_type_id = request.args.get('test_type_id', type=int)
+        operator_id = request.args.get('operator_id', type=int)
+        start_date = request.args.get('start_date')
+        end_date = request.args.get('end_date')
+        serial_number = request.args.get('serial_number')
+        duration_min = request.args.get('duration_min', type=int)
+        duration_max = request.args.get('duration_max', type=int)
+        error_message = request.args.get('error_message')
+        page = request.args.get('page', 1, type=int)
+        per_page = request.args.get('per_page', 25, type=int)
+        
+        # Build query
+        query = TestResult.query.options(
+            db.joinedload(TestResult.pcba_model),
+            db.joinedload(TestResult.test_type),
+            db.joinedload(TestResult.operator)
+        )
+        
+        # Apply filters
+        if status:
+            query = query.filter(TestResult.test_status == status)
+        
+        if pcba_model_id:
+            query = query.filter(TestResult.pcba_model_id == pcba_model_id)
+        
+        if test_type_id:
+            query = query.filter(TestResult.test_type_id == test_type_id)
+        
+        if operator_id:
+            query = query.filter(TestResult.operator_id == operator_id)
+        
+        if start_date:
+            try:
+                start_dt = datetime.strptime(start_date, '%Y-%m-%d')
+                query = query.filter(TestResult.test_date >= start_dt)
+            except ValueError:
+                pass
+        
+        if end_date:
+            try:
+                end_dt = datetime.strptime(end_date, '%Y-%m-%d')
+                end_dt = end_dt.replace(hour=23, minute=59, second=59)
+                query = query.filter(TestResult.test_date <= end_dt)
+            except ValueError:
+                pass
+        
+        if serial_number:
+            query = query.filter(TestResult.serial_number.ilike(f'%{serial_number}%'))
+        
+        if duration_min is not None:
+            query = query.filter(TestResult.test_duration >= duration_min)
+        
+        if duration_max is not None:
+            query = query.filter(TestResult.test_duration <= duration_max)
+        
+        if error_message:
+            query = query.filter(TestResult.error_message.ilike(f'%{error_message}%'))
+        
+        # Get total count
+        total_count = query.count()
+        
+        # Apply pagination and ordering
+        results = query.order_by(TestResult.test_date.desc()).paginate(
+            page=page, per_page=per_page, error_out=False
+        )
+        
+        # Format results
+        test_results = []
+        for result in results.items:
+            test_results.append({
+                'id': result.id,
+                'pcba_model_name': result.pcba_model.part_number if result.pcba_model else None,
+                'test_type_name': result.test_type.type_name if result.test_type else None,
+                'serial_number': result.serial_number,
+                'test_status': result.test_status,
+                'test_duration': result.test_duration,
+                'test_date': result.test_date.isoformat() if result.test_date else None,
+                'operator_name': result.operator.username if result.operator else None,
+                'error_message': result.error_message,
+                'test_data': result.test_data
+            })
+        
+        # Calculate statistics
+        all_results = query.all()
+        passed_count = len([r for r in all_results if r.test_status == 'PASS'])
+        failed_count = len([r for r in all_results if r.test_status == 'FAIL'])
+        error_count = len([r for r in all_results if r.test_status == 'ERROR'])
+        total_tests = len(all_results)
+        
+        success_rate = (passed_count / total_tests * 100) if total_tests > 0 else 0
+        
+        # Calculate average duration
+        durations = [r.test_duration for r in all_results if r.test_duration]
+        avg_duration = sum(durations) / len(durations) if durations else 0
+        
+        statistics = {
+            'passed_count': passed_count,
+            'failed_count': failed_count,
+            'error_count': error_count,
+            'total_count': total_tests,
+            'success_rate': round(success_rate, 1),
+            'avg_duration': round(avg_duration, 1)
+        }
+        
+        # Generate chart data
+        chart_data = generate_chart_data(all_results)
+        
+        return jsonify({
+            'success': True,
+            'test_results': test_results,
+            'total_count': total_count,
+            'statistics': statistics,
+            'chart_data': chart_data,
+            'pagination': {
+                'page': page,
+                'per_page': per_page,
+                'total_pages': results.pages,
+                'has_next': results.has_next,
+                'has_prev': results.has_prev
+            }
+        })
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Failed to get advanced test results: {str(e)}'})
+
+@app.route('/api/test-results/<int:test_id>', methods=['GET'])
+@login_required
+@require_permission('view_test_results')
+def api_get_test_result_details(test_id):
+    """Get detailed information for a specific test result"""
+    try:
+        result = TestResult.query.options(
+            db.joinedload(TestResult.pcba_model),
+            db.joinedload(TestResult.test_type),
+            db.joinedload(TestResult.operator)
+        ).get_or_404(test_id)
+        
+        test_result = {
+            'id': result.id,
+            'pcba_model_name': result.pcba_model.part_number if result.pcba_model else None,
+            'test_type_name': result.test_type.type_name if result.test_type else None,
+            'serial_number': result.serial_number,
+            'test_status': result.test_status,
+            'test_duration': result.test_duration,
+            'test_date': result.test_date.isoformat() if result.test_date else None,
+            'operator_name': result.operator.username if result.operator else None,
+            'error_message': result.error_message,
+            'test_data': result.test_data,
+            'created_at': result.created_at.isoformat() if result.created_at else None
+        }
+        
+        return jsonify({
+            'success': True,
+            'test_result': test_result
+        })
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Failed to get test result details: {str(e)}'})
+
+@app.route('/api/test-results-export', methods=['GET'])
+@login_required
+@require_permission('view_test_results')
+def api_export_test_results():
+    """Export test results to CSV or PDF"""
+    try:
+        export_format = request.args.get('export', 'csv')
+        
+        # Get same filters as advanced results
+        status = request.args.get('status')
+        pcba_model_id = request.args.get('pcba_model_id', type=int)
+        test_type_id = request.args.get('test_type_id', type=int)
+        operator_id = request.args.get('operator_id', type=int)
+        start_date = request.args.get('start_date')
+        end_date = request.args.get('end_date')
+        serial_number = request.args.get('serial_number')
+        duration_min = request.args.get('duration_min', type=int)
+        duration_max = request.args.get('duration_max', type=int)
+        error_message = request.args.get('error_message')
+        
+        # Build query (same as advanced results)
+        query = TestResult.query.options(
+            db.joinedload(TestResult.pcba_model),
+            db.joinedload(TestResult.test_type),
+            db.joinedload(TestResult.operator)
+        )
+        
+        # Apply same filters
+        if status:
+            query = query.filter(TestResult.test_status == status)
+        if pcba_model_id:
+            query = query.filter(TestResult.pcba_model_id == pcba_model_id)
+        if test_type_id:
+            query = query.filter(TestResult.test_type_id == test_type_id)
+        if operator_id:
+            query = query.filter(TestResult.operator_id == operator_id)
+        if start_date:
+            try:
+                start_dt = datetime.strptime(start_date, '%Y-%m-%d')
+                query = query.filter(TestResult.test_date >= start_dt)
+            except ValueError:
+                pass
+        if end_date:
+            try:
+                end_dt = datetime.strptime(end_date, '%Y-%m-%d')
+                end_dt = end_dt.replace(hour=23, minute=59, second=59)
+                query = query.filter(TestResult.test_date <= end_dt)
+            except ValueError:
+                pass
+        if serial_number:
+            query = query.filter(TestResult.serial_number.ilike(f'%{serial_number}%'))
+        if duration_min is not None:
+            query = query.filter(TestResult.test_duration >= duration_min)
+        if duration_max is not None:
+            query = query.filter(TestResult.test_duration <= duration_max)
+        if error_message:
+            query = query.filter(TestResult.error_message.ilike(f'%{error_message}%'))
+        
+        results = query.order_by(TestResult.test_date.desc()).all()
+        
+        if export_format == 'csv':
+            return export_results_csv(results)
+        elif export_format == 'pdf':
+            return export_results_pdf(results)
+        else:
+            return jsonify({'success': False, 'message': 'Invalid export format'})
+            
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Failed to export test results: {str(e)}'})
+
+def generate_chart_data(results):
+    """Generate chart data for test results analytics"""
+    try:
+        # Distribution data
+        distribution = {
+            'pass': len([r for r in results if r.test_status == 'PASS']),
+            'fail': len([r for r in results if r.test_status == 'FAIL']),
+            'error': len([r for r in results if r.test_status == 'ERROR'])
+        }
+        
+        # Trend data (last 7 days)
+        from collections import defaultdict
+        trend_data = defaultdict(lambda: {'pass': 0, 'fail': 0, 'error': 0})
+        
+        for result in results:
+            if result.test_date:
+                date_key = result.test_date.strftime('%Y-%m-%d')
+                if result.test_status == 'PASS':
+                    trend_data[date_key]['pass'] += 1
+                elif result.test_status == 'FAIL':
+                    trend_data[date_key]['fail'] += 1
+                elif result.test_status == 'ERROR':
+                    trend_data[date_key]['error'] += 1
+        
+        # Sort by date and get last 7 days
+        sorted_dates = sorted(trend_data.keys())[-7:]
+        
+        trend = {
+            'labels': sorted_dates,
+            'pass': [trend_data[date]['pass'] for date in sorted_dates],
+            'fail': [trend_data[date]['fail'] for date in sorted_dates],
+            'error': [trend_data[date]['error'] for date in sorted_dates]
+        }
+        
+        return {
+            'distribution': distribution,
+            'trend': trend
+        }
+        
+    except Exception as e:
+        print(f"Error generating chart data: {e}")
+        return {
+            'distribution': {'pass': 0, 'fail': 0, 'error': 0},
+            'trend': {'labels': [], 'pass': [], 'fail': [], 'error': []}
+        }
+
+def export_results_csv(results):
+    """Export test results to CSV format"""
+    import csv
+    import io
+    from flask import make_response
+    
+    output = io.StringIO()
+    writer = csv.writer(output)
+    
+    # Write header
+    writer.writerow([
+        'Test ID', 'PCBA Model', 'Seri Numarası', 'Test Tipi', 'Durum', 
+        'Süre (sn)', 'Tarih', 'Operatör', 'Hata Mesajı'
+    ])
+    
+    # Write data
+    for result in results:
+        writer.writerow([
+            result.id,
+            result.pcba_model.part_number if result.pcba_model else '',
+            result.serial_number or '',
+            result.test_type.type_name if result.test_type else '',
+            result.test_status,
+            result.test_duration or 0,
+            result.test_date.strftime('%Y-%m-%d %H:%M:%S') if result.test_date else '',
+            result.operator.username if result.operator else '',
+            result.error_message or ''
+        ])
+    
+    output.seek(0)
+    
+    response = make_response(output.getvalue())
+    response.headers['Content-Type'] = 'text/csv'
+    response.headers['Content-Disposition'] = f'attachment; filename=test_results_{datetime.now().strftime("%Y%m%d_%H%M%S")}.csv'
+    
+    return response
+
+def export_results_pdf(results):
+    """Export test results to PDF format"""
+    # For now, return a simple message
+    # In a real implementation, you would use a library like ReportLab
+    return jsonify({
+        'success': False, 
+        'message': 'PDF export not implemented yet. Please use CSV export.'
+    })
+
+@app.route('/test-results-advanced')
+@login_required
+@require_permission('view_test_results')
+def test_results_advanced():
+    return render_template('test-results-advanced.html')
+
+# ============================================================================
+# TEST CONFIGURATION API ENDPOINTS
+# ============================================================================
+
+@app.route('/api/test-config', methods=['GET'])
+@login_required
+@require_permission('manage_system_settings')
+def api_get_test_config():
+    """Get current test configuration"""
+    try:
+        # Get configuration from database or use defaults
+        config = TestConfiguration.query.first()
+        
+        if not config:
+            # Create default configuration
+            config = TestConfiguration(
+                test_timeout=300,
+                retry_count=3,
+                retry_delay=5,
+                connection_timeout=30,
+                heartbeat_interval=30,
+                auto_reconnect=True,
+                log_level='INFO',
+                log_file_size=10,
+                log_retention_days=30,
+                email_notifications=True,
+                smtp_server='smtp.gmail.com',
+                smtp_port=587,
+                notification_emails='',
+                max_concurrent_tests=3,
+                db_cleanup_interval=90
+            )
+            db.session.add(config)
+            db.session.commit()
+        
+        config_data = {
+            'test_timeout': config.test_timeout,
+            'retry_count': config.retry_count,
+            'retry_delay': config.retry_delay,
+            'connection_timeout': config.connection_timeout,
+            'heartbeat_interval': config.heartbeat_interval,
+            'auto_reconnect': config.auto_reconnect,
+            'log_level': config.log_level,
+            'log_file_size': config.log_file_size,
+            'log_retention_days': config.log_retention_days,
+            'email_notifications': config.email_notifications,
+            'smtp_server': config.smtp_server,
+            'smtp_port': config.smtp_port,
+            'notification_emails': config.notification_emails,
+            'max_concurrent_tests': config.max_concurrent_tests,
+            'db_cleanup_interval': config.db_cleanup_interval
+        }
+        
+        return jsonify({
+            'success': True,
+            'config': config_data
+        })
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Failed to get test configuration: {str(e)}'})
+
+@app.route('/api/test-config', methods=['PUT'])
+@login_required
+@require_permission('manage_system_settings')
+def api_update_test_config():
+    """Update test configuration"""
+    try:
+        data = request.get_json()
+        
+        # Get or create configuration
+        config = TestConfiguration.query.first()
+        if not config:
+            config = TestConfiguration()
+            db.session.add(config)
+        
+        # Update configuration fields
+        if 'test_timeout' in data:
+            config.test_timeout = data['test_timeout']
+        if 'retry_count' in data:
+            config.retry_count = data['retry_count']
+        if 'retry_delay' in data:
+            config.retry_delay = data['retry_delay']
+        if 'connection_timeout' in data:
+            config.connection_timeout = data['connection_timeout']
+        if 'heartbeat_interval' in data:
+            config.heartbeat_interval = data['heartbeat_interval']
+        if 'auto_reconnect' in data:
+            config.auto_reconnect = data['auto_reconnect']
+        if 'log_level' in data:
+            config.log_level = data['log_level']
+        if 'log_file_size' in data:
+            config.log_file_size = data['log_file_size']
+        if 'log_retention_days' in data:
+            config.log_retention_days = data['log_retention_days']
+        if 'email_notifications' in data:
+            config.email_notifications = data['email_notifications']
+        if 'smtp_server' in data:
+            config.smtp_server = data['smtp_server']
+        if 'smtp_port' in data:
+            config.smtp_port = data['smtp_port']
+        if 'notification_emails' in data:
+            config.notification_emails = data['notification_emails']
+        if 'max_concurrent_tests' in data:
+            config.max_concurrent_tests = data['max_concurrent_tests']
+        if 'db_cleanup_interval' in data:
+            config.db_cleanup_interval = data['db_cleanup_interval']
+        
+        config.updated_at = datetime.utcnow()
+        config.updated_by = current_user.id
+        
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Test configuration updated successfully'
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': f'Failed to update test configuration: {str(e)}'})
+
+@app.route('/api/test-connection', methods=['POST'])
+@login_required
+@require_permission('manage_system_settings')
+def api_test_equipment_connection():
+    """Test connection to test equipment"""
+    try:
+        # Get current configuration
+        config = TestConfiguration.query.first()
+        
+        # Simulate connection test
+        # In a real implementation, this would test actual hardware connections
+        import time
+        time.sleep(2)  # Simulate connection test delay
+        
+        # For demo purposes, randomly succeed or fail
+        import random
+        if random.random() > 0.2:  # 80% success rate
+            return jsonify({
+                'success': True,
+                'message': 'All test equipment connections are working properly'
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'message': 'Connection failed: Test equipment not responding'
+            })
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Connection test failed: {str(e)}'})
+
+@app.route('/test-configuration')
+@login_required
+@require_permission('manage_system_settings')
+def test_configuration():
+    return render_template('test-configuration.html')
+
+# ============================================================================
+# CONNECTION MANAGEMENT FUNCTIONS
+# ============================================================================
+
+def check_test_equipment_connections():
+    """Check status of all test equipment connections"""
+    try:
+        # Get active connections
+        active_connections = Connection.query.filter_by(is_active=True).all()
+        
+        if not active_connections:
+            return {
+                'success': False,
+                'message': 'No active test equipment connections found'
+            }
+        
+        # Check each connection
+        failed_connections = []
+        working_connections = []
+        
+        for connection in active_connections:
+            try:
+                # Test the connection
+                if test_single_connection(connection):
+                    working_connections.append(connection)
+                    
+                    # Log successful connection check
+                    log_communication_event(
+                        connection_id=connection.id,
+                        event_type='HEARTBEAT',
+                        direction='OUTGOING',
+                        message='Connection check successful',
+                        status='SUCCESS'
+                    )
+                else:
+                    failed_connections.append(connection)
+                    
+                    # Log failed connection check
+                    log_communication_event(
+                        connection_id=connection.id,
+                        event_type='HEARTBEAT',
+                        direction='OUTGOING',
+                        message='Connection check failed',
+                        status='FAILED'
+                    )
+                    
+            except Exception as e:
+                failed_connections.append(connection)
+                
+                # Log connection error
+                log_communication_event(
+                    connection_id=connection.id,
+                    event_type='ERROR',
+                    direction='SYSTEM',
+                    message=f'Connection check error: {str(e)}',
+                    status='ERROR'
+                )
+        
+        if failed_connections:
+            failed_names = [conn.connection_name for conn in failed_connections]
+            return {
+                'success': False,
+                'message': f'Connection failed for: {", ".join(failed_names)}',
+                'failed_connections': failed_connections,
+                'working_connections': working_connections
+            }
+        
+        # Return first working connection for test execution
+        return {
+            'success': True,
+            'message': 'All connections are working',
+            'connection_id': working_connections[0].id if working_connections else None,
+            'working_connections': working_connections
+        }
+        
+    except Exception as e:
+        return {
+            'success': False,
+            'message': f'Connection check failed: {str(e)}'
+        }
+
+def test_single_connection(connection):
+    """Test a single connection to equipment"""
+    try:
+        # Get test configuration for timeouts
+        config = TestConfiguration.query.first()
+        timeout = config.connection_timeout if config else 30
+        
+        # Simulate connection test based on connection type
+        if connection.connection_type == 'TCP':
+            return test_tcp_connection(connection, timeout)
+        elif connection.connection_type == 'SERIAL':
+            return test_serial_connection(connection, timeout)
+        elif connection.connection_type == 'USB':
+            return test_usb_connection(connection, timeout)
+        else:
+            # Unknown connection type
+            return False
+            
+    except Exception as e:
+        print(f"Connection test error for {connection.connection_name}: {e}")
+        return False
+
+def test_tcp_connection(connection, timeout):
+    """Test TCP connection"""
+    try:
+        import socket
+        
+        # Parse host and port from connection details
+        host = connection.host or 'localhost'
+        port = connection.port or 8080
+        
+        # Create socket and test connection
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(timeout)
+        
+        result = sock.connect_ex((host, port))
+        sock.close()
+        
+        return result == 0
+        
+    except Exception as e:
+        print(f"TCP connection test failed: {e}")
+        return False
+
+def test_serial_connection(connection, timeout):
+    """Test Serial connection"""
+    try:
+        # For demo purposes, simulate serial connection test
+        # In real implementation, you would use pyserial
+        import time
+        time.sleep(0.1)  # Simulate connection test delay
+        
+        # Simulate 90% success rate for demo
+        import random
+        return random.random() > 0.1
+        
+    except Exception as e:
+        print(f"Serial connection test failed: {e}")
+        return False
+
+def test_usb_connection(connection, timeout):
+    """Test USB connection"""
+    try:
+        # For demo purposes, simulate USB connection test
+        # In real implementation, you would use appropriate USB libraries
+        import time
+        time.sleep(0.1)  # Simulate connection test delay
+        
+        # Simulate 85% success rate for demo
+        import random
+        return random.random() > 0.15
+        
+    except Exception as e:
+        print(f"USB connection test failed: {e}")
+        return False
+
+def attempt_reconnection(connection_id):
+    """Attempt to reconnect to a failed connection"""
+    try:
+        connection = Connection.query.get(connection_id)
+        if not connection:
+            return False
+        
+        # Log reconnection attempt
+        log_communication_event(
+            connection_id=connection_id,
+            event_type='RECONNECT_ATTEMPT',
+            direction='SYSTEM',
+            message='Attempting to reconnect',
+            status='PENDING'
+        )
+        
+        # Test the connection
+        if test_single_connection(connection):
+            # Update connection status
+            connection.last_heartbeat = datetime.utcnow()
+            connection.is_active = True
+            db.session.commit()
+            
+            # Log successful reconnection
+            log_communication_event(
+                connection_id=connection_id,
+                event_type='RECONNECT_SUCCESS',
+                direction='SYSTEM',
+                message='Reconnection successful',
+                status='SUCCESS'
+            )
+            
+            return True
+        else:
+            # Log failed reconnection
+            log_communication_event(
+                connection_id=connection_id,
+                event_type='RECONNECT_FAILED',
+                direction='SYSTEM',
+                message='Reconnection failed',
+                status='FAILED'
+            )
+            
+            return False
+            
+    except Exception as e:
+        # Log reconnection error
+        log_communication_event(
+            connection_id=connection_id,
+            event_type='RECONNECT_ERROR',
+            direction='SYSTEM',
+            message=f'Reconnection error: {str(e)}',
+            status='ERROR'
+        )
+        
+        return False
+
+def handle_connection_failure_during_test(execution_id, connection_id):
+    """Handle connection failure during test execution"""
+    try:
+        execution = TestExecution.query.get(execution_id)
+        if not execution:
+            return
+        
+        # Get test configuration for auto-reconnect setting
+        config = TestConfiguration.query.first()
+        auto_reconnect = config.auto_reconnect if config else True
+        
+        if auto_reconnect:
+            # Attempt reconnection
+            if attempt_reconnection(connection_id):
+                # Continue test execution
+                log_communication_event(
+                    connection_id=connection_id,
+                    event_type='TEST_RESUMED',
+                    direction='SYSTEM',
+                    message=f'Test execution {execution_id} resumed after reconnection',
+                    status='SUCCESS'
+                )
+                return
+        
+        # Stop test execution due to connection failure
+        execution.status = 'FAILED'
+        execution.end_time = datetime.utcnow()
+        execution.error_message = 'Test stopped due to connection failure'
+        execution.progress = execution.progress  # Keep current progress
+        
+        db.session.commit()
+        
+        # Log test stop
+        log_communication_event(
+            connection_id=connection_id,
+            event_type='TEST_STOPPED',
+            direction='SYSTEM',
+            message=f'Test execution {execution_id} stopped due to connection failure',
+            status='FAILED'
+        )
+        
+    except Exception as e:
+        print(f"Error handling connection failure: {e}")
+
+def log_communication_event(connection_id, event_type, direction, message, status, data=None):
+    """Log communication events for monitoring and debugging"""
+    try:
+        # Create communication log entry
+        log_entry = CommunicationLog(
+            connection_id=connection_id,
+            timestamp=datetime.utcnow(),
+            event_type=event_type,
+            direction=direction,
+            message=message,
+            data=data,
+            status=status
+        )
+        
+        db.session.add(log_entry)
+        db.session.commit()
+        
+    except Exception as e:
+        print(f"Failed to log communication event: {e}")
+
+# ============================================================================
+# CONNECTION MONITORING API ENDPOINTS
+# ============================================================================
+
+@app.route('/api/connections/status', methods=['GET'])
+@login_required
+@require_permission('view_connections')
+def api_get_connections_status():
+    """Get current status of all connections"""
+    try:
+        connections = Connection.query.all()
+        
+        connection_status = []
+        for conn in connections:
+            # Test connection
+            is_working = test_single_connection(conn) if conn.is_active else False
+            
+            connection_status.append({
+                'id': conn.id,
+                'name': conn.connection_name,
+                'type': conn.connection_type,
+                'host': conn.host,
+                'port': conn.port,
+                'is_active': conn.is_active,
+                'is_working': is_working,
+                'last_heartbeat': conn.last_heartbeat.isoformat() if conn.last_heartbeat else None,
+                'created_at': conn.created_at.isoformat() if conn.created_at else None
+            })
+        
+        return jsonify({
+            'success': True,
+            'connections': connection_status
+        })
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Failed to get connection status: {str(e)}'})
+
+@app.route('/api/connections/<int:connection_id>/test', methods=['POST'])
+@login_required
+@require_permission('manage_connections')
+def api_test_connection_endpoint(connection_id):
+    """Test a specific connection"""
+    try:
+        connection = Connection.query.get_or_404(connection_id)
+        
+        # Test the connection
+        is_working = test_single_connection(connection)
+        
+        if is_working:
+            # Update last heartbeat
+            connection.last_heartbeat = datetime.utcnow()
+            db.session.commit()
+            
+            return jsonify({
+                'success': True,
+                'message': f'Connection to {connection.connection_name} is working'
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'message': f'Connection to {connection.connection_name} failed'
+            })
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Connection test failed: {str(e)}'})
+
+@app.route('/api/connections/<int:connection_id>/reconnect', methods=['POST'])
+@login_required
+@require_permission('manage_connections')
+def api_reconnect_connection(connection_id):
+    """Attempt to reconnect a failed connection"""
+    try:
+        if attempt_reconnection(connection_id):
+            return jsonify({
+                'success': True,
+                'message': 'Reconnection successful'
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'message': 'Reconnection failed'
+            })
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Reconnection attempt failed: {str(e)}'})
+
+# ============================================================================
+# ERROR MANAGEMENT AND NOTIFICATION SYSTEM
+# ============================================================================
+
+def handle_test_error(execution_id, error_type, error_message, retry_count=0):
+    """Handle test execution errors with retry logic"""
+    try:
+        execution = TestExecution.query.get(execution_id)
+        if not execution:
+            return False
+        
+        # Get test configuration
+        config = TestConfiguration.query.first()
+        max_retries = config.retry_count if config else 3
+        retry_delay = config.retry_delay if config else 5
+        
+        # Log the error
+        log_test_error(execution_id, error_type, error_message, retry_count)
+        
+        # Check if we should retry
+        if retry_count < max_retries and error_type in ['CONNECTION_ERROR', 'TIMEOUT_ERROR', 'COMMUNICATION_ERROR']:
+            # Schedule retry
+            schedule_test_retry(execution_id, retry_count + 1, retry_delay)
+            
+            # Update execution status
+            execution.status = 'RETRYING'
+            execution.error_message = f'Retry {retry_count + 1}/{max_retries}: {error_message}'
+            db.session.commit()
+            
+            return True
+        else:
+            # Mark test as failed
+            execution.status = 'FAILED'
+            execution.end_time = datetime.utcnow()
+            execution.error_message = error_message
+            db.session.commit()
+            
+            # Send failure notification
+            send_test_failure_notification(execution)
+            
+            return False
+            
+    except Exception as e:
+        print(f"Error handling test error: {e}")
+        return False
+
+def log_test_error(execution_id, error_type, error_message, retry_count):
+    """Log test errors for analysis and debugging"""
+    try:
+        execution = TestExecution.query.get(execution_id)
+        if not execution:
+            return
+        
+        # Create error log entry
+        error_log = {
+            'execution_id': execution_id,
+            'error_type': error_type,
+            'error_message': error_message,
+            'retry_count': retry_count,
+            'timestamp': datetime.utcnow().isoformat(),
+            'test_scenario_id': execution.test_scenario_id,
+            'pcba_model_id': execution.pcba_model_id,
+            'serial_number': execution.serial_number,
+            'user_id': execution.user_id
+        }
+        
+        # In a real implementation, you might store this in a separate error log table
+        # or send to a logging service like ELK stack
+        print(f"TEST ERROR LOG: {error_log}")
+        
+        # Also log to communication logs if it's a connection-related error
+        if error_type in ['CONNECTION_ERROR', 'COMMUNICATION_ERROR']:
+            log_communication_event(
+                connection_id=execution.connection_id if hasattr(execution, 'connection_id') else None,
+                event_type='TEST_ERROR',
+                direction='SYSTEM',
+                message=f'Test {execution_id} error: {error_message}',
+                status='ERROR',
+                data=str(error_log)
+            )
+        
+    except Exception as e:
+        print(f"Failed to log test error: {e}")
+
+def schedule_test_retry(execution_id, retry_count, delay_seconds):
+    """Schedule a test retry after specified delay"""
+    try:
+        # In a real implementation, you would use a task queue like Celery
+        # For now, we'll simulate scheduling
+        import threading
+        import time
+        
+        def retry_test():
+            time.sleep(delay_seconds)
+            retry_test_execution(execution_id, retry_count)
+        
+        # Start retry in background thread
+        retry_thread = threading.Thread(target=retry_test)
+        retry_thread.daemon = True
+        retry_thread.start()
+        
+        print(f"Scheduled retry for execution {execution_id} in {delay_seconds} seconds")
+        
+    except Exception as e:
+        print(f"Failed to schedule test retry: {e}")
+
+def retry_test_execution(execution_id, retry_count):
+    """Retry a failed test execution"""
+    try:
+        execution = TestExecution.query.get(execution_id)
+        if not execution:
+            return
+        
+        # Check connection status before retry
+        if hasattr(execution, 'connection_id') and execution.connection_id:
+            connection_status = check_test_equipment_connections()
+            if not connection_status['success']:
+                # Connection still failed, don't retry
+                handle_test_error(execution_id, 'CONNECTION_ERROR', 
+                                'Retry failed: Connection still unavailable', retry_count)
+                return
+        
+        # Reset execution status for retry
+        execution.status = 'RUNNING'
+        execution.start_time = datetime.utcnow()
+        execution.end_time = None
+        execution.progress = 0
+        execution.current_step = f'Retrying test (attempt {retry_count})'
+        
+        db.session.commit()
+        
+        # Log retry attempt
+        log_communication_event(
+            connection_id=execution.connection_id if hasattr(execution, 'connection_id') else None,
+            event_type='TEST_RETRY',
+            direction='SYSTEM',
+            message=f'Test execution {execution_id} retry attempt {retry_count}',
+            status='PENDING'
+        )
+        
+        # Restart the test (in a real implementation, this would trigger the actual test)
+        # For now, we'll simulate test execution
+        simulate_test_retry(execution_id, retry_count)
+        
+    except Exception as e:
+        print(f"Failed to retry test execution: {e}")
+        handle_test_error(execution_id, 'SYSTEM_ERROR', f'Retry failed: {str(e)}', retry_count)
+
+def simulate_test_retry(execution_id, retry_count):
+    """Simulate test retry execution"""
+    try:
+        import threading
+        import time
+        import random
+        
+        def run_retry():
+            execution = TestExecution.query.get(execution_id)
+            if not execution:
+                return
+            
+            # Simulate test execution with higher success rate on retry
+            success_rate = 0.7 + (retry_count * 0.1)  # Increase success rate with retries
+            
+            # Simulate test duration
+            for i in range(10):
+                time.sleep(0.5)
+                execution.progress = (i + 1) * 10
+                execution.current_step = f'Retry step {i + 1}/10'
+                db.session.commit()
+            
+            # Determine test result
+            if random.random() < success_rate:
+                # Test succeeded
+                execution.status = 'COMPLETED'
+                execution.end_time = datetime.utcnow()
+                execution.progress = 100
+                execution.current_step = 'Test completed successfully'
+                execution.error_message = None
+                
+                # Send success notification
+                send_test_success_notification(execution)
+            else:
+                # Test failed again
+                handle_test_error(execution_id, 'TEST_FAILURE', 
+                                'Test failed after retry', retry_count)
+            
+            db.session.commit()
+        
+        # Run retry in background thread
+        retry_thread = threading.Thread(target=run_retry)
+        retry_thread.daemon = True
+        retry_thread.start()
+        
+    except Exception as e:
+        print(f"Failed to simulate test retry: {e}")
+
+def send_test_failure_notification(execution):
+    """Send notification for test failure"""
+    try:
+        # Get test configuration
+        config = TestConfiguration.query.first()
+        if not config or not config.email_notifications:
+            return
+        
+        # Get notification email addresses
+        notification_emails = config.notification_emails
+        if not notification_emails:
+            return
+        
+        # Prepare notification data
+        test_scenario = execution.test_scenario.scenario_name if execution.test_scenario else 'Unknown'
+        pcba_model = execution.pcba_model.part_number if execution.pcba_model else 'Unknown'
+        operator = execution.user.username if execution.user else 'Unknown'
+        
+        subject = f"Test Failure Alert - {test_scenario}"
+        message = f"""
+Test Execution Failed
+
+Test Details:
+- Test ID: {execution.id}
+- Test Scenario: {test_scenario}
+- PCBA Model: {pcba_model}
+- Serial Number: {execution.serial_number}
+- Operator: {operator}
+- Start Time: {execution.start_time}
+- End Time: {execution.end_time}
+- Error: {execution.error_message}
+
+Please check the system for more details.
+        """
+        
+        # Send email notification
+        send_email_notification(notification_emails, subject, message)
+        
+        # Log notification
+        log_communication_event(
+            connection_id=None,
+            event_type='NOTIFICATION_SENT',
+            direction='OUTGOING',
+            message=f'Test failure notification sent for execution {execution.id}',
+            status='SUCCESS'
+        )
+        
+    except Exception as e:
+        print(f"Failed to send test failure notification: {e}")
+
+def send_test_success_notification(execution):
+    """Send notification for test success (if configured)"""
+    try:
+        # Get test configuration
+        config = TestConfiguration.query.first()
+        if not config or not config.email_notifications:
+            return
+        
+        # Only send success notifications for scheduled tests or critical tests
+        if execution.execution_type != 'SCHEDULED':
+            return
+        
+        # Get notification email addresses
+        notification_emails = config.notification_emails
+        if not notification_emails:
+            return
+        
+        # Prepare notification data
+        test_scenario = execution.test_scenario.scenario_name if execution.test_scenario else 'Unknown'
+        pcba_model = execution.pcba_model.part_number if execution.pcba_model else 'Unknown'
+        
+        subject = f"Test Success - {test_scenario}"
+        message = f"""
+Test Execution Completed Successfully
+
+Test Details:
+- Test ID: {execution.id}
+- Test Scenario: {test_scenario}
+- PCBA Model: {pcba_model}
+- Serial Number: {execution.serial_number}
+- Duration: {(execution.end_time - execution.start_time).total_seconds():.1f} seconds
+
+Test completed without errors.
+        """
+        
+        # Send email notification
+        send_email_notification(notification_emails, subject, message)
+        
+    except Exception as e:
+        print(f"Failed to send test success notification: {e}")
+
+def send_email_notification(email_addresses, subject, message):
+    """Send email notification using SMTP"""
+    try:
+        # Get SMTP configuration
+        config = TestConfiguration.query.first()
+        if not config:
+            return
+        
+        import smtplib
+        from email.mime.text import MIMEText
+        from email.mime.multipart import MIMEMultipart
+        
+        # Parse email addresses
+        recipients = [email.strip() for email in email_addresses.split(',') if email.strip()]
+        if not recipients:
+            return
+        
+        # Create message
+        msg = MIMEMultipart()
+        msg['From'] = 'noreply@taytech.com'
+        msg['Subject'] = subject
+        
+        # Add message body
+        msg.attach(MIMEText(message, 'plain'))
+        
+        # Send to each recipient
+        for recipient in recipients:
+            try:
+                msg['To'] = recipient
+                
+                # Connect to SMTP server
+                server = smtplib.SMTP(config.smtp_server, config.smtp_port)
+                server.starttls()
+                
+                # In a real implementation, you would use proper authentication
+                # server.login(username, password)
+                
+                # Send email
+                text = msg.as_string()
+                server.sendmail(msg['From'], recipient, text)
+                server.quit()
+                
+                print(f"Email notification sent to {recipient}")
+                
+            except Exception as e:
+                print(f"Failed to send email to {recipient}: {e}")
+        
+    except Exception as e:
+        print(f"Failed to send email notification: {e}")
+
+def cleanup_old_logs():
+    """Clean up old logs based on retention policy"""
+    try:
+        # Get test configuration
+        config = TestConfiguration.query.first()
+        if not config:
+            return
+        
+        # Calculate cutoff date
+        cutoff_date = datetime.utcnow() - timedelta(days=config.log_retention_days)
+        
+        # Clean up communication logs
+        old_comm_logs = CommunicationLog.query.filter(
+            CommunicationLog.timestamp < cutoff_date
+        ).count()
+        
+        if old_comm_logs > 0:
+            CommunicationLog.query.filter(
+                CommunicationLog.timestamp < cutoff_date
+            ).delete()
+            
+            print(f"Cleaned up {old_comm_logs} old communication log entries")
+        
+        # Clean up old test results (optional - be careful with this)
+        # old_results = TestResult.query.filter(
+        #     TestResult.test_date < cutoff_date
+        # ).count()
+        
+        db.session.commit()
+        
+    except Exception as e:
+        print(f"Failed to cleanup old logs: {e}")
+        db.session.rollback()
+
+# ============================================================================
+# ERROR RECOVERY PROCEDURES
+# ============================================================================
+
+def recover_from_system_error():
+    """Attempt to recover from system-level errors"""
+    try:
+        # Check and restart failed connections
+        failed_connections = Connection.query.filter_by(is_active=False).all()
+        
+        for connection in failed_connections:
+            if attempt_reconnection(connection.id):
+                print(f"Recovered connection: {connection.connection_name}")
+        
+        # Check for stuck test executions
+        stuck_executions = TestExecution.query.filter(
+            TestExecution.status == 'RUNNING',
+            TestExecution.start_time < datetime.utcnow() - timedelta(hours=1)
+        ).all()
+        
+        for execution in stuck_executions:
+            execution.status = 'FAILED'
+            execution.end_time = datetime.utcnow()
+            execution.error_message = 'Test execution timed out and was automatically stopped'
+            
+            print(f"Recovered stuck execution: {execution.id}")
+        
+        db.session.commit()
+        
+        return True
+        
+    except Exception as e:
+        print(f"System recovery failed: {e}")
+        return False
+
+# ============================================================================
+# BACKGROUND TASK PROCESSING SYSTEM
+# ============================================================================
+
+import threading
+import queue
+import time
+from enum import Enum
+
+class TaskType(Enum):
+    TEST_EXECUTION = "test_execution"
+    CONNECTION_CHECK = "connection_check"
+    LOG_CLEANUP = "log_cleanup"
+    NOTIFICATION = "notification"
+    SYSTEM_RECOVERY = "system_recovery"
+
+class BackgroundTask:
+    def __init__(self, task_type, task_data, priority=1):
+        self.task_type = task_type
+        self.task_data = task_data
+        self.priority = priority
+        self.created_at = datetime.utcnow()
+        self.attempts = 0
+        self.max_attempts = 3
+
+class BackgroundTaskProcessor:
+    def __init__(self):
+        self.task_queue = queue.PriorityQueue()
+        self.workers = []
+        self.is_running = False
+        self.worker_count = 3
+        
+    def start(self):
+        """Start the background task processor"""
+        if self.is_running:
+            return
+        
+        self.is_running = True
+        
+        # Start worker threads
+        for i in range(self.worker_count):
+            worker = threading.Thread(target=self._worker, args=(i,))
+            worker.daemon = True
+            worker.start()
+            self.workers.append(worker)
+        
+        # Start periodic tasks
+        periodic_thread = threading.Thread(target=self._periodic_tasks)
+        periodic_thread.daemon = True
+        periodic_thread.start()
+        
+        print(f"Background task processor started with {self.worker_count} workers")
+    
+    def stop(self):
+        """Stop the background task processor"""
+        self.is_running = False
+        print("Background task processor stopped")
+    
+    def add_task(self, task_type, task_data, priority=1):
+        """Add a task to the processing queue"""
+        task = BackgroundTask(task_type, task_data, priority)
+        # Use negative priority for priority queue (lower number = higher priority)
+        self.task_queue.put((-priority, task.created_at, task))
+        print(f"Added task: {task_type.value} with priority {priority}")
+    
+    def _worker(self, worker_id):
+        """Worker thread that processes tasks"""
+        print(f"Worker {worker_id} started")
+        
+        while self.is_running:
+            try:
+                # Get task from queue with timeout
+                try:
+                    priority, created_at, task = self.task_queue.get(timeout=1)
+                except queue.Empty:
+                    continue
+                
+                # Process the task
+                success = self._process_task(task, worker_id)
+                
+                # Handle task result
+                if not success and task.attempts < task.max_attempts:
+                    task.attempts += 1
+                    # Re-queue with lower priority
+                    self.task_queue.put((-task.priority + task.attempts, task.created_at, task))
+                    print(f"Re-queued task {task.task_type.value} (attempt {task.attempts})")
+                
+                self.task_queue.task_done()
+                
+            except Exception as e:
+                print(f"Worker {worker_id} error: {e}")
+                time.sleep(1)
+        
+        print(f"Worker {worker_id} stopped")
+    
+    def _process_task(self, task, worker_id):
+        """Process a single task"""
+        try:
+            print(f"Worker {worker_id} processing: {task.task_type.value}")
+            
+            if task.task_type == TaskType.TEST_EXECUTION:
+                return self._process_test_execution(task.task_data)
+            elif task.task_type == TaskType.CONNECTION_CHECK:
+                return self._process_connection_check(task.task_data)
+            elif task.task_type == TaskType.LOG_CLEANUP:
+                return self._process_log_cleanup(task.task_data)
+            elif task.task_type == TaskType.NOTIFICATION:
+                return self._process_notification(task.task_data)
+            elif task.task_type == TaskType.SYSTEM_RECOVERY:
+                return self._process_system_recovery(task.task_data)
+            else:
+                print(f"Unknown task type: {task.task_type}")
+                return False
+                
+        except Exception as e:
+            print(f"Task processing error: {e}")
+            return False
+    
+    def _process_test_execution(self, task_data):
+        """Process test execution task"""
+        try:
+            execution_id = task_data.get('execution_id')
+            if not execution_id:
+                return False
+            
+            # Simulate test execution
+            execution = TestExecution.query.get(execution_id)
+            if not execution:
+                return False
+            
+            # Update execution status
+            execution.status = 'RUNNING'
+            execution.progress = 0
+            execution.current_step = 'Starting test execution'
+            db.session.commit()
+            
+            # Simulate test steps
+            steps = ['Initializing', 'Connecting', 'Testing', 'Validating', 'Completing']
+            for i, step in enumerate(steps):
+                time.sleep(2)  # Simulate work
+                
+                execution.progress = (i + 1) * 20
+                execution.current_step = step
+                db.session.commit()
+                
+                # Check if test was cancelled
+                execution = TestExecution.query.get(execution_id)
+                if execution.status == 'CANCELLED':
+                    return True
+            
+            # Complete test
+            execution.status = 'COMPLETED'
+            execution.end_time = datetime.utcnow()
+            execution.progress = 100
+            execution.current_step = 'Test completed'
+            db.session.commit()
+            
+            # Send success notification
+            send_test_success_notification(execution)
+            
+            return True
+            
+        except Exception as e:
+            print(f"Test execution task error: {e}")
+            return False
+    
+    def _process_connection_check(self, task_data):
+        """Process connection check task"""
+        try:
+            connection_id = task_data.get('connection_id')
+            if connection_id:
+                # Check specific connection
+                return test_single_connection(Connection.query.get(connection_id))
+            else:
+                # Check all connections
+                result = check_test_equipment_connections()
+                return result['success']
+                
+        except Exception as e:
+            print(f"Connection check task error: {e}")
+            return False
+    
+    def _process_log_cleanup(self, task_data):
+        """Process log cleanup task"""
+        try:
+            cleanup_old_logs()
+            return True
+            
+        except Exception as e:
+            print(f"Log cleanup task error: {e}")
+            return False
+    
+    def _process_notification(self, task_data):
+        """Process notification task"""
+        try:
+            email_addresses = task_data.get('email_addresses')
+            subject = task_data.get('subject')
+            message = task_data.get('message')
+            
+            if email_addresses and subject and message:
+                send_email_notification(email_addresses, subject, message)
+                return True
+            
+            return False
+            
+        except Exception as e:
+            print(f"Notification task error: {e}")
+            return False
+    
+    def _process_system_recovery(self, task_data):
+        """Process system recovery task"""
+        try:
+            return recover_from_system_error()
+            
+        except Exception as e:
+            print(f"System recovery task error: {e}")
+            return False
+    
+    def _periodic_tasks(self):
+        """Run periodic maintenance tasks"""
+        print("Periodic tasks thread started")
+        
+        while self.is_running:
+            try:
+                # Run every 5 minutes
+                time.sleep(300)
+                
+                if not self.is_running:
+                    break
+                
+                # Add periodic tasks
+                self.add_task(TaskType.CONNECTION_CHECK, {}, priority=3)
+                
+                # Run log cleanup daily (check every 5 minutes but only run once per day)
+                current_hour = datetime.utcnow().hour
+                if current_hour == 2:  # Run at 2 AM
+                    self.add_task(TaskType.LOG_CLEANUP, {}, priority=5)
+                
+                # System recovery check
+                self.add_task(TaskType.SYSTEM_RECOVERY, {}, priority=4)
+                
+            except Exception as e:
+                print(f"Periodic tasks error: {e}")
+                time.sleep(60)
+        
+        print("Periodic tasks thread stopped")
+
+# Global task processor instance
+task_processor = BackgroundTaskProcessor()
+
+# ============================================================================
+# BACKGROUND TASK API ENDPOINTS
+# ============================================================================
+
+@app.route('/api/tasks/status', methods=['GET'])
+@login_required
+@require_permission('view_system_status')
+def api_get_task_status():
+    """Get background task processor status"""
+    try:
+        return jsonify({
+            'success': True,
+            'status': {
+                'is_running': task_processor.is_running,
+                'worker_count': task_processor.worker_count,
+                'queue_size': task_processor.task_queue.qsize(),
+                'workers_active': len(task_processor.workers)
+            }
+        })
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Failed to get task status: {str(e)}'})
+
+@app.route('/api/tasks/start', methods=['POST'])
+@login_required
+@require_permission('manage_system_settings')
+def api_start_task_processor():
+    """Start the background task processor"""
+    try:
+        task_processor.start()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Background task processor started'
+        })
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Failed to start task processor: {str(e)}'})
+
+@app.route('/api/tasks/stop', methods=['POST'])
+@login_required
+@require_permission('manage_system_settings')
+def api_stop_task_processor():
+    """Stop the background task processor"""
+    try:
+        task_processor.stop()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Background task processor stopped'
+        })
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Failed to stop task processor: {str(e)}'})
+
+# ============================================================================
+# AUDIT LOGGING AND SECURITY SYSTEM
+# ============================================================================
+
+def log_audit_event(user_id, action, resource_type, resource_id=None, details=None, ip_address=None):
+    """Log security and audit events"""
+    try:
+        # Create audit log entry
+        audit_log = {
+            'user_id': user_id,
+            'username': current_user.username if current_user and current_user.is_authenticated else 'Anonymous',
+            'action': action,
+            'resource_type': resource_type,
+            'resource_id': resource_id,
+            'details': details,
+            'ip_address': ip_address or request.remote_addr if request else None,
+            'user_agent': request.headers.get('User-Agent') if request else None,
+            'timestamp': datetime.utcnow().isoformat(),
+            'session_id': session.get('_id') if session else None
+        }
+        
+        # In a real implementation, you would store this in a dedicated audit log table
+        # For now, we'll print it and could store in a file or external logging service
+        print(f"AUDIT LOG: {audit_log}")
+        
+        # Also log critical security events to communication logs
+        if action in ['LOGIN_FAILED', 'PERMISSION_DENIED', 'UNAUTHORIZED_ACCESS']:
+            log_communication_event(
+                connection_id=None,
+                event_type='SECURITY_EVENT',
+                direction='SYSTEM',
+                message=f'Security event: {action} by user {audit_log["username"]}',
+                status='WARNING',
+                data=str(audit_log)
+            )
+        
+    except Exception as e:
+        print(f"Failed to log audit event: {e}")
+
+def enhanced_require_permission(permission_name, log_access=True):
+    """Enhanced permission decorator with audit logging"""
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            if not current_user.is_authenticated:
+                if log_access:
+                    log_audit_event(
+                        user_id=None,
+                        action='UNAUTHORIZED_ACCESS',
+                        resource_type='ENDPOINT',
+                        resource_id=request.endpoint,
+                        details=f'Attempted to access {request.endpoint} without authentication'
+                    )
+                return redirect(url_for('login'))
+            
+            # Check if user has the required permission
+            if not has_permission(current_user, permission_name):
+                if log_access:
+                    log_audit_event(
+                        user_id=current_user.id,
+                        action='PERMISSION_DENIED',
+                        resource_type='ENDPOINT',
+                        resource_id=request.endpoint,
+                        details=f'User lacks permission: {permission_name}'
+                    )
+                
+                flash(f'Bu işlem için yetkiniz bulunmamaktadır. Gerekli yetki: {permission_name}', 'error')
+                return redirect(url_for('index'))
+            
+            # Log successful access for sensitive operations
+            if log_access and permission_name in ['manage_system_settings', 'manage_users', 'manage_scheduled_tests']:
+                log_audit_event(
+                    user_id=current_user.id,
+                    action='ACCESS_GRANTED',
+                    resource_type='ENDPOINT',
+                    resource_id=request.endpoint,
+                    details=f'Accessed {request.endpoint} with permission: {permission_name}'
+                )
+            
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator
+
+def validate_test_execution_permissions(user, test_scenario_id, pcba_model_id):
+    """Validate if user can execute specific test scenarios and models"""
+    try:
+        # Check basic test execution permission
+        if not has_permission(user, 'start_manual_tests'):
+            return False, 'No permission to start manual tests'
+        
+        # Check if user can access specific test scenario
+        test_scenario = TestScenario.query.get(test_scenario_id)
+        if not test_scenario:
+            return False, 'Test scenario not found'
+        
+        if not test_scenario.is_active:
+            return False, 'Test scenario is not active'
+        
+        # Check if user can access specific PCBA model
+        pcba_model = PCBAModel.query.get(pcba_model_id)
+        if not pcba_model:
+            return False, 'PCBA model not found'
+        
+        if not pcba_model.is_active:
+            return False, 'PCBA model is not active'
+        
+        # Additional role-based restrictions
+        if user.role == 'operator':
+            # Operators might have restrictions on certain test types
+            restricted_test_types = ['CALIBRATION', 'FIRMWARE_UPDATE']
+            if test_scenario.test_type and test_scenario.test_type.type_name in restricted_test_types:
+                return False, f'Operators cannot run {test_scenario.test_type.type_name} tests'
+        
+        return True, 'Permission granted'
+        
+    except Exception as e:
+        return False, f'Permission validation error: {str(e)}'
+
+def validate_scheduled_test_permissions(user, action, scheduled_test=None):
+    """Validate permissions for scheduled test operations"""
+    try:
+        # Basic permission check
+        if action in ['create', 'update', 'delete', 'toggle']:
+            if not has_permission(user, 'manage_scheduled_tests'):
+                return False, 'No permission to manage scheduled tests'
+        elif action == 'view':
+            if not has_permission(user, 'view_scheduled_tests'):
+                return False, 'No permission to view scheduled tests'
+        
+        # Additional checks for specific actions
+        if scheduled_test and action in ['update', 'delete']:
+            # Check if user created the scheduled test or is admin
+            if user.role != 'admin' and scheduled_test.created_by != user.id:
+                return False, 'Can only modify scheduled tests you created'
+        
+        return True, 'Permission granted'
+        
+    except Exception as e:
+        return False, f'Permission validation error: {str(e)}'
+
+def validate_configuration_access(user, config_section):
+    """Validate access to configuration sections"""
+    try:
+        # Basic system settings permission
+        if not has_permission(user, 'manage_system_settings'):
+            return False, 'No permission to manage system settings'
+        
+        # Additional restrictions for critical sections
+        critical_sections = ['security', 'database', 'network']
+        if config_section in critical_sections and user.role != 'admin':
+            return False, f'Only administrators can modify {config_section} settings'
+        
+        return True, 'Permission granted'
+        
+    except Exception as e:
+        return False, f'Permission validation error: {str(e)}'
+
+def check_rate_limiting(user_id, action, limit_per_minute=10):
+    """Simple rate limiting for API endpoints"""
+    try:
+        # In a real implementation, you would use Redis or similar
+        # For now, we'll use a simple in-memory approach
+        
+        if not hasattr(check_rate_limiting, 'requests'):
+            check_rate_limiting.requests = {}
+        
+        current_time = datetime.utcnow()
+        key = f"{user_id}:{action}"
+        
+        # Clean old entries
+        if key in check_rate_limiting.requests:
+            check_rate_limiting.requests[key] = [
+                req_time for req_time in check_rate_limiting.requests[key]
+                if (current_time - req_time).total_seconds() < 60
+            ]
+        else:
+            check_rate_limiting.requests[key] = []
+        
+        # Check rate limit
+        if len(check_rate_limiting.requests[key]) >= limit_per_minute:
+            return False, 'Rate limit exceeded'
+        
+        # Add current request
+        check_rate_limiting.requests[key].append(current_time)
+        
+        return True, 'Rate limit OK'
+        
+    except Exception as e:
+        return True, 'Rate limiting error - allowing request'
+
+def validate_input_security(data, allowed_fields=None, max_length=1000):
+    """Validate input data for security issues"""
+    try:
+        if not isinstance(data, dict):
+            return False, 'Invalid data format'
+        
+        # Check for allowed fields
+        if allowed_fields:
+            for field in data.keys():
+                if field not in allowed_fields:
+                    return False, f'Field not allowed: {field}'
+        
+        # Check for SQL injection patterns
+        dangerous_patterns = [
+            'union select', 'drop table', 'delete from', 'insert into',
+            'update set', 'exec(', 'execute(', 'sp_', 'xp_'
+        ]
+        
+        for field, value in data.items():
+            if isinstance(value, str):
+                # Check length
+                if len(value) > max_length:
+                    return False, f'Field {field} exceeds maximum length'
+                
+                # Check for dangerous patterns
+                value_lower = value.lower()
+                for pattern in dangerous_patterns:
+                    if pattern in value_lower:
+                        return False, f'Potentially dangerous input detected in {field}'
+        
+        return True, 'Input validation passed'
+        
+    except Exception as e:
+        return False, f'Input validation error: {str(e)}'
+
+# ============================================================================
+# ENHANCED SECURITY API ENDPOINTS
+# ============================================================================
+
+@app.route('/api/security/audit-logs', methods=['GET'])
+@login_required
+@enhanced_require_permission('view_audit_logs')
+def api_get_audit_logs():
+    """Get audit logs (admin only)"""
+    try:
+        # Only admins can view audit logs
+        if current_user.role != 'admin':
+            return jsonify({'success': False, 'message': 'Admin access required'})
+        
+        # In a real implementation, you would query audit log table
+        # For now, return a placeholder response
+        return jsonify({
+            'success': True,
+            'message': 'Audit logs would be returned here',
+            'logs': []
+        })
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Failed to get audit logs: {str(e)}'})
+
+@app.route('/api/security/active-sessions', methods=['GET'])
+@login_required
+@enhanced_require_permission('view_system_status')
+def api_get_active_sessions():
+    """Get active user sessions"""
+    try:
+        # Only admins can view active sessions
+        if current_user.role != 'admin':
+            return jsonify({'success': False, 'message': 'Admin access required'})
+        
+        # In a real implementation, you would track active sessions
+        # For now, return current user session info
+        return jsonify({
+            'success': True,
+            'sessions': [{
+                'user_id': current_user.id,
+                'username': current_user.username,
+                'login_time': 'Current session',
+                'ip_address': request.remote_addr,
+                'user_agent': request.headers.get('User-Agent')
+            }]
+        })
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Failed to get active sessions: {str(e)}'})
+
+@app.route('/api/security/permissions/validate', methods=['POST'])
+@login_required
+def api_validate_permissions():
+    """Validate user permissions for specific actions"""
+    try:
+        data = request.get_json()
+        
+        # Validate input
+        allowed_fields = ['action', 'resource_type', 'resource_id']
+        is_valid, message = validate_input_security(data, allowed_fields)
+        if not is_valid:
+            return jsonify({'success': False, 'message': message})
+        
+        action = data.get('action')
+        resource_type = data.get('resource_type')
+        resource_id = data.get('resource_id')
+        
+        # Validate permissions based on resource type
+        if resource_type == 'test_execution':
+            if action == 'start':
+                test_scenario_id = data.get('test_scenario_id')
+                pcba_model_id = data.get('pcba_model_id')
+                
+                is_valid, message = validate_test_execution_permissions(
+                    current_user, test_scenario_id, pcba_model_id
+                )
+                
+                return jsonify({
+                    'success': is_valid,
+                    'message': message,
+                    'has_permission': is_valid
+                })
+        
+        elif resource_type == 'scheduled_test':
+            scheduled_test = None
+            if resource_id:
+                scheduled_test = ScheduledTest.query.get(resource_id)
+            
+            is_valid, message = validate_scheduled_test_permissions(
+                current_user, action, scheduled_test
+            )
+            
+            return jsonify({
+                'success': is_valid,
+                'message': message,
+                'has_permission': is_valid
+            })
+        
+        return jsonify({
+            'success': False,
+            'message': 'Unknown resource type or action'
+        })
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Permission validation failed: {str(e)}'})
+
+# ============================================================================
+# DASHBOARD API ENDPOINTS
+# ============================================================================
+
+@app.route('/api/dashboard/test-stats', methods=['GET'])
+@login_required
+def api_dashboard_test_stats():
+    """Get test statistics for dashboard"""
+    try:
+        # Get test statistics for the last 30 days
+        thirty_days_ago = datetime.utcnow() - timedelta(days=30)
+        
+        total_tests = TestResult.query.filter(
+            TestResult.test_date >= thirty_days_ago
+        ).count()
+        
+        passed_tests = TestResult.query.filter(
+            TestResult.test_date >= thirty_days_ago,
+            TestResult.test_status == 'PASS'
+        ).count()
+        
+        failed_tests = TestResult.query.filter(
+            TestResult.test_date >= thirty_days_ago,
+            TestResult.test_status == 'FAIL'
+        ).count()
+        
+        success_rate = (passed_tests / total_tests * 100) if total_tests > 0 else 0
+        
+        return jsonify({
+            'success': True,
+            'total_tests': total_tests,
+            'passed_tests': passed_tests,
+            'failed_tests': failed_tests,
+            'success_rate': round(success_rate, 1)
+        })
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Failed to get dashboard stats: {str(e)}'})
+
 # Error Handlers
 @app.errorhandler(404)
 def not_found_error(error):
@@ -1994,9 +4553,653 @@ def handle_exception(e):
                          error_message="Beklenmeyen bir hata oluştu.",
                          error_description="Sistem yöneticisi ile iletişime geçin."), 500
 
+# ============================================================================
+# AUTOMATED TEST EXECUTION SERVICES
+# ============================================================================
+
+import threading
+import time
+import queue
+import random
+from datetime import datetime, timedelta
+
+class TestRunner:
+    """Individual test execution runner"""
+    
+    def __init__(self, execution_id):
+        self.execution_id = execution_id
+        self.execution = None
+        self.is_cancelled = False
+        self.current_progress = 0
+        
+    def run(self):
+        """Main test execution method"""
+        try:
+            with app.app_context():
+                # Get execution record
+                self.execution = TestExecution.query.get(self.execution_id)
+                if not self.execution:
+                    raise Exception(f"Test execution {self.execution_id} not found")
+                
+                # Update status to running
+                self.execution.status = 'RUNNING'
+                self.execution.start_time = datetime.utcnow()
+                db.session.commit()
+                
+                # Get test scenario and parameters
+                test_scenario = self.execution.test_scenario
+                if not test_scenario or not test_scenario.test_parameters:
+                    raise Exception("Test scenario or parameters not found")
+                
+                test_params = test_scenario.test_parameters
+                test_results = {}
+                
+                # Execute test steps
+                self._execute_test_step("Initializing", self._initialize_test, 10)
+                self._execute_test_step("Connecting to Hardware", self._connect_hardware, 20)
+                
+                # Execute parameter tests
+                if 'voltage_range' in test_params:
+                    self._execute_test_step("Voltage Test", 
+                                          lambda: self._test_voltage(test_params['voltage_range']), 40)
+                    test_results['voltage'] = self.execution.test_data.get('voltage', {})
+                
+                if 'current_range' in test_params:
+                    self._execute_test_step("Current Test", 
+                                          lambda: self._test_current(test_params['current_range']), 60)
+                    test_results['current'] = self.execution.test_data.get('current', {})
+                
+                if 'frequency_test' in test_params:
+                    self._execute_test_step("Frequency Test", 
+                                          lambda: self._test_frequency(test_params['frequency_test']), 80)
+                    test_results['frequency'] = self.execution.test_data.get('frequency', {})
+                
+                self._execute_test_step("Finalizing", self._finalize_test, 100)
+                
+                # Determine final result
+                final_result = 'PASS'
+                for test_name, result in test_results.items():
+                    if result.get('status') == 'FAIL':
+                        final_result = 'FAIL'
+                        break
+                
+                # Update execution record
+                self.execution.status = 'COMPLETED'
+                self.execution.end_time = datetime.utcnow()
+                self.execution.final_result = final_result
+                self.execution.progress = 100
+                self.execution.current_step = 'Completed'
+                db.session.commit()
+                
+                print(f"Test execution {self.execution_id} completed with result: {final_result}")
+                
+        except Exception as e:
+            with app.app_context():
+                if self.execution:
+                    self.execution.status = 'FAILED'
+                    self.execution.end_time = datetime.utcnow()
+                    self.execution.error_message = str(e)
+                    self.execution.progress = self.current_progress
+                    db.session.commit()
+                print(f"Test execution {self.execution_id} failed: {str(e)}")
+    
+    def _execute_test_step(self, step_name, test_function, target_progress):
+        """Execute a single test step with progress tracking"""
+        if self.is_cancelled:
+            raise Exception("Test cancelled by user")
+        
+        with app.app_context():
+            self.execution.current_step = step_name
+            self.execution.progress = target_progress
+            self.current_progress = target_progress
+            db.session.commit()
+        
+        print(f"Executing step: {step_name} ({target_progress}%)")
+        
+        # Execute the test function
+        test_function()
+        
+        # Simulate some processing time
+        time.sleep(1)
+    
+    def _initialize_test(self):
+        """Initialize test environment"""
+        # Simulate initialization
+        time.sleep(0.5)
+        
+        # Initialize test_data if not exists
+        if not self.execution.test_data:
+            self.execution.test_data = {}
+    
+    def _connect_hardware(self):
+        """Connect to hardware interfaces"""
+        # Simulate hardware connection
+        time.sleep(1)
+        
+        # In real implementation, this would connect to actual hardware
+        # For now, we'll simulate a successful connection
+        pass
+    
+    def _test_voltage(self, voltage_params):
+        """Execute voltage test"""
+        time.sleep(2)  # Simulate test duration
+        
+        # Simulate voltage measurement
+        min_voltage = voltage_params['min']
+        max_voltage = voltage_params['max']
+        
+        # Generate realistic measurement with some variation
+        measured_voltage = round(random.uniform(min_voltage - 0.1, max_voltage + 0.1), 2)
+        
+        # Determine test result
+        status = 'PASS' if min_voltage <= measured_voltage <= max_voltage else 'FAIL'
+        
+        # Store result
+        voltage_result = {
+            'measured': measured_voltage,
+            'expected_min': min_voltage,
+            'expected_max': max_voltage,
+            'status': status,
+            'timestamp': datetime.utcnow().isoformat()
+        }
+        
+        if not self.execution.test_data:
+            self.execution.test_data = {}
+        self.execution.test_data['voltage'] = voltage_result
+        db.session.commit()
+    
+    def _test_current(self, current_params):
+        """Execute current test"""
+        time.sleep(2)  # Simulate test duration
+        
+        # Simulate current measurement
+        min_current = current_params['min']
+        max_current = current_params['max']
+        
+        # Generate realistic measurement with some variation
+        measured_current = round(random.uniform(min_current - 0.05, max_current + 0.05), 3)
+        
+        # Determine test result
+        status = 'PASS' if min_current <= measured_current <= max_current else 'FAIL'
+        
+        # Store result
+        current_result = {
+            'measured': measured_current,
+            'expected_min': min_current,
+            'expected_max': max_current,
+            'status': status,
+            'timestamp': datetime.utcnow().isoformat()
+        }
+        
+        if not self.execution.test_data:
+            self.execution.test_data = {}
+        self.execution.test_data['current'] = current_result
+        db.session.commit()
+    
+    def _test_frequency(self, frequency_params):
+        """Execute frequency test"""
+        time.sleep(2)  # Simulate test duration
+        
+        # Simulate frequency measurement
+        target_freq = frequency_params['target']
+        tolerance = frequency_params['tolerance']
+        
+        # Generate realistic measurement with some variation
+        measured_freq = random.randint(
+            target_freq - tolerance - 5,
+            target_freq + tolerance + 5
+        )
+        
+        # Determine test result
+        min_freq = target_freq - tolerance
+        max_freq = target_freq + tolerance
+        status = 'PASS' if min_freq <= measured_freq <= max_freq else 'FAIL'
+        
+        # Store result
+        frequency_result = {
+            'measured': measured_freq,
+            'expected': target_freq,
+            'tolerance': tolerance,
+            'min_acceptable': min_freq,
+            'max_acceptable': max_freq,
+            'status': status,
+            'timestamp': datetime.utcnow().isoformat()
+        }
+        
+        if not self.execution.test_data:
+            self.execution.test_data = {}
+        self.execution.test_data['frequency'] = frequency_result
+        db.session.commit()
+    
+    def _finalize_test(self):
+        """Finalize test execution"""
+        time.sleep(0.5)
+        
+        # Cleanup and finalization
+        # In real implementation, this would disconnect hardware, cleanup resources, etc.
+        pass
+    
+    def cancel(self):
+        """Cancel the test execution"""
+        self.is_cancelled = True
+        with app.app_context():
+            if self.execution:
+                self.execution.status = 'CANCELLED'
+                self.execution.end_time = datetime.utcnow()
+                self.execution.current_step = 'Cancelled'
+                db.session.commit()
+
+class TestExecutorService:
+    """Main service for managing test executions"""
+    
+    def __init__(self):
+        self.running_tests = {}  # execution_id -> TestRunner
+        self.test_threads = {}   # execution_id -> Thread
+        self.max_concurrent_tests = 3
+        
+    def start_manual_test(self, test_scenario_id, pcba_model_id, serial_number, user_id):
+        """Start a manual test execution"""
+        try:
+            # Check concurrent test limit
+            if len(self.running_tests) >= self.max_concurrent_tests:
+                return {'success': False, 'message': f'Maximum {self.max_concurrent_tests} concurrent tests allowed'}
+            
+            # Validate inputs
+            test_scenario = TestScenario.query.get(test_scenario_id)
+            if not test_scenario:
+                return {'success': False, 'message': 'Test scenario not found'}
+            
+            pcba_model = PCBAModel.query.get(pcba_model_id)
+            if not pcba_model:
+                return {'success': False, 'message': 'PCBA model not found'}
+            
+            # Check for duplicate serial number in running tests
+            for runner in self.running_tests.values():
+                if (runner.execution and 
+                    runner.execution.serial_number == serial_number and 
+                    runner.execution.pcba_model_id == pcba_model_id):
+                    return {'success': False, 'message': 'Test with this serial number is already running'}
+            
+            # Create test execution record
+            execution = TestExecution(
+                test_scenario_id=test_scenario_id,
+                pcba_model_id=pcba_model_id,
+                serial_number=serial_number,
+                status='PENDING',
+                execution_type='MANUAL',
+                user_id=user_id,
+                progress=0,
+                current_step='Initializing'
+            )
+            
+            db.session.add(execution)
+            db.session.commit()
+            
+            # Create and start test runner
+            runner = TestRunner(execution.id)
+            thread = threading.Thread(target=runner.run, daemon=True)
+            
+            self.running_tests[execution.id] = runner
+            self.test_threads[execution.id] = thread
+            
+            thread.start()
+            
+            return {
+                'success': True, 
+                'message': 'Test started successfully',
+                'execution_id': execution.id
+            }
+            
+        except Exception as e:
+            return {'success': False, 'message': f'Failed to start test: {str(e)}'}
+    
+    def start_scheduled_test(self, scheduled_test_id):
+        """Start a scheduled test execution"""
+        try:
+            scheduled_test = ScheduledTest.query.get(scheduled_test_id)
+            if not scheduled_test:
+                return {'success': False, 'message': 'Scheduled test not found'}
+            
+            # Generate auto serial number
+            serial_number = f"{scheduled_test.serial_number_prefix or 'AUTO'}-{datetime.now().strftime('%Y%m%d%H%M%S')}"
+            
+            return self.start_manual_test(
+                scheduled_test.test_scenario_id,
+                scheduled_test.pcba_model_id,
+                serial_number,
+                scheduled_test.created_by
+            )
+            
+        except Exception as e:
+            return {'success': False, 'message': f'Failed to start scheduled test: {str(e)}'}
+    
+    def stop_test(self, execution_id):
+        """Stop a running test"""
+        try:
+            if execution_id in self.running_tests:
+                runner = self.running_tests[execution_id]
+                runner.cancel()
+                
+                # Wait for thread to finish (with timeout)
+                if execution_id in self.test_threads:
+                    thread = self.test_threads[execution_id]
+                    thread.join(timeout=5)
+                
+                # Cleanup
+                self._cleanup_test(execution_id)
+                
+                return {'success': True, 'message': 'Test stopped successfully'}
+            else:
+                return {'success': False, 'message': 'Test not found or not running'}
+                
+        except Exception as e:
+            return {'success': False, 'message': f'Failed to stop test: {str(e)}'}
+    
+    def get_test_status(self, execution_id):
+        """Get current test status"""
+        try:
+            execution = TestExecution.query.get(execution_id)
+            if not execution:
+                return {'success': False, 'message': 'Test execution not found'}
+            
+            return {
+                'success': True,
+                'execution': execution.to_dict(),
+                'is_running': execution_id in self.running_tests
+            }
+            
+        except Exception as e:
+            return {'success': False, 'message': f'Failed to get test status: {str(e)}'}
+    
+    def get_running_tests(self):
+        """Get list of currently running tests"""
+        try:
+            running_executions = []
+            for execution_id in list(self.running_tests.keys()):
+                execution = TestExecution.query.get(execution_id)
+                if execution:
+                    running_executions.append(execution.to_dict())
+                else:
+                    # Cleanup orphaned test
+                    self._cleanup_test(execution_id)
+            
+            return {
+                'success': True,
+                'running_tests': running_executions,
+                'count': len(running_executions)
+            }
+            
+        except Exception as e:
+            return {'success': False, 'message': f'Failed to get running tests: {str(e)}'}
+    
+    def _cleanup_test(self, execution_id):
+        """Clean up completed or cancelled test"""
+        if execution_id in self.running_tests:
+            del self.running_tests[execution_id]
+        if execution_id in self.test_threads:
+            del self.test_threads[execution_id]
+    
+    def cleanup_completed_tests(self):
+        """Clean up completed test threads"""
+        completed_tests = []
+        for execution_id, thread in self.test_threads.items():
+            if not thread.is_alive():
+                completed_tests.append(execution_id)
+        
+        for execution_id in completed_tests:
+            self._cleanup_test(execution_id)
+
+# ============================================================================
+# TEST SCHEDULER SERVICE
+# ============================================================================
+
+class TestScheduler:
+    def __init__(self):
+        self.scheduler = BackgroundScheduler()
+        self.scheduler.start()
+        
+        # Register cleanup on exit
+        atexit.register(lambda: self.scheduler.shutdown())
+        
+    def add_scheduled_test(self, scheduled_test):
+        """Add a new scheduled test to the scheduler"""
+        try:
+            job_id = f"scheduled_test_{scheduled_test.id}"
+            
+            # Remove existing job if it exists
+            if self.scheduler.get_job(job_id):
+                self.scheduler.remove_job(job_id)
+            
+            if scheduled_test.schedule_type == 'ONCE':
+                # Schedule for specific datetime
+                self.scheduler.add_job(
+                    func=self._execute_scheduled_test,
+                    args=[scheduled_test.id],
+                    trigger='date',
+                    run_date=scheduled_test.next_run,
+                    id=job_id,
+                    name=f"Once: {scheduled_test.name}"
+                )
+            elif scheduled_test.schedule_type == 'DAILY':
+                # Schedule daily at specific time
+                self.scheduler.add_job(
+                    func=self._execute_scheduled_test,
+                    args=[scheduled_test.id],
+                    trigger='cron',
+                    hour=scheduled_test.schedule_time.hour,
+                    minute=scheduled_test.schedule_time.minute,
+                    id=job_id,
+                    name=f"Daily: {scheduled_test.name}"
+                )
+            elif scheduled_test.schedule_type == 'WEEKLY':
+                # Schedule weekly on specific days
+                days = [int(d) for d in scheduled_test.schedule_days.split(',') if d.strip()]
+                day_of_week = ','.join([str(d-1) for d in days])  # APScheduler uses 0-6 for Mon-Sun
+                
+                self.scheduler.add_job(
+                    func=self._execute_scheduled_test,
+                    args=[scheduled_test.id],
+                    trigger='cron',
+                    day_of_week=day_of_week,
+                    hour=scheduled_test.schedule_time.hour,
+                    minute=scheduled_test.schedule_time.minute,
+                    id=job_id,
+                    name=f"Weekly: {scheduled_test.name}"
+                )
+            elif scheduled_test.schedule_type == 'MONTHLY':
+                # Schedule monthly on first day of month
+                self.scheduler.add_job(
+                    func=self._execute_scheduled_test,
+                    args=[scheduled_test.id],
+                    trigger='cron',
+                    day=1,
+                    hour=scheduled_test.schedule_time.hour,
+                    minute=scheduled_test.schedule_time.minute,
+                    id=job_id,
+                    name=f"Monthly: {scheduled_test.name}"
+                )
+            
+            print(f"✓ Scheduled test added: {scheduled_test.name} ({scheduled_test.schedule_type})")
+            return True
+            
+        except Exception as e:
+            print(f"✗ Failed to add scheduled test: {str(e)}")
+            return False
+    
+    def remove_scheduled_test(self, scheduled_test_id):
+        """Remove a scheduled test from the scheduler"""
+        try:
+            job_id = f"scheduled_test_{scheduled_test_id}"
+            if self.scheduler.get_job(job_id):
+                self.scheduler.remove_job(job_id)
+                print(f"✓ Scheduled test removed: {job_id}")
+                return True
+            return False
+        except Exception as e:
+            print(f"✗ Failed to remove scheduled test: {str(e)}")
+            return False
+    
+    def update_scheduled_test(self, scheduled_test):
+        """Update an existing scheduled test"""
+        # Remove and re-add
+        self.remove_scheduled_test(scheduled_test.id)
+        return self.add_scheduled_test(scheduled_test)
+    
+    def get_scheduled_jobs(self):
+        """Get list of all scheduled jobs"""
+        return self.scheduler.get_jobs()
+    
+    def _execute_scheduled_test(self, scheduled_test_id):
+        """Execute a scheduled test"""
+        try:
+            with app.app_context():
+                scheduled_test = ScheduledTest.query.get(scheduled_test_id)
+                if not scheduled_test or not scheduled_test.is_active:
+                    print(f"Scheduled test {scheduled_test_id} not found or inactive")
+                    return
+                
+                print(f"Executing scheduled test: {scheduled_test.name}")
+                
+                # Generate unique serial number for scheduled test
+                timestamp = datetime.utcnow().strftime('%Y%m%d_%H%M%S')
+                serial_number = f"SCHED_{scheduled_test.id}_{timestamp}"
+                
+                # Start the test using test executor service
+                execution_id = test_executor_service.start_test(
+                    test_scenario_id=scheduled_test.test_scenario_id,
+                    pcba_model_id=scheduled_test.pcba_model_id,
+                    serial_number=serial_number,
+                    user_id=scheduled_test.created_by,
+                    execution_type='SCHEDULED'
+                )
+                
+                # Update last run time
+                scheduled_test.last_run = datetime.utcnow()
+                
+                # Calculate next run time for recurring tests
+                if scheduled_test.schedule_type != 'ONCE':
+                    scheduled_test.next_run = self._calculate_next_run(scheduled_test)
+                
+                db.session.commit()
+                
+                print(f"✓ Scheduled test executed successfully: {execution_id}")
+                
+                # Send notification if configured
+                if scheduled_test.notification_emails:
+                    self._send_notification(scheduled_test, execution_id, 'STARTED')
+                
+        except Exception as e:
+            print(f"✗ Failed to execute scheduled test {scheduled_test_id}: {str(e)}")
+            
+            # Send error notification
+            try:
+                with app.app_context():
+                    scheduled_test = ScheduledTest.query.get(scheduled_test_id)
+                    if scheduled_test and scheduled_test.notification_emails:
+                        self._send_notification(scheduled_test, None, 'ERROR', str(e))
+            except:
+                pass
+    
+    def _calculate_next_run(self, scheduled_test):
+        """Calculate next run time for recurring tests"""
+        now = datetime.utcnow()
+        
+        if scheduled_test.schedule_type == 'DAILY':
+            next_run = now.replace(
+                hour=scheduled_test.schedule_time.hour,
+                minute=scheduled_test.schedule_time.minute,
+                second=0,
+                microsecond=0
+            )
+            if next_run <= now:
+                next_run += timedelta(days=1)
+            return next_run
+            
+        elif scheduled_test.schedule_type == 'WEEKLY':
+            # Find next occurrence of scheduled days
+            days = [int(d) for d in scheduled_test.schedule_days.split(',') if d.strip()]
+            current_weekday = now.weekday() + 1  # Convert to 1-7 format
+            
+            next_day = None
+            for day in sorted(days):
+                if day > current_weekday:
+                    next_day = day
+                    break
+            
+            if next_day is None:
+                next_day = min(days)  # Next week
+                days_ahead = 7 - current_weekday + next_day
+            else:
+                days_ahead = next_day - current_weekday
+            
+            next_run = now + timedelta(days=days_ahead)
+            next_run = next_run.replace(
+                hour=scheduled_test.schedule_time.hour,
+                minute=scheduled_test.schedule_time.minute,
+                second=0,
+                microsecond=0
+            )
+            return next_run
+            
+        elif scheduled_test.schedule_type == 'MONTHLY':
+            # Next month, first day
+            if now.month == 12:
+                next_run = now.replace(year=now.year + 1, month=1, day=1)
+            else:
+                next_run = now.replace(month=now.month + 1, day=1)
+            
+            next_run = next_run.replace(
+                hour=scheduled_test.schedule_time.hour,
+                minute=scheduled_test.schedule_time.minute,
+                second=0,
+                microsecond=0
+            )
+            return next_run
+        
+        return None
+    
+    def _send_notification(self, scheduled_test, execution_id, status, error_message=None):
+        """Send email notification for scheduled test"""
+        # TODO: Implement email notification
+        # For now, just log the notification
+        emails = scheduled_test.notification_emails.split(',')
+        print(f"📧 Notification would be sent to: {emails}")
+        print(f"   Test: {scheduled_test.name}")
+        print(f"   Status: {status}")
+        if execution_id:
+            print(f"   Execution ID: {execution_id}")
+        if error_message:
+            print(f"   Error: {error_message}")
+    
+    def load_existing_scheduled_tests(self):
+        """Load and schedule all existing active scheduled tests"""
+        try:
+            with app.app_context():
+                scheduled_tests = ScheduledTest.query.filter_by(is_active=True).all()
+                
+                for scheduled_test in scheduled_tests:
+                    self.add_scheduled_test(scheduled_test)
+                
+                print(f"✓ Loaded {len(scheduled_tests)} scheduled tests")
+                
+        except Exception as e:
+            print(f"✗ Failed to load scheduled tests: {str(e)}")
+
+# Global instances
+test_executor_service = TestExecutorService()
+test_scheduler = TestScheduler()
+
 if __name__ == '__main__':
     init_db()
     print("Flask uygulaması başlatılıyor...")
+    
+    # Load existing scheduled tests
+    print("Zamanlanmış testler yükleniyor...")
+    test_scheduler.load_existing_scheduled_tests()
+    
+    # Start background task processor
+    print("Background task processor başlatılıyor...")
+    task_processor.start()
     
     # Debug: Route'ları listele
     print("Yüklenen route'lar:")

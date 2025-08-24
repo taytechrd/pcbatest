@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html lang="tr">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>TayTech - Gelişmiş Test Sonuçları</title>
+    <meta
+      content="width=device-width, initial-scale=1.0, shrink-to-fit=no"
+      name="viewport"
+    />
+    <link rel="icon" href="assets/img/tay.png" type="image/png" />
+
+    <!-- Fonts and icons -->
+    <script src="assets/js/plugin/webfont/webfont.min.js"></script>
+    <script>
+      WebFont.load({
+        google: { families: ["Public Sans:300,400,500,600,700"] },
+        custom: {
+          families: [
+            "Font Awesome 5 Solid",
+            "Font Awesome 5 Regular",
+            "Font Awesome 5 Brands",
+            "simple-line-icons",
+          ],
+          urls: ["assets/css/fonts.min.css"],
+        },
+        active: function () {
+          sessionStorage.fonts = true;
+        },
+      });
+    </script>
+
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="assets/css/plugins.min.css" />
+    <link rel="stylesheet" href="assets/css/kaiadmin.min.css" />
+    <link rel="stylesheet" href="assets/css/demo.css" />
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+      .filter-card {
+        background: #f8f9fa;
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+      }
+      
+      .result-card {
+        border: 1px solid #e9ecef;
+        transition: all 0.3s ease;
+        margin-bottom: 1rem;
+      }
+      
+      .result-card:hover {
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        transform: translateY(-2px);
+      }
+      
+      .result-card.pass {
+        border-left: 4px solid #28a745;
+      }
+      
+      .result-card.fail {
+        border-left: 4px solid #dc3545;
+      }
+      
+      .result-card.error {
+        border-left: 4px solid #ffc107;
+      }
+      
+      .status-badge {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+      }
+      
+      .test-details {
+        font-family: 'Courier New', monospace;
+        background: #f8f9fa;
+        padding: 0.5rem;
+        border-radius: 0.25rem;
+        font-size: 0.875rem;
+        max-height: 200px;
+        overflow-y: auto;
+      }
+      
+      .chart-container {
+        position: relative;
+        height: 300px;
+        margin-bottom: 2rem;
+      }
+      
+      .export-buttons {
+        margin-bottom: 1rem;
+      }
+      
+      .date-range-picker {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      
+      .advanced-filters {
+        display: none;
+      }
+      
+      .advanced-filters.show {
+        display: block;
+      }
+      
+      .pagination-info {
+        display: flex;
+        justify-content: between;
+        align-items: center;
+        margin-top: 1rem;
+      }
+      
+      .test-duration {
+        color: #6c757d;
+        font-size: 0.875rem;
+      }
+      
+      .error-details {
+        background: #fff3cd;
+        border: 1px solid #ffeaa7;
+        border-radius: 0.25rem;
+        padding: 0.75rem;
+        margin-top: 0.5rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrapper">
+      <!-- Sidebar -->
+      <div class="sidebar" data-background-color="dark">
+        <div class="sidebar-logo">
+          <!-- Logo Header -->
+          <div class="logo-header" data-background-color="dark">
+            <a href="/" class="logo">
+              <img
+                src="assets/img/tay.png"
+                alt="TayTech Logo"
+                class="navbar-brand"
+                height="35"
+              />
+            </a>
+            <div class="nav-toggle">
+              <button class="btn btn-toggle toggle-sidebar">
+                <i class="gg-menu-right"></i>
+              </button>
+              <button class="btn btn-toggle sidenav-toggler">
+                <i class="gg-menu-left"></i>
+              </button>
+            </div>
+            <button class="topbar-toggler more">
+              <i class="gg-more-vertical-alt"></i>
+            </button>
+          </div>
+          <!-- End Logo Header -->
+        </div>
+        <div class="sidebar-wrapper scrollbar scrollbar-inner">
+          <div class="sidebar-content">
+            <ul class="nav nav-secondary">
+              <li class="nav-item">
+                <a href="/" class="collapsed" aria-expanded="false">
+                  <i class="fas fa-home"></i>
+                  <p>Dashboard</p>
+                </a>
+              </li>
+              <li class="nav-section">
+                <span class="sidebar-mini-icon">
+                  <i class="fa fa-ellipsis-h"></i>
+                </span>
+                <h4 class="text-section">Test İşlemleri</h4>
+              </li>
+              <li class="nav-item">
+                <a href="/test-execution">
+                  <i class="fas fa-play-circle"></i>
+                  <p>Test Çalıştır</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="/test-monitoring">
+                  <i class="fas fa-desktop"></i>
+                  <p>Test İzleme</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a data-bs-toggle="collapse" href="#testResults">
+                  <i class="fas fa-chart-line"></i>
+                  <p>Test Sonuçları</p>
+                  <span class="caret"></span>
+                </a>
+                <div class="collapse" id="testResults">
+                  <ul class="nav nav-collapse">
+                    <li>
+                      <a href="/test-results">
+                        <span class="sub-item">Temel Görünüm</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="/test-results-advanced" class="active">
+                        <span class="sub-item">Gelişmiş Analiz</span>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </li>
+              <li class="nav-item">
+                <a href="/scheduled-tests">
+                  <i class="fas fa-clock"></i>
+                  <p>Zamanlanmış Testler</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="/reports">
+                  <i class="fas fa-file-alt"></i>
+                  <p>Raporlar</p>
+                </a>
+              </li>
+              <li class="nav-section">
+                <span class="sidebar-mini-icon">
+                  <i class="fa fa-ellipsis-h"></i>
+                </span>
+                <h4 class="text-section">Yönetim</h4>
+              </li>
+              <li class="nav-item">
+                <a data-bs-toggle="collapse" href="#userManagement">
+                  <i class="fas fa-users"></i>
+                  <p>Kullanıcı Yönetimi</p>
+                  <span class="caret"></span>
+                </a>
+                <div class="collapse" id="userManagement">
+                  <ul class="nav nav-collapse">
+                    <li>
+                      <a href="/users">
+                        <span class="sub-item">Kullanıcı Listesi</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="/add-user">
+                        <span class="sub-item">Yeni Kullanıcı</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="/role-management">
+                        <span class="sub-item">Rol Yönetimi</span>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </li>
+              <li class="nav-item">
+                <a data-bs-toggle="collapse" href="#testManagement">
+                  <i class="fas fa-cogs"></i>
+                  <p>Test Yönetimi</p>
+                  <span class="caret"></span>
+                </a>
+                <div class="collapse" id="testManagement">
+                  <ul class="nav nav-collapse">
+                    <li>
+                      <a href="/test-types">
+                        <span class="sub-item">Test Tipleri</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="/test-scenarios">
+                        <span class="sub-item">Test Senaryoları</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="/pcba-models">
+                        <span class="sub-item">PCBA Modelleri</span>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </li>
+              <li class="nav-item">
+                <a href="/communication-logs">
+                  <i class="fas fa-exchange-alt"></i>
+                  <p>Haberleşme Logları</p>
+                </a>
+              </li>
+              <li class="nav-section">
+                <span class="sidebar-mini-icon">
+                  <i class="fa fa-ellipsis-h"></i>
+                </span>
+                <h4 class="text-section">Ayarlar</h4>
+              </li>
+              <li class="nav-item">
+                <a data-bs-toggle="collapse" href="#submenu">
+                  <i class="fas fa-cog"></i>
+                  <p>Settings</p>
+                  <span class="caret"></span>
+                </a>
+                <div class="collapse" id="submenu">
+                  <ul class="nav nav-collapse">
+                    <li>
+                      <a href="/user-settings">
+                        <span class="sub-item">User Settings</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="/system-settings">
+                        <span class="sub-item">System Settings</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="/test-configuration">
+                        <span class="sub-item">Test Configuration</span>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <!-- End Sidebar -->
+
+      <div class="main-panel">
+        <div class="main-header">
+          <div class="main-header-logo">
+            <!-- Logo Header -->
+            <div class="logo-header" data-background-color="dark">
+              <a href="/" class="logo">
+                <img
+                  src="assets/img/tay.png"
+                  alt="TayTech Logo"
+                  class="navbar-brand"
+                  height="35"
+                />
+              </a>
+              <div class="nav-toggle">
+                <button class="btn btn-toggle toggle-sidebar">
+                  <i class="gg-menu-right"></i>
+                </button>
+                <button class="btn btn-toggle sidenav-toggler">
+                  <i class="gg-menu-left"></i>
+                </button>
+              </div>
+              <button class="topbar-toggler more">
+                <i class="gg-more-vertical-alt"></i>
+              </button>
+            </div>
+            <!-- End Logo Header -->
+          </div>
+          <!-- Navbar Header -->
+          <nav
+            class="navbar navbar-header navbar-header-transparent navbar-expand-lg border-bottom"
+          >
+            <div class="container-fluid">
+              <nav
+                class="navbar navbar-header-left navbar-expand-lg navbar-form nav-search p-0 d-none d-lg-flex"
+              >
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <button type="submit" class="btn btn-search pe-1">
+                      <i class="fa fa-search search-icon"></i>
+                    </button>
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Test sonucu ara..."
+                    class="form-control"
+                    id="searchResults"
+                  />
+                </div>
+              </nav>
+
+              <ul class="navbar-nav topbar-nav ms-md-auto align-items-center">
+                <li class="nav-item topbar-user dropdown hidden-caret">
+                  <a
+                    class="dropdown-toggle profile-pic"
+                    data-bs-toggle="dropdown"
+                    href="#"
+                    aria-expanded="false"
+                  >
+                    <div class="avatar-sm">
+                      <img
+                        src="assets/img/user.png"
+                        alt="..."
+                        class="avatar-img rounded-circle"
+                      />
+                    </div>
+                    <span class="profile-username">
+                      <span class="op-7">Merhaba,</span>
+                      <span class="fw-bold">{{ current_user.username if current_user else 'Kullanıcı' }}</span>
+                    </span>
+                  </a>
+                  <ul class="dropdown-menu dropdown-user animated fadeIn">
+                    <div class="dropdown-user-scroll scrollbar-outer">
+                      <li>
+                        <div class="user-box">
+                          <div class="avatar-lg">
+                            <img
+                              src="assets/img/user.png"
+                              alt="image profile"
+                              class="avatar-img rounded"
+                            />
+                          </div>
+                          <div class="u-text">
+                            <h4>{{ current_user.username if current_user else 'Kullanıcı' }}</h4>
+                            <p class="text-muted">{{ current_user.email if current_user else 'email@example.com' }}</p>
+                            <p class="text-muted">Rol: {{ current_user.role.title() if current_user else 'Operator' }}</p>
+                          </div>
+                        </div>
+                      </li>
+                      <li>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="/user-settings">Profilim</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="/logout">Çıkış</a>
+                      </li>
+                    </div>
+                  </ul>
+                </li>
+              </ul>
+            </div>
+          </nav>
+          <!-- End Navbar -->
+        </div>
+
+        <div class="container">
+          <div class="page-inner">
+            <div
+              class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4"
+            >
+              <div>
+                <h3 class="fw-bold mb-3">Gelişmiş Test Sonuçları</h3>
+                <h6 class="op-7 mb-2">Detaylı analiz ve raporlama</h6>
+              </div>
+              <div class="ms-md-auto py-2 py-md-0">
+                <div class="export-buttons">
+                  <button class="btn btn-success btn-round me-2" id="exportCSV">
+                    <i class="fa fa-file-csv"></i> CSV İndir
+                  </button>
+                  <button class="btn btn-danger btn-round me-2" id="exportPDF">
+                    <i class="fa fa-file-pdf"></i> PDF İndir
+                  </button>
+                  <button class="btn btn-primary btn-round" id="refreshResults">
+                    <i class="fa fa-sync"></i> Yenile
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Statistics Cards -->
+            <div class="row mb-4">
+              <div class="col-md-3">
+                <div class="card card-stats card-round">
+                  <div class="card-body">
+                    <div class="row align-items-center">
+                      <div class="col-icon">
+                        <div class="icon-big text-center icon-success bubble-shadow-small">
+                          <i class="fas fa-check-circle"></i>
+                        </div>
+                      </div>
+                      <div class="col col-stats ms-3 ms-sm-0">
+                        <div class="numbers">
+                          <p class="card-category">Başarılı Testler</p>
+                          <h4 class="card-title" id="passedCount">0</h4>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="card card-stats card-round">
+                  <div class="card-body">
+                    <div class="row align-items-center">
+                      <div class="col-icon">
+                        <div class="icon-big text-center icon-danger bubble-shadow-small">
+                          <i class="fas fa-times-circle"></i>
+                        </div>
+                      </div>
+                      <div class="col col-stats ms-3 ms-sm-0">
+                        <div class="numbers">
+                          <p class="card-category">Başarısız Testler</p>
+                          <h4 class="card-title" id="failedCount">0</h4>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="card card-stats card-round">
+                  <div class="card-body">
+                    <div class="row align-items-center">
+                      <div class="col-icon">
+                        <div class="icon-big text-center icon-primary bubble-shadow-small">
+                          <i class="fas fa-percentage"></i>
+                        </div>
+                      </div>
+                      <div class="col col-stats ms-3 ms-sm-0">
+                        <div class="numbers">
+                          <p class="card-category">Başarı Oranı</p>
+                          <h4 class="card-title" id="successRate">0%</h4>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="card card-stats card-round">
+                  <div class="card-body">
+                    <div class="row align-items-center">
+                      <div class="col-icon">
+                        <div class="icon-big text-center icon-warning bubble-shadow-small">
+                          <i class="fas fa-clock"></i>
+                        </div>
+                      </div>
+                      <div class="col col-stats ms-3 ms-sm-0">
+                        <div class="numbers">
+                          <p class="card-category">Ort. Süre</p>
+                          <h4 class="card-title" id="avgDuration">0s</h4>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Charts Row -->
+            <div class="row mb-4">
+              <div class="col-md-6">
+                <div class="card">
+                  <div class="card-header">
+                    <h4 class="card-title">Test Sonuçları Dağılımı</h4>
+                  </div>
+                  <div class="card-body">
+                    <div class="chart-container">
+                      <canvas id="resultsChart"></canvas>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="card">
+                  <div class="card-header">
+                    <h4 class="card-title">Günlük Test Trendi</h4>
+                  </div>
+                  <div class="card-body">
+                    <div class="chart-container">
+                      <canvas id="trendChart"></canvas>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Advanced Filters -->
+            <div class="filter-card">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0"><i class="fas fa-filter me-2"></i>Gelişmiş Filtreler</h5>
+                <button class="btn btn-outline-primary btn-sm" id="toggleAdvancedFilters">
+                  <i class="fa fa-chevron-down"></i> Detayları Göster
+                </button>
+              </div>
+              
+              <!-- Basic Filters -->
+              <div class="row mb-3">
+                <div class="col-md-3">
+                  <label for="statusFilter" class="form-label">Test Durumu</label>
+                  <select class="form-control" id="statusFilter">
+                    <option value="">Tümü</option>
+                    <option value="PASS">Başarılı</option>
+                    <option value="FAIL">Başarısız</option>
+                    <option value="ERROR">Hata</option>
+                  </select>
+                </div>
+                <div class="col-md-3">
+                  <label for="pcbaModelFilter" class="form-label">PCBA Model</label>
+                  <select class="form-control" id="pcbaModelFilter">
+                    <option value="">Tümü</option>
+                  </select>
+                </div>
+                <div class="col-md-3">
+                  <label for="testTypeFilter" class="form-label">Test Tipi</label>
+                  <select class="form-control" id="testTypeFilter">
+                    <option value="">Tümü</option>
+                  </select>
+                </div>
+                <div class="col-md-3">
+                  <label for="operatorFilter" class="form-label">Operatör</label>
+                  <select class="form-control" id="operatorFilter">
+                    <option value="">Tümü</option>
+                  </select>
+                </div>
+              </div>
+              
+              <!-- Date Range -->
+              <div class="row mb-3">
+                <div class="col-md-12">
+                  <label class="form-label">Tarih Aralığı</label>
+                  <div class="date-range-picker">
+                    <input type="date" class="form-control" id="startDate" style="max-width: 200px;">
+                    <span>-</span>
+                    <input type="date" class="form-control" id="endDate" style="max-width: 200px;">
+                    <button class="btn btn-outline-secondary" id="todayBtn">Bugün</button>
+                    <button class="btn btn-outline-secondary" id="weekBtn">Bu Hafta</button>
+                    <button class="btn btn-outline-secondary" id="monthBtn">Bu Ay</button>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Advanced Filters (Hidden by default) -->
+              <div class="advanced-filters" id="advancedFiltersSection">
+                <hr>
+                <div class="row mb-3">
+                  <div class="col-md-3">
+                    <label for="serialNumberFilter" class="form-label">Seri Numarası</label>
+                    <input type="text" class="form-control" id="serialNumberFilter" placeholder="Seri numarası ara...">
+                  </div>
+                  <div class="col-md-3">
+                    <label for="durationMinFilter" class="form-label">Min. Süre (sn)</label>
+                    <input type="number" class="form-control" id="durationMinFilter" min="0">
+                  </div>
+                  <div class="col-md-3">
+                    <label for="durationMaxFilter" class="form-label">Max. Süre (sn)</label>
+                    <input type="number" class="form-control" id="durationMaxFilter" min="0">
+                  </div>
+                  <div class="col-md-3">
+                    <label for="errorMessageFilter" class="form-label">Hata Mesajı</label>
+                    <input type="text" class="form-control" id="errorMessageFilter" placeholder="Hata mesajı ara...">
+                  </div>
+                </div>
+              </div>
+              
+              <div class="d-flex justify-content-end">
+                <button class="btn btn-secondary me-2" id="clearFilters">
+                  <i class="fa fa-times"></i> Temizle
+                </button>
+                <button class="btn btn-primary" id="applyFilters">
+                  <i class="fa fa-search"></i> Filtrele
+                </button>
+              </div>
+            </div>
+
+            <!-- Results Table -->
+            <div class="row">
+              <div class="col-12">
+                <div class="card">
+                  <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                      <h4 class="card-title">Test Sonuçları</h4>
+                      <div>
+                        <select class="form-control form-control-sm" id="pageSize" style="width: auto; display: inline-block;">
+                          <option value="10">10 kayıt</option>
+                          <option value="25" selected>25 kayıt</option>
+                          <option value="50">50 kayıt</option>
+                          <option value="100">100 kayıt</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="card-body">
+                    <div id="resultsContainer">
+                      <!-- Results will be loaded here -->
+                    </div>
+                    
+                    <!-- Pagination -->
+                    <div class="pagination-info">
+                      <div>
+                        <span id="paginationInfo">Gösterilen: 0-0 / 0</span>
+                      </div>
+                      <nav>
+                        <ul class="pagination pagination-sm" id="pagination">
+                          <!-- Pagination will be generated here -->
+                        </ul>
+                      </nav>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <footer class="footer">
+          <div class="container-fluid d-flex justify-content-between">
+            <div class="copyright">
+              2024, TayTech PCBA Test Sistemi
+            </div>
+          </div>
+        </footer>
+      </div>
+    </div>
+
+    <!-- Test Details Modal -->
+    <div class="modal fade" id="testDetailsModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Test Detayları</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div id="testDetailsContent">
+              <!-- Test details will be loaded here -->
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!--   Core JS Files   -->
+    <script src="assets/js/core/jquery-3.7.1.min.js"></script>
+    <script src="assets/js/core/popper.min.js"></script>
+    <script src="assets/js/core/bootstrap.min.js"></script>
+
+    <!-- jQuery Scrollbar -->
+    <script src="assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js"></script>
+
+    <!-- Sweet Alert -->
+    <script src="assets/js/plugin/sweetalert/sweetalert.min.js"></script>
+
+    <!-- Kaiadmin JS -->
+    <script src="assets/js/kaiadmin.min.js"></script>
+
+    <script>
+      $(document).ready(function () {
+        let testResults = [];
+        let filteredResults = [];
+        let currentPage = 1;
+        let pageSize = 25;
+        let totalResults = 0;
+        let resultsChart = null;
+        let trendChart = null;
+        
+        // Initialize page
+        loadInitialData();
+        
+        // Event handlers
+        $('#refreshResults').click(function() {
+          loadTestResults();
+        });
+        
+        $('#applyFilters').click(function() {
+          applyFilters();
+        });
+        
+        $('#clearFilters').click(function() {
+          clearFilters();
+        });
+        
+        $('#toggleAdvancedFilters').click(function() {
+          toggleAdvancedFilters();
+        });
+        
+        $('#pageSize').change(function() {
+          pageSize = parseInt($(this).val());
+          currentPage = 1;
+          displayResults();
+        });
+        
+        $('#exportCSV').click(function() {
+          exportToCSV();
+        });
+        
+        $('#exportPDF').click(function() {
+          exportToPDF();
+        });
+        
+        // Date range buttons
+        $('#todayBtn').click(function() {
+          setDateRange('today');
+        });
+        
+        $('#weekBtn').click(function() {
+          setDateRange('week');
+        });
+        
+        $('#monthBtn').click(function() {
+          setDateRange('month');
+        });
+        
+        $('#searchResults').on('input', function() {
+          searchResults($(this).val());
+        });
+        
+        function loadInitialData() {
+          // Load filter options
+          loadFilterOptions();
+          
+          // Set default date range (last 30 days)
+          const endDate = new Date();
+          const startDate = new Date();
+          startDate.setDate(startDate.getDate() - 30);
+          
+          $('#startDate').val(startDate.toISOString().split('T')[0]);
+          $('#endDate').val(endDate.toISOString().split('T')[0]);
+          
+          // Load test results
+          loadTestResults();
+        }
+        
+        function loadFilterOptions() {
+          // Load PCBA models
+          $.ajax({
+            url: '/api/test/pcba-models',
+            method: 'GET',
+            success: function(response) {
+              if (response.success) {
+                const select = $('#pcbaModelFilter');
+                response.pcba_models.forEach(model => {
+                  select.append(`<option value="${model.id}">${model.part_number}</option>`);
+                });
+              }
+            }
+          });
+          
+          // Load test types
+          $.ajax({
+            url: '/api/test/test-types',
+            method: 'GET',
+            success: function(response) {
+              if (response.success) {
+                const select = $('#testTypeFilter');
+                response.test_types.forEach(type => {
+                  select.append(`<option value="${type.id}">${type.type_name}</option>`);
+                });
+              }
+            }
+          });
+          
+          // Load operators
+          $.ajax({
+            url: '/api/users',
+            method: 'GET',
+            success: function(response) {
+              if (response.success) {
+                const select = $('#operatorFilter');
+                response.users.forEach(user => {
+                  select.append(`<option value="${user.id}">${user.username}</option>`);
+                });
+              }
+            }
+          });
+        }
+        
+        function loadTestResults() {
+          const filters = getFilters();
+          
+          $.ajax({
+            url: '/api/test-results-advanced',
+            method: 'GET',
+            data: filters,
+            success: function(response) {
+              if (response.success) {
+                testResults = response.test_results;
+                filteredResults = testResults;
+                totalResults = response.total_count;
+                
+                displayResults();
+                updateStatistics(response.statistics);
+                updateCharts(response.chart_data);
+              }
+            },
+            error: function(xhr, status, error) {
+              console.error('Failed to load test results:', error);
+              swal('Hata!', 'Test sonuçları yüklenirken hata oluştu.', 'error');
+            }
+          });
+        }
+        
+        function getFilters() {
+          return {
+            status: $('#statusFilter').val(),
+            pcba_model_id: $('#pcbaModelFilter').val(),
+            test_type_id: $('#testTypeFilter').val(),
+            operator_id: $('#operatorFilter').val(),
+            start_date: $('#startDate').val(),
+            end_date: $('#endDate').val(),
+            serial_number: $('#serialNumberFilter').val(),
+            duration_min: $('#durationMinFilter').val(),
+            duration_max: $('#durationMaxFilter').val(),
+            error_message: $('#errorMessageFilter').val(),
+            page: currentPage,
+            per_page: pageSize
+          };
+        }
+        
+        function applyFilters() {
+          currentPage = 1;
+          loadTestResults();
+        }
+        
+        function clearFilters() {
+          $('#statusFilter').val('');
+          $('#pcbaModelFilter').val('');
+          $('#testTypeFilter').val('');
+          $('#operatorFilter').val('');
+          $('#serialNumberFilter').val('');
+          $('#durationMinFilter').val('');
+          $('#durationMaxFilter').val('');
+          $('#errorMessageFilter').val('');
+          
+          // Reset date range to last 30 days
+          const endDate = new Date();
+          const startDate = new Date();
+          startDate.setDate(startDate.getDate() - 30);
+          
+          $('#startDate').val(startDate.toISOString().split('T')[0]);
+          $('#endDate').val(endDate.toISOString().split('T')[0]);
+          
+          currentPage = 1;
+          loadTestResults();
+        }
+        
+        function toggleAdvancedFilters() {
+          const section = $('#advancedFiltersSection');
+          const button = $('#toggleAdvancedFilters');
+          
+          if (section.hasClass('show')) {
+            section.removeClass('show');
+            button.html('<i class="fa fa-chevron-down"></i> Detayları Göster');
+          } else {
+            section.addClass('show');
+            button.html('<i class="fa fa-chevron-up"></i> Detayları Gizle');
+          }
+        }
+        
+        function setDateRange(range) {
+          const endDate = new Date();
+          const startDate = new Date();
+          
+          switch(range) {
+            case 'today':
+              startDate.setHours(0, 0, 0, 0);
+              endDate.setHours(23, 59, 59, 999);
+              break;
+            case 'week':
+              startDate.setDate(startDate.getDate() - startDate.getDay());
+              break;
+            case 'month':
+              startDate.setDate(1);
+              break;
+          }
+          
+          $('#startDate').val(startDate.toISOString().split('T')[0]);
+          $('#endDate').val(endDate.toISOString().split('T')[0]);
+        }
+        
+        function displayResults() {
+          const container = $('#resultsContainer');
+          
+          if (filteredResults.length === 0) {
+            container.html(`
+              <div class="text-center py-5">
+                <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">Sonuç bulunamadı</h5>
+                <p class="text-muted">Arama kriterlerinizi değiştirmeyi deneyin.</p>
+              </div>
+            `);
+            updatePagination();
+            return;
+          }
+          
+          let html = '';
+          const startIndex = (currentPage - 1) * pageSize;
+          const endIndex = Math.min(startIndex + pageSize, filteredResults.length);
+          
+          for (let i = startIndex; i < endIndex; i++) {
+            const result = filteredResults[i];
+            html += createResultCard(result);
+          }
+          
+          container.html(html);
+          updatePagination();
+        }
+        
+        function createResultCard(result) {
+          const statusClass = result.test_status.toLowerCase();
+          const statusText = getStatusText(result.test_status);
+          const statusColor = getStatusColor(result.test_status);
+          const duration = result.test_duration ? `${result.test_duration}s` : 'N/A';
+          const testDate = formatDateTime(result.test_date);
+          
+          return `
+            <div class="result-card ${statusClass} card mb-3">
+              <div class="card-body">
+                <div class="row align-items-center">
+                  <div class="col-md-2">
+                    <span class="badge status-badge bg-${statusColor}">${statusText}</span>
+                    <div class="test-duration mt-1">${duration}</div>
+                  </div>
+                  <div class="col-md-3">
+                    <strong>${result.pcba_model_name || 'N/A'}</strong><br>
+                    <small class="text-muted">SN: ${result.serial_number || 'N/A'}</small>
+                  </div>
+                  <div class="col-md-2">
+                    <strong>${result.test_type_name || 'N/A'}</strong>
+                  </div>
+                  <div class="col-md-2">
+                    <small class="text-muted">Operatör:</small><br>
+                    <strong>${result.operator_name || 'N/A'}</strong>
+                  </div>
+                  <div class="col-md-2">
+                    <small class="text-muted">${testDate}</small>
+                  </div>
+                  <div class="col-md-1">
+                    <button class="btn btn-sm btn-outline-primary" onclick="showTestDetails(${result.id})">
+                      <i class="fa fa-eye"></i>
+                    </button>
+                  </div>
+                </div>
+                
+                ${result.error_message ? `
+                  <div class="error-details mt-3">
+                    <strong>Hata:</strong> ${result.error_message}
+                  </div>
+                ` : ''}
+              </div>
+            </div>
+          `;
+        }
+        
+        function getStatusText(status) {
+          switch(status) {
+            case 'PASS': return 'Başarılı';
+            case 'FAIL': return 'Başarısız';
+            case 'ERROR': return 'Hata';
+            default: return status;
+          }
+        }
+        
+        function getStatusColor(status) {
+          switch(status) {
+            case 'PASS': return 'success';
+            case 'FAIL': return 'danger';
+            case 'ERROR': return 'warning';
+            default: return 'secondary';
+          }
+        }
+        
+        function formatDateTime(dateTimeStr) {
+          const date = new Date(dateTimeStr);
+          return date.toLocaleString('tr-TR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          });
+        }
+        
+        function updatePagination() {
+          const totalPages = Math.ceil(filteredResults.length / pageSize);
+          const startIndex = (currentPage - 1) * pageSize + 1;
+          const endIndex = Math.min(currentPage * pageSize, filteredResults.length);
+          
+          $('#paginationInfo').text(`Gösterilen: ${startIndex}-${endIndex} / ${filteredResults.length}`);
+          
+          let paginationHtml = '';
+          
+          // Previous button
+          if (currentPage > 1) {
+            paginationHtml += `<li class="page-item"><a class="page-link" href="#" onclick="changePage(${currentPage - 1})">Önceki</a></li>`;
+          }
+          
+          // Page numbers
+          const startPage = Math.max(1, currentPage - 2);
+          const endPage = Math.min(totalPages, currentPage + 2);
+          
+          for (let i = startPage; i <= endPage; i++) {
+            const activeClass = i === currentPage ? 'active' : '';
+            paginationHtml += `<li class="page-item ${activeClass}"><a class="page-link" href="#" onclick="changePage(${i})">${i}</a></li>`;
+          }
+          
+          // Next button
+          if (currentPage < totalPages) {
+            paginationHtml += `<li class="page-item"><a class="page-link" href="#" onclick="changePage(${currentPage + 1})">Sonraki</a></li>`;
+          }
+          
+          $('#pagination').html(paginationHtml);
+        }
+        
+        function updateStatistics(stats) {
+          $('#passedCount').text(stats.passed_count || 0);
+          $('#failedCount').text(stats.failed_count || 0);
+          $('#successRate').text(`${stats.success_rate || 0}%`);
+          $('#avgDuration').text(`${stats.avg_duration || 0}s`);
+        }
+        
+        function updateCharts(chartData) {
+          // Results distribution chart
+          if (resultsChart) {
+            resultsChart.destroy();
+          }
+          
+          const ctx1 = document.getElementById('resultsChart').getContext('2d');
+          resultsChart = new Chart(ctx1, {
+            type: 'doughnut',
+            data: {
+              labels: ['Başarılı', 'Başarısız', 'Hata'],
+              datasets: [{
+                data: [
+                  chartData.distribution.pass || 0,
+                  chartData.distribution.fail || 0,
+                  chartData.distribution.error || 0
+                ],
+                backgroundColor: ['#28a745', '#dc3545', '#ffc107']
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  position: 'bottom'
+                }
+              }
+            }
+          });
+          
+          // Trend chart
+          if (trendChart) {
+            trendChart.destroy();
+          }
+          
+          const ctx2 = document.getElementById('trendChart').getContext('2d');
+          trendChart = new Chart(ctx2, {
+            type: 'line',
+            data: {
+              labels: chartData.trend.labels || [],
+              datasets: [{
+                label: 'Başarılı',
+                data: chartData.trend.pass || [],
+                borderColor: '#28a745',
+                backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                fill: true
+              }, {
+                label: 'Başarısız',
+                data: chartData.trend.fail || [],
+                borderColor: '#dc3545',
+                backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                fill: true
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  position: 'bottom'
+                }
+              },
+              scales: {
+                y: {
+                  beginAtZero: true
+                }
+              }
+            }
+          });
+        }
+        
+        function searchResults(searchTerm) {
+          if (!searchTerm) {
+            filteredResults = testResults;
+          } else {
+            filteredResults = testResults.filter(result => {
+              return (
+                (result.pcba_model_name && result.pcba_model_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                (result.serial_number && result.serial_number.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                (result.test_type_name && result.test_type_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                (result.operator_name && result.operator_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                (result.error_message && result.error_message.toLowerCase().includes(searchTerm.toLowerCase()))
+              );
+            });
+          }
+          
+          currentPage = 1;
+          displayResults();
+        }
+        
+        function exportToCSV() {
+          const filters = getFilters();
+          filters.export = 'csv';
+          
+          const url = '/api/test-results-export?' + $.param(filters);
+          window.open(url, '_blank');
+        }
+        
+        function exportToPDF() {
+          const filters = getFilters();
+          filters.export = 'pdf';
+          
+          const url = '/api/test-results-export?' + $.param(filters);
+          window.open(url, '_blank');
+        }
+        
+        // Global functions
+        window.changePage = function(page) {
+          currentPage = page;
+          displayResults();
+        };
+        
+        window.showTestDetails = function(testId) {
+          $.ajax({
+            url: `/api/test-results/${testId}`,
+            method: 'GET',
+            success: function(response) {
+              if (response.success) {
+                const result = response.test_result;
+                const detailsHtml = `
+                  <div class="row">
+                    <div class="col-md-6">
+                      <h6>Temel Bilgiler</h6>
+                      <table class="table table-sm">
+                        <tr><td><strong>Test ID:</strong></td><td>${result.id}</td></tr>
+                        <tr><td><strong>PCBA Model:</strong></td><td>${result.pcba_model_name || 'N/A'}</td></tr>
+                        <tr><td><strong>Seri Numarası:</strong></td><td>${result.serial_number || 'N/A'}</td></tr>
+                        <tr><td><strong>Test Tipi:</strong></td><td>${result.test_type_name || 'N/A'}</td></tr>
+                        <tr><td><strong>Durum:</strong></td><td><span class="badge bg-${getStatusColor(result.test_status)}">${getStatusText(result.test_status)}</span></td></tr>
+                        <tr><td><strong>Süre:</strong></td><td>${result.test_duration || 0}s</td></tr>
+                        <tr><td><strong>Operatör:</strong></td><td>${result.operator_name || 'N/A'}</td></tr>
+                        <tr><td><strong>Tarih:</strong></td><td>${formatDateTime(result.test_date)}</td></tr>
+                      </table>
+                    </div>
+                    <div class="col-md-6">
+                      <h6>Test Verileri</h6>
+                      <div class="test-details">
+                        ${result.test_data || 'Test verisi mevcut değil'}
+                      </div>
+                      ${result.error_message ? `
+                        <h6 class="mt-3">Hata Detayları</h6>
+                        <div class="error-details">
+                          ${result.error_message}
+                        </div>
+                      ` : ''}
+                    </div>
+                  </div>
+                `;
+                
+                $('#testDetailsContent').html(detailsHtml);
+                $('#testDetailsModal').modal('show');
+              }
+            },
+            error: function(xhr, status, error) {
+              swal('Hata!', 'Test detayları yüklenirken hata oluştu.', 'error');
+            }
+          });
+        };
+      });
+    </script>
+  </body>
+</html>
