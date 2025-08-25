@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="tr">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>TayTech - Virtual Port Ekle</title>
+    <meta content="width=device-width, initial-scale=1.0, shrink-to-fit=no" name="viewport" />
+    <link rel="icon" href="{{ url_for('static', filename='img/tay.png') }}" type="image/png" />
+
+    <script src="{{ url_for('static', filename='js/plugin/webfont/webfont.min.js') }}"></script>
+    <script>
+      WebFont.load({
+        google: { families: ["Public Sans:300,400,500,600,700"] },
+        custom: {
+          families: ["Font Awesome 5 Solid", "Font Awesome 5 Regular", "Font Awesome 5 Brands", "simple-line-icons"],
+          urls: ["{{ url_for('static', filename='css/fonts.min.css') }}"],
+        },
+        active: function () { sessionStorage.fonts = true; },
+      });
+    </script>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/plugins.min.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/kaiadmin.min.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/demo.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dropdown-fix.css') }}" />
+  </head>
+  <body>
+    <div class="wrapper">
+      <div class="sidebar" data-background-color="dark">
+        <div class="sidebar-logo">
+          <div class="logo-header" data-background-color="dark">
+            <a href="/" class="logo">
+              <img src="{{ url_for('static', filename='img/tay.png') }}" alt="TayTech Logo" class="navbar-brand" height="35" />
+            </a>
+          </div>
+        </div>
+        <div class="sidebar-wrapper scrollbar scrollbar-inner">
+          <div class="sidebar-content">
+            <ul class="nav nav-secondary">
+              <li class="nav-item"><a href="/"><i class="fas fa-home"></i><p>Dashboard</p></a></li>
+              {% if current_user.is_authenticated and current_user.has_permission('manage_simulators') %}
+              <li class="nav-section">
+                <span class="sidebar-mini-icon"><i class="fa fa-code"></i></span>
+                <h4 class="text-section">Developer Tools</h4>
+              </li>
+              <li class="nav-item">
+                <a data-bs-toggle="collapse" href="#simulatorManagement">
+                  <i class="fas fa-microchip"></i><p>Simulatör Yönetimi</p><span class="caret"></span>
+                </a>
+                <div class="collapse show" id="simulatorManagement">
+                  <ul class="nav nav-collapse">
+                    <li><a href="/simulator-management"><span class="sub-item">Simulatör Listesi</span></a></li>
+                    <li><a href="/add-simulator"><span class="sub-item">Yeni Simulatör</span></a></li>
+                    <li class="active"><a href="/add-virtual-port"><span class="sub-item">Virtual Port Ekle</span></a></li>
+                  </ul>
+                </div>
+              </li>
+              {% endif %}
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="main-panel">
+        <div class="main-header">
+          <nav class="navbar navbar-header navbar-header-transparent navbar-expand-lg border-bottom">
+            <div class="container-fluid">
+              <ul class="navbar-nav topbar-nav ms-md-auto align-items-center">
+                <li class="nav-item topbar-user dropdown hidden-caret">
+                  <a class="dropdown-toggle profile-pic" data-bs-toggle="dropdown" href="#" aria-expanded="false">
+                    <div class="avatar-sm">
+                      <img src="{{ url_for('static', filename='img/user.png') }}" alt="..." class="avatar-img rounded-circle" />
+                    </div>
+                    <span class="profile-username">
+                      <span class="op-7">Merhaba,</span>
+                      <span class="fw-bold">{{ current_user.username if current_user else 'Developer' }}</span>
+                    </span>
+                  </a>
+                  <ul class="dropdown-menu dropdown-user animated fadeIn">
+                    <div class="dropdown-user-scroll scrollbar-outer">
+                      <li>
+                        <div class="user-box">
+                          <div class="avatar-lg">
+                            <img src="{{ url_for('static', filename='img/user.png') }}" alt="image profile" class="avatar-img rounded" />
+                          </div>
+                          <div class="u-text">
+                            <h4>{{ current_user.username if current_user else 'Developer' }}</h4>
+                            <p class="text-muted">Rol: Developer</p>
+                          </div>
+                        </div>
+                      </li>
+                      <li>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="/user-settings">Profilim</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="/logout">Çıkış</a>
+                      </li>
+                    </div>
+                  </ul>
+                </li>
+              </ul>
+            </div>
+          </nav>
+        </div>
+
+        <div class="container">
+          <div class="page-inner">
+            <div class="page-header">
+              <h3 class="fw-bold mb-3">Virtual Port Ekle</h3>
+              <ul class="breadcrumbs mb-3">
+                <li class="nav-home"><a href="/"><i class="icon-home"></i></a></li>
+                <li class="separator"><i class="icon-arrow-right"></i></li>
+                <li class="nav-item"><a href="#">Developer Tools</a></li>
+                <li class="separator"><i class="icon-arrow-right"></i></li>
+                <li class="nav-item"><a href="/simulator-management">Simulatör Yönetimi</a></li>
+                <li class="separator"><i class="icon-arrow-right"></i></li>
+                <li class="nav-item"><a href="#">Virtual Port Ekle</a></li>
+              </ul>
+            </div>
+
+            <div class="row">
+              <div class="col-md-8">
+                <div class="card">
+                  <div class="card-header">
+                    <div class="card-title">Virtual Port Bilgileri</div>
+                  </div>
+                  <div class="card-body">
+                    <form id="virtualPortForm" action="/add-virtual-port" method="POST">
+                      <div class="row">
+                        <div class="col-md-6">
+                          <div class="form-group">
+                            <label for="name">Port Adı <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="name" name="name" 
+                                   placeholder="Örn: Virtual Port 1" required />
+                          </div>
+                        </div>
+                        <div class="col-md-6">
+                          <div class="form-group">
+                            <label for="port_pair">Port Çifti <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="port_pair" name="port_pair" 
+                                   placeholder="COM10,COM11" required />
+                            <small class="form-text text-muted">Format: COM10,COM11</small>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="row">
+                        <div class="col-md-12">
+                          <div class="form-group">
+                            <label for="description">Açıklama</label>
+                            <textarea class="form-control" id="description" name="description" rows="3"
+                                      placeholder="Virtual port açıklaması"></textarea>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="row">
+                        <div class="col-md-6">
+                          <div class="form-group">
+                            <label for="baud_rate">Baud Rate</label>
+                            <select class="form-control" id="baud_rate" name="baud_rate">
+                              <option value="9600" selected>9600</option>
+                              <option value="19200">19200</option>
+                              <option value="38400">38400</option>
+                              <option value="115200">115200</option>
+                            </select>
+                          </div>
+                        </div>
+                        <div class="col-md-6">
+                          <div class="form-group">
+                            <label for="buffer_size">Buffer Size (bytes)</label>
+                            <input type="number" class="form-control" id="buffer_size" name="buffer_size" 
+                                   value="4096" min="1024" max="65536" />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="card-action">
+                        <button type="submit" class="btn btn-success">
+                          <i class="fa fa-save"></i> Virtual Port Oluştur
+                        </button>
+                        <a href="/simulator-management" class="btn btn-danger ms-2">
+                          <i class="fa fa-times"></i> İptal
+                        </a>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-4">
+                <div class="card">
+                  <div class="card-header">
+                    <div class="card-title">Virtual Port Hakkında</div>
+                  </div>
+                  <div class="card-body">
+                    <p><strong>Virtual Port nedir?</strong></p>
+                    <p>Virtual portlar, fiziksel olmayan seri portlardır. İki port arasında köprü görevi görür ve simulatör testleri için kullanılır.</p>
+                    
+                    <p><strong>Nasıl çalışır?</strong></p>
+                    <ul>
+                      <li>COM10'a yazılan veri COM11'den okunur</li>
+                      <li>COM11'e yazılan veri COM10'dan okunur</li>
+                      <li>Modbus RTU simulatörleri için idealdir</li>
+                    </ul>
+
+                    <p><strong>Önemli notlar:</strong></p>
+                    <ul>
+                      <li>Port numaraları kullanımda olmamalı</li>
+                      <li>Sistem yöneticisi hakları gerekebilir</li>
+                      <li>Windows için com0com gerekli</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <footer class="footer">
+          <div class="container-fluid d-flex justify-content-between">
+            <div class="copyright">2024, TayTech PCBA Test Sistemi - Developer Mode</div>
+          </div>
+        </footer>
+      </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/core/jquery-3.7.1.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/core/popper.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/core/bootstrap.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/plugin/jquery-scrollbar/jquery.scrollbar.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/plugin/sweetalert/sweetalert.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/kaiadmin.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/global-dropdown-init.js') }}"></script>
+
+    <script>
+      $(document).ready(function () {
+        $('#virtualPortForm').on('submit', function(e) {
+          if (!validateForm()) {
+            e.preventDefault();
+          }
+        });
+      });
+
+      function validateForm() {
+        var name = $('#name').val().trim();
+        var portPair = $('#port_pair').val().trim();
+        
+        if (!name) {
+          swal("Hata!", "Port adı zorunludur!", "error");
+          return false;
+        }
+        
+        if (!portPair) {
+          swal("Hata!", "Port çifti zorunludur!", "error");
+          return false;
+        }
+        
+        // Validate port pair format
+        var portRegex = /^COM\d+,COM\d+$/i;
+        if (!portRegex.test(portPair)) {
+          swal("Hata!", "Port çifti 'COM10,COM11' formatında olmalıdır!", "error");
+          return false;
+        }
+        
+        var ports = portPair.split(',');
+        if (ports[0].trim() === ports[1].trim()) {
+          swal("Hata!", "Port çiftindeki portlar farklı olmalıdır!", "error");
+          return false;
+        }
+        
+        return true;
+      }
+    </script>
+  </body>
+</html>

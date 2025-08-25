@@ -44,6 +44,9 @@
 
     <!-- CSS Just for demo purpose, don't include it in your project -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/demo.css') }}" />
+    
+    <!-- Global Dropdown Fix CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dropdown-fix.css') }}" />
   </head>
   <body>
     <div class="wrapper">
@@ -412,8 +415,14 @@
                                 <span class="badge badge-danger">Admin</span>
                               {% elif user.role == 'technician' %}
                                 <span class="badge badge-warning">Teknisyen</span>
-                              {% else %}
+                              {% elif user.role == 'operator' %}
                                 <span class="badge badge-secondary">Operatör</span>
+                              {% elif user.role == 'viewer' %}
+                                <span class="badge badge-info">Viewer</span>
+                              {% elif user.role == 'developer' %}
+                                <span class="badge badge-success">Developer</span>
+                              {% else %}
+                                <span class="badge badge-light">{{ user.role.title() if user.role else 'Tanımsız' }}</span>
                               {% endif %}
                             </td>
                             <td>
@@ -481,6 +490,9 @@
 
     <!-- Kaiadmin JS -->
     <script src="{{ url_for('static', filename='js/kaiadmin.min.js') }}"></script>
+    
+    <!-- Global Dropdown Initialization -->
+    <script src="{{ url_for('static', filename='js/global-dropdown-init.js') }}"></script>
 
     <script>
       $(document).ready(function () {

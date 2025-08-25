@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="tr">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>TayTech - Simulatör Yönetimi</title>
+    <meta content="width=device-width, initial-scale=1.0, shrink-to-fit=no" name="viewport" />
+    <link rel="icon" href="{{ url_for('static', filename='img/tay.png') }}" type="image/png" />
+
+    <script src="{{ url_for('static', filename='js/plugin/webfont/webfont.min.js') }}"></script>
+    <script>
+      WebFont.load({
+        google: { families: ["Public Sans:300,400,500,600,700"] },
+        custom: {
+          families: ["Font Awesome 5 Solid", "Font Awesome 5 Regular", "Font Awesome 5 Brands", "simple-line-icons"],
+          urls: ["{{ url_for('static', filename='css/fonts.min.css') }}"],
+        },
+        active: function () { sessionStorage.fonts = true; },
+      });
+    </script>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/plugins.min.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/kaiadmin.min.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/demo.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dropdown-fix.css') }}" />
+
+    <style>
+      .simulator-card { transition: all 0.3s ease; border-left: 4px solid #007bff; }
+      .simulator-card.running { border-left-color: #28a745; background-color: #f8fff9; }
+      .simulator-card.stopped { border-left-color: #dc3545; background-color: #fff8f8; }
+      .status-indicator { width: 12px; height: 12px; border-radius: 50%; display: inline-block; margin-right: 8px; }
+      .status-running { background-color: #28a745; }
+      .status-stopped { background-color: #dc3545; }
+    </style>
+  </head>
+  <body>
+    <div class="wrapper">
+      <!-- Sidebar -->
+      <div class="sidebar" data-background-color="dark">
+        <div class="sidebar-logo">
+          <div class="logo-header" data-background-color="dark">
+            <a href="/" class="logo">
+              <img src="{{ url_for('static', filename='img/tay.png') }}" alt="TayTech Logo" class="navbar-brand" height="35" />
+            </a>
+            <div class="nav-toggle">
+              <button class="btn btn-toggle toggle-sidebar"><i class="gg-menu-right"></i></button>
+              <button class="btn btn-toggle sidenav-toggler"><i class="gg-menu-left"></i></button>
+            </div>
+            <button class="topbar-toggler more"><i class="gg-more-vertical-alt"></i></button>
+          </div>
+        </div>
+        
+        <div class="sidebar-wrapper scrollbar scrollbar-inner">
+          <div class="sidebar-content">
+            <ul class="nav nav-secondary">
+              <li class="nav-item"><a href="/"><i class="fas fa-home"></i><p>Dashboard</p></a></li>
+              
+              {% if current_user.is_authenticated and current_user.has_permission('manage_simulators') %}
+              <li class="nav-section">
+                <span class="sidebar-mini-icon"><i class="fa fa-code"></i></span>
+                <h4 class="text-section">Developer Tools</h4>
+              </li>
+              <li class="nav-item active">
+                <a data-bs-toggle="collapse" href="#simulatorManagement">
+                  <i class="fas fa-microchip"></i><p>Simulatör Yönetimi</p><span class="caret"></span>
+                </a>
+                <div class="collapse show" id="simulatorManagement">
+                  <ul class="nav nav-collapse">
+                    <li class="active"><a href="/simulator-management"><span class="sub-item">Simulatör Listesi</span></a></li>
+                    <li><a href="/add-simulator"><span class="sub-item">Yeni Simulatör</span></a></li>
+                    <li><a href="/add-virtual-port"><span class="sub-item">Virtual Port Ekle</span></a></li>
+                  </ul>
+                </div>
+              </li>
+              {% endif %}
+              
+              <li class="nav-section">
+                <span class="sidebar-mini-icon"><i class="fa fa-ellipsis-h"></i></span>
+                <h4 class="text-section">Test İşlemleri</h4>
+              </li>
+              <li class="nav-item"><a href="/test-execution"><i class="fas fa-play-circle"></i><p>Test Çalıştır</p></a></li>
+              <li class="nav-item"><a href="/connections"><i class="fas fa-plug"></i><p>Bağlantı Yönetimi</p></a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="main-panel">
+        <div class="main-header">
+          <div class="main-header-logo">
+            <div class="logo-header" data-background-color="dark">
+              <a href="/" class="logo">
+                <img src="{{ url_for('static', filename='img/tay.png') }}" alt="TayTech Logo" class="navbar-brand" height="35" />
+              </a>
+              <div class="nav-toggle">
+                <button class="btn btn-toggle toggle-sidebar"><i class="gg-menu-right"></i></button>
+                <button class="btn btn-toggle sidenav-toggler"><i class="gg-menu-left"></i></button>
+              </div>
+              <button class="topbar-toggler more"><i class="gg-more-vertical-alt"></i></button>
+            </div>
+          </div>
+          
+          <nav class="navbar navbar-header navbar-header-transparent navbar-expand-lg border-bottom">
+            <div class="container-fluid">
+              <ul class="navbar-nav topbar-nav ms-md-auto align-items-center">
+                <li class="nav-item topbar-user dropdown hidden-caret">
+                  <a class="dropdown-toggle profile-pic" data-bs-toggle="dropdown" href="#" aria-expanded="false">
+                    <div class="avatar-sm">
+                      <img src="{{ url_for('static', filename='img/user.png') }}" alt="..." class="avatar-img rounded-circle" />
+                    </div>
+                    <span class="profile-username">
+                      <span class="op-7">Merhaba,</span>
+                      <span class="fw-bold">{{ current_user.username if current_user else 'Kullanıcı' }}</span>
+                    </span>
+                  </a>
+                  <ul class="dropdown-menu dropdown-user animated fadeIn">
+                    <div class="dropdown-user-scroll scrollbar-outer">
+                      <li>
+                        <div class="user-box">
+                          <div class="avatar-lg">
+                            <img src="{{ url_for('static', filename='img/user.png') }}" alt="image profile" class="avatar-img rounded" />
+                          </div>
+                          <div class="u-text">
+                            <h4>{{ current_user.username if current_user else 'Kullanıcı' }}</h4>
+                            <p class="text-muted">{{ current_user.email if current_user else 'email@example.com' }}</p>
+                            <p class="text-muted">Rol: Developer</p>
+                          </div>
+                        </div>
+                      </li>
+                      <li>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="/user-settings">Profilim</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="/logout">Çıkış</a>
+                      </li>
+                    </div>
+                  </ul>
+                </li>
+              </ul>
+            </div>
+          </nav>
+        </div>
+
+        <div class="container">
+          <div class="page-inner">
+            <div class="page-header">
+              <h3 class="fw-bold mb-3">Simulatör Yönetimi</h3>
+              <ul class="breadcrumbs mb-3">
+                <li class="nav-home"><a href="/"><i class="icon-home"></i></a></li>
+                <li class="separator"><i class="icon-arrow-right"></i></li>
+                <li class="nav-item"><a href="#">Developer Tools</a></li>
+                <li class="separator"><i class="icon-arrow-right"></i></li>
+                <li class="nav-item"><a href="#">Simulatör Yönetimi</a></li>
+              </ul>
+            </div>
+
+            <!-- Statistics Cards -->
+            <div class="row">
+              <div class="col-sm-6 col-md-3">
+                <div class="card card-stats card-round">
+                  <div class="card-body">
+                    <div class="row align-items-center">
+                      <div class="col-icon">
+                        <div class="icon-big text-center icon-primary bubble-shadow-small">
+                          <i class="fas fa-microchip"></i>
+                        </div>
+                      </div>
+                      <div class="col col-stats ms-3 ms-sm-0">
+                        <div class="numbers">
+                          <p class="card-category">Toplam Simulatör</p>
+                          <h4 class="card-title">{{ stats.total_simulators }}</h4>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-6 col-md-3">
+                <div class="card card-stats card-round">
+                  <div class="card-body">
+                    <div class="row align-items-center">
+                      <div class="col-icon">
+                        <div class="icon-big text-center icon-success bubble-shadow-small">
+                          <i class="fas fa-play-circle"></i>
+                        </div>
+                      </div>
+                      <div class="col col-stats ms-3 ms-sm-0">
+                        <div class="numbers">
+                          <p class="card-category">Çalışan</p>
+                          <h4 class="card-title">{{ stats.running_simulators }}</h4>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-6 col-md-3">
+                <div class="card card-stats card-round">
+                  <div class="card-body">
+                    <div class="row align-items-center">
+                      <div class="col-icon">
+                        <div class="icon-big text-center icon-info bubble-shadow-small">
+                          <i class="fas fa-usb"></i>
+                        </div>
+                      </div>
+                      <div class="col col-stats ms-3 ms-sm-0">
+                        <div class="numbers">
+                          <p class="card-category">Virtual Port</p>
+                          <h4 class="card-title">{{ stats.virtual_ports }}</h4>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-6 col-md-3">
+                <div class="card card-stats card-round">
+                  <div class="card-body">
+                    <div class="row align-items-center">
+                      <div class="col-icon">
+                        <div class="icon-big text-center icon-warning bubble-shadow-small">
+                          <i class="fas fa-link"></i>
+                        </div>
+                      </div>
+                      <div class="col col-stats ms-3 ms-sm-0">
+                        <div class="numbers">
+                          <p class="card-category">Aktif Port</p>
+                          <h4 class="card-title">{{ stats.active_ports }}</h4>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Simulators Table -->
+            <div class="row">
+              <div class="col-md-12">
+                <div class="card">
+                  <div class="card-header">
+                    <div class="d-flex align-items-center">
+                      <h4 class="card-title">Simulatör Listesi</h4>
+                      <div class="ms-auto">
+                        <a href="/add-simulator" class="btn btn-primary btn-round ms-auto">
+                          <i class="fa fa-plus"></i> Yeni Simulatör
+                        </a>
+                        <a href="/add-virtual-port" class="btn btn-info btn-round ms-2">
+                          <i class="fa fa-plus"></i> Virtual Port
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="card-body">
+                    {% if simulators %}
+                    <div class="table-responsive">
+                      <table id="simulatorsTable" class="display table table-striped table-hover">
+                        <thead>
+                          <tr>
+                            <th>ID</th>
+                            <th>Simulatör Adı</th>
+                            <th>Tip</th>
+                            <th>Durum</th>
+                            <th>Bağlantı</th>
+                            <th>İşlemler</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {% for simulator in simulators %}
+                          <tr>
+                            <td>{{ simulator.id }}</td>
+                            <td>
+                              <div class="fw-bold">{{ simulator.name }}</div>
+                              <small class="text-muted">{{ simulator.description or 'Açıklama yok' }}</small>
+                            </td>
+                            <td>
+                              <span class="badge 
+                                {% if simulator.simulator_type == 'SERIAL' %}badge-primary
+                                {% elif simulator.simulator_type == 'TCP' %}badge-success
+                                {% elif simulator.simulator_type == 'USB' %}badge-info
+                                {% endif %}">
+                                {{ simulator.simulator_type }}
+                              </span>
+                            </td>
+                            <td>
+                              <span class="status-indicator 
+                                {% if simulator.is_running %}status-running{% else %}status-stopped{% endif %}">
+                              </span>
+                              {% if simulator.is_running %}
+                                <span class="badge badge-success">Çalışıyor</span>
+                              {% else %}
+                                <span class="badge badge-danger">Durmuş</span>
+                              {% endif %}
+                            </td>
+                            <td>
+                              {% if simulator.simulator_type == 'SERIAL' %}
+                                {{ simulator.serial_port or 'Tanımlanmamış' }}
+                              {% elif simulator.simulator_type == 'TCP' %}
+                                {{ simulator.ip_address }}:{{ simulator.tcp_port }}
+                              {% elif simulator.simulator_type == 'USB' %}
+                                USB:{{ simulator.usb_vendor_id }}
+                              {% endif %}
+                            </td>
+                            <td>
+                              <div class="form-button-action">
+                                {% if simulator.is_running %}
+                                  <button type="button" class="btn btn-link btn-danger btn-lg" 
+                                          onclick="stopSimulator({{ simulator.id }}, '{{ simulator.name }}')"
+                                          data-bs-toggle="tooltip" title="Durdur">
+                                    <i class="fa fa-stop"></i>
+                                  </button>
+                                {% else %}
+                                  <button type="button" class="btn btn-link btn-success btn-lg" 
+                                          onclick="startSimulator({{ simulator.id }}, '{{ simulator.name }}')"
+                                          data-bs-toggle="tooltip" title="Başlat">
+                                    <i class="fa fa-play"></i>
+                                  </button>
+                                {% endif %}
+                                <a href="/edit-simulator/{{ simulator.id }}" 
+                                   class="btn btn-link btn-primary btn-lg" 
+                                   data-bs-toggle="tooltip" title="Düzenle">
+                                  <i class="fa fa-edit"></i>
+                                </a>
+                                <button type="button" class="btn btn-link btn-danger btn-lg" 
+                                        onclick="deleteSimulator({{ simulator.id }}, '{{ simulator.name }}')"
+                                        data-bs-toggle="tooltip" title="Sil">
+                                  <i class="fa fa-times"></i>
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                          {% endfor %}
+                        </tbody>
+                      </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                      <i class="fas fa-microchip fa-3x text-muted mb-3"></i>
+                      <h4>Henüz simulatör tanımlanmamış</h4>
+                      <p class="text-muted">Yeni bir simulatör eklemek için "Yeni Simulatör" butonunu kullanın.</p>
+                      <a href="/add-simulator" class="btn btn-primary">
+                        <i class="fa fa-plus"></i> İlk Simulatörü Ekle
+                      </a>
+                    </div>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <footer class="footer">
+          <div class="container-fluid d-flex justify-content-between">
+            <div class="copyright">2024, TayTech PCBA Test Sistemi - Developer Mode</div>
+          </div>
+        </footer>
+      </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/core/jquery-3.7.1.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/core/popper.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/core/bootstrap.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/plugin/jquery-scrollbar/jquery.scrollbar.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/plugin/datatables/datatables.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/plugin/sweetalert/sweetalert.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/kaiadmin.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/global-dropdown-init.js') }}"></script>
+
+    <script>
+      $(document).ready(function () {
+        $('#simulatorsTable').DataTable({
+          pageLength: 10,
+          responsive: true,
+          language: { url: "//cdn.datatables.net/plug-ins/1.10.25/i18n/Turkish.json" }
+        });
+        $('[data-bs-toggle="tooltip"]').tooltip();
+        setInterval(function() { location.reload(); }, 30000);
+      });
+
+      function startSimulator(id, name) {
+        swal({
+          title: "Simulatör Başlat",
+          text: `"${name}" simulatörünü başlatmak istediğinizden emin misiniz?`,
+          type: "info",
+          buttons: { cancel: "İptal", confirm: "Başlat" }
+        }).then((willStart) => {
+          if (willStart) {
+            $.post(`/api/simulator/${id}/start`)
+              .done(function(response) {
+                if (response.success) {
+                  swal("Başarılı!", response.message, "success");
+                  setTimeout(() => location.reload(), 1500);
+                } else {
+                  swal("Hata!", response.message, "error");
+                }
+              })
+              .fail(function() {
+                swal("Hata!", "Simulator başlatılırken bir hata oluştu", "error");
+              });
+          }
+        });
+      }
+
+      function stopSimulator(id, name) {
+        swal({
+          title: "Simulatör Durdur",
+          text: `"${name}" simulatörünü durdurmak istediğinizden emin misiniz?`,
+          type: "warning",
+          buttons: { cancel: "İptal", confirm: "Durdur" }
+        }).then((willStop) => {
+          if (willStop) {
+            $.post(`/api/simulator/${id}/stop`)
+              .done(function(response) {
+                if (response.success) {
+                  swal("Başarılı!", response.message, "success");
+                  setTimeout(() => location.reload(), 1500);
+                } else {
+                  swal("Hata!", response.message, "error");
+                }
+              })
+              .fail(function() {
+                swal("Hata!", "Simulator durdurulurken bir hata oluştu", "error");
+              });
+          }
+        });
+      }
+
+      function deleteSimulator(id, name) {
+        swal({
+          title: "Simulatör Sil",
+          text: `"${name}" simulatörünü silmek istediğinizden emin misiniz?`,
+          type: "warning",
+          buttons: {
+            cancel: "İptal",
+            confirm: { text: "Sil", value: true, className: "btn-danger" }
+          }
+        }).then((willDelete) => {
+          if (willDelete) {
+            $.post(`/delete-simulator/${id}`)
+              .done(function(response) {
+                if (response.success) {
+                  swal("Silindi!", response.message, "success");
+                  setTimeout(() => location.reload(), 1500);
+                } else {
+                  swal("Hata!", response.message, "error");
+                }
+              })
+              .fail(function() {
+                swal("Hata!", "Simulator silinirken bir hata oluştu", "error");
+              });
+          }
+        });
+      }
+    </script>
+  </body>
+</html>

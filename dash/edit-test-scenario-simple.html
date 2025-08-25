@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Senaryosu Düzenle</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}" />
+</head>
+<body>
+    <div class="container mt-4">
+        <h2>Test Senaryosu Düzenle</h2>
+        
+        <form method="POST">
+            <div class="mb-3">
+                <label for="scenario_name" class="form-label">Senaryo Adı</label>
+                <input type="text" class="form-control" id="scenario_name" name="scenario_name" 
+                       value="{{ scenario.scenario_name }}" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="description" class="form-label">Açıklama</label>
+                <textarea class="form-control" id="description" name="description" rows="3">{{ scenario.description or '' }}</textarea>
+            </div>
+            
+            <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" id="is_active" name="is_active" 
+                       {% if scenario.is_active %}checked{% endif %}>
+                <label class="form-check-label" for="is_active">Aktif</label>
+            </div>
+            
+            <h4>Test Parametreleri</h4>
+            
+            <!-- Voltage Parameters -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="enable_voltage" name="enable_voltage" 
+                               {% if scenario.test_parameters and 'voltage_range' in scenario.test_parameters %}checked{% endif %}>
+                        <label class="form-check-label" for="enable_voltage">Gerilim Parametreleri</label>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="voltage_min" class="form-label">Min. Gerilim (V)</label>
+                            <input type="number" class="form-control" id="voltage_min" name="voltage_min" step="0.1" 
+                                   value="{{ scenario.test_parameters.voltage_range.min if scenario.test_parameters and 'voltage_range' in scenario.test_parameters else '' }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="voltage_max" class="form-label">Max. Gerilim (V)</label>
+                            <input type="number" class="form-control" id="voltage_max" name="voltage_max" step="0.1" 
+                                   value="{{ scenario.test_parameters.voltage_range.max if scenario.test_parameters and 'voltage_range' in scenario.test_parameters else '' }}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Current Parameters -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="enable_current" name="enable_current" 
+                               {% if scenario.test_parameters and 'current_range' in scenario.test_parameters %}checked{% endif %}>
+                        <label class="form-check-label" for="enable_current">Akım Parametreleri</label>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="current_min" class="form-label">Min. Akım (A)</label>
+                            <input type="number" class="form-control" id="current_min" name="current_min" step="0.001" 
+                                   value="{{ scenario.test_parameters.current_range.min if scenario.test_parameters and 'current_range' in scenario.test_parameters else '' }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="current_max" class="form-label">Max. Akım (A)</label>
+                            <input type="number" class="form-control" id="current_max" name="current_max" step="0.001" 
+                                   value="{{ scenario.test_parameters.current_range.max if scenario.test_parameters and 'current_range' in scenario.test_parameters else '' }}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Frequency Parameters -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="enable_frequency" name="enable_frequency" 
+                               {% if scenario.test_parameters and 'frequency_test' in scenario.test_parameters %}checked{% endif %}>
+                        <label class="form-check-label" for="enable_frequency">Frekans Parametreleri</label>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="frequency_target" class="form-label">Hedef Frekans (Hz)</label>
+                            <input type="number" class="form-control" id="frequency_target" name="frequency_target" 
+                                   value="{{ scenario.test_parameters.frequency_test.target if scenario.test_parameters and 'frequency_test' in scenario.test_parameters else '' }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="frequency_tolerance" class="form-label">Tolerans (Hz)</label>
+                            <input type="number" class="form-control" id="frequency_tolerance" name="frequency_tolerance" 
+                                   value="{{ scenario.test_parameters.frequency_test.tolerance if scenario.test_parameters and 'frequency_test' in scenario.test_parameters else '' }}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <button type="submit" class="btn btn-primary">Güncelle</button>
+                <a href="/test-scenarios" class="btn btn-secondary">İptal</a>
+            </div>
+        </form>
+        
+        <div class="mt-4">
+            <h5>Senaryo Bilgileri</h5>
+            <p><strong>ID:</strong> {{ scenario.id }}</p>
+            <p><strong>Oluşturma:</strong> {{ scenario.created_at.strftime('%d.%m.%Y %H:%M') }}</p>
+            <p><strong>Durum:</strong> 
+                {% if scenario.is_active %}
+                    <span class="badge bg-success">Aktif</span>
+                {% else %}
+                    <span class="badge bg-secondary">Pasif</span>
+                {% endif %}
+            </p>
+            <p><strong>Kullanan Model:</strong> {{ related_models_count }} adet</p>
+        </div>
+    </div>
+</body>
+</html>

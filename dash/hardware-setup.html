@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Hardware Setup - TayTech PCBA Test System</title>
+  <meta content="width=device-width, initial-scale=1.0, shrink-to-fit=no" name="viewport" />
+  <link rel="icon" href="{{ url_for('static', filename='img/tay.png') }}" type="image/x-icon" />
+
+  <!-- Fonts and icons -->
+  <script src="{{ url_for('static', filename='js/plugin/webfont/webfont.min.js') }}"></script>
+  <script>
+    WebFont.load({
+      google: { families: ["Public Sans:300,400,500,600,700"] },
+      custom: {
+        families: [
+          "Font Awesome 5 Solid",
+          "Font Awesome 5 Regular", 
+          "Font Awesome 5 Brands",
+          "simple-line-icons",
+        ],
+        urls: ["{{ url_for('static', filename='css/fonts.min.css') }}"],
+      },
+      active: function () {
+        sessionStorage.fonts = true;
+      },
+    });
+  </script>
+
+  <!-- CSS Files -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/plugins.min.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/kaiadmin.min.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/overflow-fix.css') }}" />
+</head>
+
+<body>
+  <div class="wrapper">
+    <!-- Sidebar -->
+    <div class="sidebar" data-background-color="dark">
+      <div class="sidebar-logo">
+        <!-- Logo Header -->
+        <div class="logo-header" data-background-color="dark">
+          <a href="{{ url_for('dashboard') }}" class="logo">
+            <img src="{{ url_for('static', filename='img/tay.png') }}" alt="TayTech Logo" class="navbar-brand" height="35" />
+          </a>
+          <div class="nav-toggle">
+            <button class="btn btn-toggle toggle-sidebar">
+              <i class="gg-menu-right"></i>
+            </button>
+            <button class="btn btn-toggle sidenav-toggler">
+              <i class="gg-menu-left"></i>
+            </button>
+          </div>
+          <button class="topbar-toggler more">
+            <i class="gg-more-vertical-alt"></i>
+          </button>
+        </div>
+        <!-- End Logo Header -->
+      </div>
+      <div class="sidebar-wrapper scrollbar scrollbar-inner">
+        <div class="sidebar-content">
+          <ul class="nav nav-secondary">
+            <li class="nav-item">
+              <a href="{{ url_for('dashboard') }}">
+                <i class="fas fa-home"></i>
+                <p>Dashboard</p>
+              </a>
+            </li>
+            <li class="nav-section">
+              <span class="sidebar-mini-icon">
+                <i class="fa fa-ellipsis-h"></i>
+              </span>
+              <h4 class="text-section">Hardware Integration</h4>
+            </li>
+            <li class="nav-item active">
+              <a href="{{ url_for('hardware_setup') }}">
+                <i class="fas fa-cogs"></i>
+                <p>Hardware Setup</p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="{{ url_for('hardware_testing') }}">
+                <i class="fas fa-play-circle"></i>
+                <p>Hardware Testing</p>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <!-- End Sidebar -->
+
+    <div class="main-panel">
+      <div class="main-header">
+        <div class="main-header-logo">
+          <!-- Logo Header -->
+          <div class="logo-header" data-background-color="dark">
+            <a href="{{ url_for('dashboard') }}" class="logo">
+              <img src="{{ url_for('static', filename='img/tay.png') }}" alt="TayTech Logo" class="navbar-brand" height="35" />
+            </a>
+            <div class="nav-toggle">
+              <button class="btn btn-toggle toggle-sidebar">
+                <i class="gg-menu-right"></i>
+              </button>
+              <button class="btn btn-toggle sidenav-toggler">
+                <i class="gg-menu-left"></i>
+              </button>
+            </div>
+            <button class="topbar-toggler more">
+              <i class="gg-more-vertical-alt"></i>
+            </button>
+          </div>
+          <!-- End Logo Header -->
+        </div>
+        <!-- Navbar Header -->
+        <nav class="navbar navbar-header navbar-header-transparent navbar-expand-lg border-bottom">
+          <div class="container-fluid">
+            <nav class="navbar navbar-header-left navbar-expand-lg navbar-form nav-search p-0 d-none d-lg-flex">
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <button type="submit" class="btn btn-search pe-1">
+                    <i class="fa fa-search search-icon"></i>
+                  </button>
+                </div>
+                <input type="text" placeholder="Search..." class="form-control" />
+              </div>
+            </nav>
+
+            <ul class="navbar-nav topbar-nav ms-md-auto align-items-center">
+              <li class="nav-item topbar-user dropdown hidden-caret">
+                <a class="dropdown-toggle profile-pic" data-bs-toggle="dropdown" href="#" aria-expanded="false">
+                  <div class="avatar-sm">
+                    <img src="{{ url_for('static', filename='img/profile.jpg') }}" alt="..." class="avatar-img rounded-circle" />
+                  </div>
+                  <span class="profile-username">
+                    <span class="op-7">Hi,</span>
+                    <span class="fw-bold">{{ current_user.username }}</span>
+                  </span>
+                </a>
+                <ul class="dropdown-menu dropdown-user animated fadeIn">
+                  <div class="dropdown-user-scroll scrollbar-outer">
+                    <li>
+                      <div class="user-box">
+                        <div class="avatar-lg">
+                          <img src="{{ url_for('static', filename='img/profile.jpg') }}" alt="image profile" class="avatar-img rounded" />
+                        </div>
+                        <div class="u-text">
+                          <h4>{{ current_user.username }}</h4>
+                          <p class="text-muted">{{ current_user.email }}</p>
+                        </div>
+                      </div>
+                    </li>
+                    <li>
+                      <div class="dropdown-divider"></div>
+                      <a class="dropdown-item" href="{{ url_for('user_settings') }}">Account Setting</a>
+                      <div class="dropdown-divider"></div>
+                      <a class="dropdown-item" href="{{ url_for('logout') }}">Logout</a>
+                    </li>
+                  </div>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </nav>
+        <!-- End Navbar -->
+      </div>
+
+      <div class="container">
+        <div class="page-inner">
+          <div class="page-header">
+            <h3 class="fw-bold mb-3">Hardware Setup</h3>
+            <ul class="breadcrumbs mb-3">
+              <li class="nav-home">
+                <a href="{{ url_for('dashboard') }}">
+                  <i class="icon-home"></i>
+                </a>
+              </li>
+              <li class="separator">
+                <i class="icon-arrow-right"></i>
+              </li>
+              <li class="nav-item">
+                <a href="#">Hardware Integration</a>
+              </li>
+              <li class="separator">
+                <i class="icon-arrow-right"></i>
+              </li>
+              <li class="nav-item">
+                <a href="#">Hardware Setup</a>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Hardware Status Panel -->
+          <div class="row">
+            <div class="col-12">
+              <div class="card">
+                <div class="card-header">
+                  <div class="d-flex align-items-center">
+                    <h4 class="card-title">Hardware Status</h4>
+                    <button class="btn btn-primary btn-round ms-auto" id="refreshStatus">
+                      <i class="fa fa-refresh"></i>
+                      Refresh Status
+                    </button>
+                  </div>
+                </div>
+                <div class="card-body">
+                  <div id="hardwareStatusContainer">
+                    <div class="text-center text-muted">
+                      <i class="fas fa-spinner fa-spin fa-2x"></i>
+                      <p class="mt-2">Loading hardware status...</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Equipment Configuration Panel -->
+          <div class="row">
+            <div class="col-12">
+              <div class="card">
+                <div class="card-header">
+                  <div class="d-flex align-items-center">
+                    <h4 class="card-title">Equipment Configuration</h4>
+                    <button class="btn btn-success btn-round ms-auto" id="addEquipment">
+                      <i class="fa fa-plus"></i>
+                      Add Equipment
+                    </button>
+                  </div>
+                </div>
+                <div class="card-body">
+                  <div id="equipmentConfigContainer">
+                    <!-- Equipment configuration forms will be added here -->
+                  </div>
+
+                  <div class="mt-4">
+                    <button class="btn btn-primary me-2" id="setupHardware">
+                      <i class="fas fa-cogs"></i> Setup Hardware
+                    </button>
+                    <button class="btn btn-success me-2" id="connectAll">
+                      <i class="fas fa-plug"></i> Connect All
+                    </button>
+                    <button class="btn btn-warning me-2" id="disconnectAll">
+                      <i class="fas fa-unlink"></i> Disconnect All
+                    </button>
+                    <button class="btn btn-info" id="healthCheck">
+                      <i class="fas fa-stethoscope"></i> Health Check
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <footer class="footer">
+        <div class="container-fluid d-flex justify-content-center">
+          <div class="copyright">
+            2025, made with <i class="fa fa-heart heart text-danger"></i> by
+            <a href="https://taytech.com.tr">Taytech</a>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </div>
+
+  <!-- Equipment Configuration Modal -->
+  <div class="modal fade" id="equipmentModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header border-0">
+          <h5 class="modal-title">
+            <span class="fw-mediumbold">Add Equipment Configuration</span>
+          </h5>
+          <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="equipmentForm">
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="equipmentName">Equipment Name</label>
+                  <input type="text" class="form-control" id="equipmentName" name="name" required>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="equipmentType">Equipment Type</label>
+                  <select class="form-control" id="equipmentType" name="equipment_type" required>
+                    <option value="">Select Type</option>
+                    <option value="multimeter">Digital Multimeter</option>
+                    <option value="power_supply">Power Supply</option>
+                    <option value="oscilloscope">Oscilloscope</option>
+                    <option value="function_generator">Function Generator</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="connectionType">Connection Type</label>
+                  <select class="form-control" id="connectionType" name="connection_type" required>
+                    <option value="">Select Connection</option>
+                    <option value="serial_rtu">Serial (RS-232/485)</option>
+                    <option value="tcp_ip">TCP/IP (Ethernet)</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="address">Address</label>
+                  <input type="text" class="form-control" id="address" name="address" placeholder="COM1 or 192.168.1.100" required>
+                </div>
+              </div>
+            </div>
+            <div class="row" id="serialSettings" style="display: none;">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="baudRate">Baud Rate</label>
+                  <select class="form-control" id="baudRate" name="baud_rate">
+                    <option value="9600">9600</option>
+                    <option value="19200">19200</option>
+                    <option value="38400">38400</option>
+                    <option value="57600">57600</option>
+                    <option value="115200">115200</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="timeout">Timeout (seconds)</label>
+                  <input type="number" class="form-control" id="timeout" name="timeout" value="5" min="1" max="30">
+                </div>
+              </div>
+            </div>
+            <div class="row" id="tcpSettings" style="display: none;">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="port">Port</label>
+                  <input type="number" class="form-control" id="port" name="port" value="502" min="1" max="65535">
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="tcpTimeout">Timeout (seconds)</label>
+                  <input type="number" class="form-control" id="tcpTimeout" name="timeout" value="5" min="1" max="30">
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer border-0">
+          <button type="button" class="btn btn-primary" id="saveEquipment">Add Equipment</button>
+          <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Core JS Files -->
+  <script src="{{ url_for('static', filename='js/core/jquery-3.7.1.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/core/popper.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/core/bootstrap.min.js') }}"></script>
+
+  <!-- jQuery Scrollbar -->
+  <script src="{{ url_for('static', filename='js/plugin/jquery-scrollbar/jquery.scrollbar.min.js') }}"></script>
+
+  <!-- Kaiadmin JS -->
+  <script src="{{ url_for('static', filename='js/kaiadmin.min.js') }}"></script>
+
+  <!-- Hardware Setup JS -->
+  <script>
+    let equipmentConfigs = [];
+
+    $(document).ready(function() {
+      loadHardwareStatus();
+
+      // Refresh status button
+      $('#refreshStatus').click(function() {
+        loadHardwareStatus();
+      });
+
+      // Add equipment button
+      $('#addEquipment').click(function() {
+        $('#equipmentModal').modal('show');
+      });
+
+      // Connection type change handler
+      $('#connectionType').change(function() {
+        const type = $(this).val();
+        if (type === 'serial_rtu') {
+          $('#serialSettings').show();
+          $('#tcpSettings').hide();
+          $('#address').attr('placeholder', 'COM1, COM2, /dev/ttyUSB0');
+        } else if (type === 'tcp_ip') {
+          $('#serialSettings').hide();
+          $('#tcpSettings').show();
+          $('#address').attr('placeholder', '192.168.1.100');
+        } else {
+          $('#serialSettings').hide();
+          $('#tcpSettings').hide();
+        }
+      });
+
+      // Save equipment configuration
+      $('#saveEquipment').click(function() {
+        const formData = new FormData($('#equipmentForm')[0]);
+        const config = Object.fromEntries(formData);
+        
+        // Validate required fields
+        if (!config.name || !config.equipment_type || !config.connection_type || !config.address) {
+          alert('Please fill in all required fields');
+          return;
+        }
+
+        // Add to equipment list
+        equipmentConfigs.push(config);
+        updateEquipmentDisplay();
+        
+        // Clear form and close modal
+        $('#equipmentForm')[0].reset();
+        $('#equipmentModal').modal('hide');
+      });
+
+      // Hardware action buttons
+      $('#setupHardware').click(function() {
+        setupHardware();
+      });
+
+      $('#connectAll').click(function() {
+        connectAllHardware();
+      });
+
+      $('#disconnectAll').click(function() {
+        disconnectAllHardware();
+      });
+
+      $('#healthCheck').click(function() {
+        performHealthCheck();
+      });
+    });
+
+    function loadHardwareStatus() {
+      $.ajax({
+        url: '/api/hardware/status',
+        method: 'GET',
+        success: function(response) {
+          if (response.success) {
+            displayHardwareStatus(response);
+          } else {
+            $('#hardwareStatusContainer').html('<div class=\"alert alert-warning\">Failed to load hardware status</div>');
+          }
+        },
+        error: function(xhr) {
+          const errorMsg = xhr.responseJSON?.error || 'Failed to load hardware status';
+          $('#hardwareStatusContainer').html(`<div class=\"alert alert-danger\">${errorMsg}</div>`);
+        }
+      });
+    }
+
+    function displayHardwareStatus(data) {
+      let html = '<div class=\"row\">';
+      
+      if (data.connected_equipment && data.connected_equipment.length > 0) {
+        html += '<div class=\"col-md-6\"><h5>Connected Equipment</h5><ul class=\"list-group\">';
+        data.connected_equipment.forEach(function(equipment) {
+          html += `<li class=\"list-group-item d-flex justify-content-between align-items-center\">
+                     ${equipment}
+                     <span class=\"badge bg-success rounded-pill\">Connected</span>
+                   </li>`;
+        });
+        html += '</ul></div>';
+      } else {
+        html += '<div class=\"col-md-6\"><div class=\"alert alert-info\">No equipment connected</div></div>';
+      }
+
+      if (data.health_check && Object.keys(data.health_check).length > 0) {
+        html += '<div class=\"col-md-6\"><h5>Health Check Results</h5><ul class=\"list-group\">';
+        Object.entries(data.health_check).forEach(function([equipment, status]) {
+          const badgeClass = status ? 'bg-success' : 'bg-danger';
+          const statusText = status ? 'Healthy' : 'Failed';
+          html += `<li class=\"list-group-item d-flex justify-content-between align-items-center\">
+                     ${equipment}
+                     <span class=\"badge ${badgeClass} rounded-pill\">${statusText}</span>
+                   </li>`;
+        });
+        html += '</ul></div>';
+      } else {
+        html += '<div class=\"col-md-6\"><div class=\"alert alert-info\">No health check data</div></div>';
+      }
+
+      html += '</div>';
+      html += `<small class=\"text-muted\">Last updated: ${new Date(data.timestamp).toLocaleString()}</small>`;
+      
+      $('#hardwareStatusContainer').html(html);
+    }
+
+    function updateEquipmentDisplay() {
+      let html = '';
+      equipmentConfigs.forEach(function(config, index) {
+        html += `<div class=\"card mb-3\">
+                   <div class=\"card-body\">
+                     <div class=\"row\">
+                       <div class=\"col-md-3\">
+                         <strong>${config.name}</strong><br>
+                         <small class=\"text-muted\">${config.equipment_type}</small>
+                       </div>
+                       <div class=\"col-md-3\">
+                         <strong>Connection:</strong><br>
+                         ${config.connection_type}
+                       </div>
+                       <div class=\"col-md-3\">
+                         <strong>Address:</strong><br>
+                         ${config.address}${config.port ? ':' + config.port : ''}
+                       </div>
+                       <div class=\"col-md-3\">
+                         <button class=\"btn btn-danger btn-sm\" onclick=\"removeEquipment(${index})\">
+                           <i class=\"fa fa-trash\"></i> Remove
+                         </button>
+                       </div>
+                     </div>
+                   </div>
+                 </div>`;
+      });
+      $('#equipmentConfigContainer').html(html);
+    }
+
+    function removeEquipment(index) {
+      equipmentConfigs.splice(index, 1);
+      updateEquipmentDisplay();
+    }
+
+    function setupHardware() {
+      if (equipmentConfigs.length === 0) {
+        alert('Please add at least one equipment configuration');
+        return;
+      }
+
+      $.ajax({
+        url: '/api/hardware/setup',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({ equipment_configs: equipmentConfigs }),
+        success: function(response) {
+          if (response.success) {
+            alert('Hardware setup completed successfully');
+            loadHardwareStatus();
+          } else {
+            alert('Hardware setup failed');
+          }
+        },
+        error: function(xhr) {
+          const errorMsg = xhr.responseJSON?.error || 'Hardware setup failed';
+          alert(errorMsg);
+        }
+      });
+    }
+
+    function connectAllHardware() {
+      $.ajax({
+        url: '/api/hardware/connect',
+        method: 'POST',
+        success: function(response) {
+          if (response.success) {
+            alert('Hardware connection completed');
+            loadHardwareStatus();
+          } else {
+            alert('Hardware connection failed');
+          }
+        },
+        error: function(xhr) {
+          const errorMsg = xhr.responseJSON?.error || 'Hardware connection failed';
+          alert(errorMsg);
+        }
+      });
+    }
+
+    function disconnectAllHardware() {
+      $.ajax({
+        url: '/api/hardware/disconnect',
+        method: 'POST',
+        success: function(response) {
+          if (response.success) {
+            alert('Hardware disconnected successfully');
+            loadHardwareStatus();
+          } else {
+            alert('Hardware disconnection failed');
+          }
+        },
+        error: function(xhr) {
+          const errorMsg = xhr.responseJSON?.error || 'Hardware disconnection failed';
+          alert(errorMsg);
+        }
+      });
+    }
+
+    function performHealthCheck() {
+      $.ajax({
+        url: '/api/hardware/status',
+        method: 'GET',
+        success: function(response) {
+          if (response.success) {
+            displayHardwareStatus(response);
+          } else {
+            alert('Health check failed');
+          }
+        },
+        error: function(xhr) {
+          const errorMsg = xhr.responseJSON?.error || 'Health check failed';
+          alert(errorMsg);
+        }
+      });
+    }
+  </script>
+</body>
+
+</html>

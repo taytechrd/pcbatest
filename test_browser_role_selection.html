@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Role Selection Test</title>
+    <link rel="stylesheet" href="/assets/css/bootstrap.min.css" />
+    <style>
+        .container { margin-top: 50px; }
+        .debug-info { background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin-top: 20px; }
+        .test-result { margin-top: 10px; padding: 10px; border-radius: 5px; }
+        .success { background-color: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+        .error { background-color: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>🧪 Role Selection Test Page</h2>
+        <p>This page tests if role selection is working correctly.</p>
+        
+        <div class="card">
+            <div class="card-header">
+                <h5>Test Role Dropdown</h5>
+            </div>
+            <div class="card-body">
+                <div class="form-group">
+                    <label for="role">Rol <span class="text-danger">*</span></label>
+                    <select class="form-control" id="role" name="role" required>
+                        <option value="">Rol seçin</option>
+                        <option value="admin" data-role-id="1" selected="selected">
+                            Admin - Sistem yöneticisi - tüm yetkilere sahip
+                        </option>
+                        <option value="technician" data-role-id="2">
+                            Technician - Teknisyen - test yönetimi ve çalıştırma yetkileri
+                        </option>
+                        <option value="operator" data-role-id="3">
+                            Operator - Operatör - temel test çalıştırma yetkileri
+                        </option>
+                        <option value="viewer" data-role-id="4">
+                            Viewer - Sadece görüntüleme yetkisi
+                        </option>
+                        <option value="Developer" data-role-id="5">
+                            Developer - Full system access
+                        </option>
+                    </select>
+                    <input type="hidden" id="role_id" name="role_id" value="1">
+                    <small class="form-text text-muted">
+                        Kullanıcının sistem yetkilerini belirleyen rol
+                    </small>
+                </div>
+                
+                <button onclick="runTest()" class="btn btn-primary">🔍 Test Role Selection</button>
+            </div>
+        </div>
+        
+        <div id="test-results" class="debug-info">
+            <h6>Test Results:</h6>
+            <div id="result-content">Click "Test Role Selection" to run tests...</div>
+        </div>
+        
+        <div class="debug-info">
+            <h6>Debug Information:</h6>
+            <div id="debug-content">Loading...</div>
+        </div>
+        
+        <div class="mt-4">
+            <h5>Instructions:</h5>
+            <ol>
+                <li>Save this file as <code>test_browser_role_selection.html</code> in your PCBA test directory</li>
+                <li>Open it in your browser: <code>http://localhost:9002/test_browser_role_selection.html</code></li>
+                <li>Check if "Admin" is selected by default in the dropdown</li>
+                <li>Click "Test Role Selection" button to run tests</li>
+                <li>Check browser console (F12) for debug messages</li>
+            </ol>
+        </div>
+    </div>
+
+    <script src="/assets/js/core/jquery-3.7.1.min.js"></script>
+    <script src="/assets/js/core/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            console.log('🚀 Role Selection Test Page Loaded');
+            
+            // Initial debug info
+            updateDebugInfo();
+            
+            // Set up role change handler
+            $('#role').on('change', function() {
+                console.log('Role changed to:', $(this).val());
+                const selectedOption = $(this).find('option:selected');
+                const roleId = selectedOption.data('role-id');
+                $('#role_id').val(roleId);
+                console.log('Set role_id to:', roleId);
+                updateDebugInfo();
+            });
+        });
+        
+        function updateDebugInfo() {
+            const selectedValue = $('#role').val();
+            const selectedText = $('#role option:selected').text();
+            const roleId = $('#role_id').val();
+            const totalOptions = $('#role option').length - 1; // -1 for empty option
+            
+            let debugHtml = '<ul>';
+            debugHtml += `<li><strong>Selected Value:</strong> ${selectedValue || 'None'}</li>`;
+            debugHtml += `<li><strong>Selected Text:</strong> ${selectedText || 'None'}</li>`;
+            debugHtml += `<li><strong>Role ID:</strong> ${roleId || 'None'}</li>`;
+            debugHtml += `<li><strong>Total Options:</strong> ${totalOptions}</li>`;
+            debugHtml += '</ul>';
+            
+            $('#debug-content').html(debugHtml);
+        }
+        
+        function runTest() {
+            console.log('🧪 Running role selection tests...');
+            
+            let results = [];
+            let allPassed = true;
+            
+            // Test 1: Check if dropdown has a selected value
+            const selectedValue = $('#role').val();
+            if (selectedValue && selectedValue !== '') {
+                results.push(`✅ Test 1 PASSED: Dropdown has selected value: ${selectedValue}`);
+            } else {
+                results.push(`❌ Test 1 FAILED: No value selected (showing "Rol seçin")`);
+                allPassed = false;
+            }
+            
+            // Test 2: Check if correct option is selected
+            const selectedOption = $('#role option:selected');
+            if (selectedOption.length > 0 && selectedOption.val() !== '') {
+                results.push(`✅ Test 2 PASSED: Option selected: ${selectedOption.text()}`);
+            } else {
+                results.push(`❌ Test 2 FAILED: No option properly selected`);
+                allPassed = false;
+            }
+            
+            // Test 3: Check role_id field
+            const roleId = $('#role_id').val();
+            if (roleId && roleId !== '') {
+                results.push(`✅ Test 3 PASSED: Role ID field populated: ${roleId}`);
+            } else {
+                results.push(`❌ Test 3 FAILED: Role ID field empty`);
+                allPassed = false;
+            }
+            
+            // Test 4: Check total options
+            const totalOptions = $('#role option').length - 1;
+            if (totalOptions >= 4) {
+                results.push(`✅ Test 4 PASSED: ${totalOptions} role options available`);
+            } else {
+                results.push(`❌ Test 4 FAILED: Only ${totalOptions} role options found`);
+                allPassed = false;
+            }
+            
+            // Display results
+            let resultHtml = '<ul>';
+            results.forEach(result => {
+                resultHtml += `<li>${result}</li>`;
+            });
+            resultHtml += '</ul>';
+            
+            const overallResult = allPassed ? 
+                '<div class="test-result success"><strong>🎉 ALL TESTS PASSED!</strong> Role selection is working correctly.</div>' :
+                '<div class="test-result error"><strong>❌ SOME TESTS FAILED!</strong> There may be an issue with role selection.</div>';
+            
+            $('#result-content').html(resultHtml + overallResult);
+            
+            console.log('Test results:', results);
+            console.log('Overall result:', allPassed ? 'PASSED' : 'FAILED');
+        }
+    </script>
+</body>
+</html>

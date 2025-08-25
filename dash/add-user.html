@@ -40,6 +40,9 @@
 
     <!-- CSS Just for demo purpose, don't include it in your project -->
     <link rel="stylesheet" href="assets/css/demo.css" />
+    
+    <!-- Global Dropdown Fix CSS -->
+    <link rel="stylesheet" href="assets/css/dropdown-fix.css" />
   </head>
   <body>
     <div class="wrapper">
@@ -428,10 +431,17 @@
                             <label for="role">Rol <span class="text-danger">*</span></label>
                             <select class="form-control" id="role" name="role" required>
                               <option value="">Rol seçin</option>
-                              <option value="operator">Operatör</option>
-                              <option value="technician">Teknisyen</option>
-                              <option value="admin">Admin</option>
+                              {% for role in roles %}
+                              <option value="{{ role.name }}" data-role-id="{{ role.id }}">
+                                {{ role.name.title() }}
+                                {% if role.description %} - {{ role.description }}{% endif %}
+                              </option>
+                              {% endfor %}
                             </select>
+                            <input type="hidden" id="role_id" name="role_id" value="">
+                            <small class="form-text text-muted">
+                              Kullanıcının sistem yetkilerini belirleyen rol
+                            </small>
                           </div>
                         </div>
                       </div>
@@ -553,6 +563,9 @@
 
     <!-- Kaiadmin JS -->
     <script src="assets/js/kaiadmin.min.js"></script>
+    
+    <!-- Global Dropdown Initialization -->
+    <script src="assets/js/global-dropdown-init.js"></script>
 
     <script>
       $(document).ready(function() {

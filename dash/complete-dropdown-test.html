@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Dropdown Test - PCBA System</title>
+    
+    <!-- Same CSS files as main dashboard -->
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="assets/css/plugins.min.css" />
+    <link rel="stylesheet" href="assets/css/kaiadmin.min.css" />
+    <link rel="stylesheet" href="assets/css/overflow-fix.css" />
+    <link rel="stylesheet" href="assets/css/dropdown-fix.css" />
+    
+    <style>
+        body { 
+            font-family: "Public Sans", sans-serif;
+            background: #f8f9fa;
+        }
+        .test-container { 
+            padding: 20px; 
+            max-width: 1200px; 
+            margin: 0 auto;
+        }
+        .test-section { 
+            margin-bottom: 30px; 
+            padding: 20px; 
+            background: white;
+            border: 1px solid #ddd; 
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            margin: -20px -20px 20px -20px;
+            border-radius: 8px 8px 0 0;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-ok { background: #28a745; }
+        .status-error { background: #dc3545; }
+        .status-warning { background: #ffc107; }
+        .mock-header {
+            background: #fff;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            overflow: visible !important;
+        }
+        .test-log {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1 style="text-align: center; color: #495057; margin-bottom: 30px;">
+            <i class="fas fa-bug"></i> Complete Dropdown Test - PCBA System
+        </h1>
+        
+        <div class="test-section">
+            <div class="test-header">
+                <h3><i class="fas fa-cog"></i> System Check</h3>
+            </div>
+            <div id="systemCheck">
+                <p><span class="status-indicator status-warning"></span> Checking system dependencies...</p>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <div class="test-header">
+                <h3><i class="fas fa-mouse-pointer"></i> Header Dropdown Simulation</h3>
+            </div>
+            <p>This simulates the exact header structure from the dashboard:</p>
+            
+            <div class="mock-header">
+                <nav class="navbar navbar-header navbar-header-transparent navbar-expand-lg border-bottom">
+                    <div class="container-fluid">
+                        <ul class="navbar-nav topbar-nav ms-md-auto align-items-center">
+                            <!-- Search Dropdown -->
+                            <li class="nav-item topbar-icon dropdown hidden-caret">
+                                <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button"
+                                  aria-expanded="false" aria-haspopup="true">
+                                  <i class="fa fa-search"></i>
+                                </a>
+                                <ul class="dropdown-menu dropdown-search animated fadeIn">
+                                    <li><div style="padding: 15px;">Search functionality</div></li>
+                                </ul>
+                            </li>
+                            
+                            <!-- Messages Dropdown -->
+                            <li class="nav-item topbar-icon dropdown hidden-caret">
+                                <a class="nav-link dropdown-toggle" href="#" id="messageDropdown" role="button"
+                                  data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                  <i class="fa fa-envelope"></i>
+                                </a>
+                                <ul class="dropdown-menu messages-notif-box animated fadeIn" aria-labelledby="messageDropdown">
+                                    <li><div style="padding: 15px;">Messages</div></li>
+                                    <li><div style="padding: 15px;">Test message 1</div></li>
+                                    <li><div style="padding: 15px;">Test message 2</div></li>
+                                </ul>
+                            </li>
+                            
+                            <!-- Notifications Dropdown -->
+                            <li class="nav-item topbar-icon dropdown hidden-caret">
+                                <a class="nav-link dropdown-toggle" href="#" id="notifDropdown" role="button" data-bs-toggle="dropdown"
+                                  aria-haspopup="true" aria-expanded="false">
+                                  <i class="fa fa-bell"></i>
+                                  <span class="notification">4</span>
+                                </a>
+                                <ul class="dropdown-menu notif-box animated fadeIn" aria-labelledby="notifDropdown">
+                                    <li><div style="padding: 15px;">Notifications</div></li>
+                                    <li><div style="padding: 15px;">Test notification 1</div></li>
+                                    <li><div style="padding: 15px;">Test notification 2</div></li>
+                                </ul>
+                            </li>
+                            
+                            <!-- Quick Actions Dropdown -->
+                            <li class="nav-item topbar-icon dropdown hidden-caret">
+                                <a class="nav-link" data-bs-toggle="dropdown" href="#" aria-expanded="false">
+                                  <i class="fas fa-layer-group"></i>
+                                </a>
+                                <div class="dropdown-menu quick-actions animated fadeIn">
+                                    <div style="padding: 15px;">Quick Actions</div>
+                                    <div style="padding: 15px;">Action 1</div>
+                                    <div style="padding: 15px;">Action 2</div>
+                                </div>
+                            </li>
+
+                            <!-- Profile Dropdown (The problematic one) -->
+                            <li class="nav-item topbar-user dropdown hidden-caret">
+                                <a class="dropdown-toggle profile-pic" data-bs-toggle="dropdown" href="#" aria-expanded="false">
+                                    <div class="avatar-sm">
+                                        <img src="assets/img/user.png" alt="..." class="avatar-img rounded-circle" />
+                                    </div>
+                                    <span class="profile-username">
+                                        <span class="op-7">Merhaba,</span>
+                                        <span class="fw-bold">Test User</span>
+                                    </span>
+                                </a>
+                                <ul class="dropdown-menu dropdown-user animated fadeIn">
+                                    <div class="dropdown-user-scroll scrollbar-outer">
+                                        <li>
+                                            <div class="user-box">
+                                                <div class="avatar-lg">
+                                                    <img src="assets/img/user.png" alt="image profile" class="avatar-img rounded" />
+                                                </div>
+                                                <div class="u-text">
+                                                    <h4>Test User</h4>
+                                                    <p class="text-muted">test@example.com</p>
+                                                    <p class="text-muted">Rol: Admin</p>
+                                                </div>
+                                            </div>
+                                        </li>
+                                        <li>
+                                            <div class="dropdown-divider"></div>
+                                            <a class="dropdown-item" href="#">Profilim</a>
+                                            <div class="dropdown-divider"></div>
+                                            <a class="dropdown-item" href="#">Çıkış</a>
+                                        </li>
+                                    </div>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
+            </div>
+            
+            <div style="margin-top: 20px;">
+                <button id="testAllDropdowns" class="btn btn-primary">Test All Dropdowns</button>
+                <button id="forceShowProfile" class="btn btn-warning">Force Show Profile</button>
+                <button id="resetDropdowns" class="btn btn-secondary">Reset All</button>
+            </div>
+            
+            <div id="testResults" class="test-log" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <div class="test-header">
+                <h3><i class="fas fa-code"></i> CSS & JavaScript Debug</h3>
+            </div>
+            <div id="debugInfo">
+                <p>Loading debug information...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Same JavaScript files as main dashboard -->
+    <script src="assets/js/core/jquery-3.7.1.min.js"></script>
+    <script src="assets/js/core/popper.min.js"></script>
+    <script src="assets/js/core/bootstrap.min.js"></script>
+    <script src="assets/js/kaiadmin.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            console.log('Complete dropdown test page loaded');
+            
+            // System check
+            function runSystemCheck() {
+                const checks = [];
+                
+                // Check jQuery
+                if (typeof $ !== 'undefined') {
+                    checks.push('<span class="status-indicator status-ok"></span> jQuery loaded: ' + $.fn.jquery);
+                } else {
+                    checks.push('<span class="status-indicator status-error"></span> jQuery not loaded');
+                }
+                
+                // Check Bootstrap
+                if (typeof bootstrap !== 'undefined') {
+                    checks.push('<span class="status-indicator status-ok"></span> Bootstrap loaded: ' + (bootstrap.Tooltip?.VERSION || 'Unknown version'));
+                } else {
+                    checks.push('<span class="status-indicator status-error"></span> Bootstrap not loaded');
+                }
+                
+                // Check dropdowns
+                const dropdowns = $('[data-bs-toggle="dropdown"]');
+                checks.push('<span class="status-indicator status-ok"></span> Dropdown elements found: ' + dropdowns.length);
+                
+                // Check CSS
+                const profileDropdown = $('.topbar-user .dropdown-menu');
+                if (profileDropdown.length > 0) {
+                    const zIndex = profileDropdown.css('z-index');
+                    checks.push('<span class="status-indicator status-ok"></span> Profile dropdown z-index: ' + zIndex);
+                } else {
+                    checks.push('<span class="status-indicator status-error"></span> Profile dropdown not found');
+                }
+                
+                $('#systemCheck').html(checks.join('<br>'));
+            }
+            
+            // Initialize Bootstrap dropdowns
+            if (typeof bootstrap !== 'undefined') {
+                const dropdownElementList = [].slice.call(document.querySelectorAll('[data-bs-toggle="dropdown"]'));
+                const dropdownList = dropdownElementList.map(function (dropdownToggleEl) {
+                    try {
+                        return new bootstrap.Dropdown(dropdownToggleEl);
+                    } catch (e) {
+                        console.error('Failed to initialize dropdown:', e);
+                        return null;
+                    }
+                });
+                console.log('Initialized', dropdownList.filter(d => d !== null).length, 'dropdowns');
+            }
+            
+            // Fallback manual dropdown handling
+            $('.dropdown-toggle').on('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const $toggle = $(this);
+                const $dropdown = $toggle.next('.dropdown-menu').length ? 
+                                  $toggle.next('.dropdown-menu') : 
+                                  $toggle.siblings('.dropdown-menu');
+                const isShown = $dropdown.hasClass('show');
+                
+                // Close all dropdowns
+                $('.dropdown-menu.show').removeClass('show');
+                $('.dropdown-toggle[aria-expanded="true"]').attr('aria-expanded', 'false');
+                
+                // Toggle current dropdown
+                if (!isShown && $dropdown.length > 0) {
+                    $dropdown.addClass('show');
+                    $toggle.attr('aria-expanded', 'true');
+                    
+                    // Log for testing
+                    logResult('Dropdown opened: ' + ($toggle.closest('li').attr('class') || 'unknown'));
+                }
+            });
+            
+            // Click outside to close
+            $(document).on('click', function(e) {
+                if (!$(e.target).closest('.dropdown').length) {
+                    $('.dropdown-menu.show').removeClass('show');
+                    $('.dropdown-toggle[aria-expanded="true"]').attr('aria-expanded', 'false');
+                }
+            });
+            
+            // Test buttons
+            $('#testAllDropdowns').click(function() {
+                logResult('=== Testing All Dropdowns ===');
+                const dropdowns = $('.dropdown-toggle');
+                
+                dropdowns.each(function(index) {
+                    const $toggle = $(this);
+                    const dropdownType = $toggle.closest('li').attr('class') || 'unknown';
+                    const $dropdown = $toggle.next('.dropdown-menu').length ? 
+                                      $toggle.next('.dropdown-menu') : 
+                                      $toggle.siblings('.dropdown-menu');
+                    
+                    logResult('Dropdown ' + (index + 1) + ': ' + dropdownType + 
+                             ' - Menu found: ' + ($dropdown.length > 0 ? 'Yes' : 'No'));
+                });
+            });
+            
+            $('#forceShowProfile').click(function() {
+                const $profileDropdown = $('.topbar-user .dropdown-menu');
+                const $profileToggle = $('.topbar-user .dropdown-toggle');
+                
+                if ($profileDropdown.length > 0) {
+                    $profileDropdown.addClass('show dropdown-force-visible');
+                    $profileToggle.attr('aria-expanded', 'true');
+                    logResult('Profile dropdown forced visible - check if you can see it!');
+                    
+                    setTimeout(function() {
+                        $profileDropdown.removeClass('show dropdown-force-visible');
+                        $profileToggle.attr('aria-expanded', 'false');
+                        logResult('Profile dropdown hidden again');
+                    }, 3000);
+                } else {
+                    logResult('ERROR: Profile dropdown not found!');
+                }
+            });
+            
+            $('#resetDropdowns').click(function() {
+                $('.dropdown-menu.show').removeClass('show dropdown-force-visible');
+                $('.dropdown-toggle[aria-expanded="true"]').attr('aria-expanded', 'false');
+                logResult('All dropdowns reset');
+            });
+            
+            function logResult(message) {
+                const $log = $('#testResults');
+                $log.show();
+                const timestamp = new Date().toLocaleTimeString();
+                $log.append('[' + timestamp + '] ' + message + '\n');
+                $log.scrollTop($log[0].scrollHeight);
+            }
+            
+            // Debug info
+            function updateDebugInfo() {
+                const info = [
+                    '<strong>Bootstrap Status:</strong> ' + (typeof bootstrap !== 'undefined' ? 'Loaded' : 'Not loaded'),
+                    '<strong>jQuery Status:</strong> ' + (typeof $ !== 'undefined' ? 'Loaded (v' + $.fn.jquery + ')' : 'Not loaded'),
+                    '<strong>Dropdown Elements:</strong> ' + $('[data-bs-toggle="dropdown"]').length,
+                    '<strong>Profile Dropdown:</strong> ' + ($('.topbar-user .dropdown-menu').length > 0 ? 'Found' : 'Not found'),
+                    '<strong>CSS Z-Index:</strong> ' + $('.dropdown-menu').css('z-index'),
+                    '<strong>Current Viewport:</strong> ' + $(window).width() + 'x' + $(window).height()
+                ];
+                
+                $('#debugInfo').html(info.join('<br>'));
+            }
+            
+            // Run initial checks
+            runSystemCheck();
+            updateDebugInfo();
+            
+            // Update debug info every 5 seconds
+            setInterval(updateDebugInfo, 5000);
+        });
+    </script>
+</body>
+</html>

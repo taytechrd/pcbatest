@@ -7,10 +7,10 @@
       content="width=device-width, initial-scale=1.0, shrink-to-fit=no"
       name="viewport"
     />
-    <link rel="icon" href="../assets/img/tay.png" type="image/png" />
+    <link rel="icon" href="{{ url_for('static', filename='img/tay.png') }}" type="image/x-icon" />
 
     <!-- Fonts and icons -->
-    <script src="../assets/js/plugin/webfont/webfont.min.js"></script>
+    <script src="{{ url_for('static', filename='js/plugin/webfont/webfont.min.js') }}"></script>
     <script>
       WebFont.load({
         google: { families: ["Public Sans:300,400,500,600,700"] },
@@ -21,7 +21,7 @@
             "Font Awesome 5 Brands",
             "simple-line-icons",
           ],
-          urls: ["../assets/css/fonts.min.css"],
+          urls: ["{{ url_for('static', filename='css/fonts.min.css') }}"],
         },
         active: function () {
           sessionStorage.fonts = true;
@@ -30,12 +30,12 @@
     </script>
 
     <!-- CSS Files -->
-    <link rel="stylesheet" href="../assets/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="../assets/css/plugins.min.css" />
-    <link rel="stylesheet" href="../assets/css/kaiadmin.min.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/plugins.min.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/kaiadmin.min.css') }}" />
 
     <!-- CSS Just for demo purpose, don't include it in your project -->
-    <link rel="stylesheet" href="../assets/css/demo.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/demo.css') }}" />
   </head>
   <body>
     <div class="wrapper">
@@ -46,7 +46,7 @@
           <div class="logo-header" data-background-color="dark">
             <a href="/" class="logo">
               <img
-                src="../assets/img/tay.png"
+                src="{{ url_for('static', filename='img/tay.png') }}"
                 alt="TayTech Logo"
                 class="navbar-brand"
                 height="35"
@@ -66,165 +66,7 @@
           </div>
           <!-- End Logo Header -->
         </div>
-                          <div class="sidebar-wrapper scrollbar scrollbar-inner">
-        <div class="sidebar-content">
-          <ul class="nav nav-secondary">
-            <li class="nav-item">
-              <a href="/">
-                <i class="fas fa-home"></i>
-                <p>Dashboard</p>
-              </a>
-            </li>
-            <li class="nav-section">
-              <span class="sidebar-mini-icon">
-                <i class="fa fa-ellipsis-h"></i>
-              </span>
-              <h4 class="text-section">Test İşlemleri</h4>
-            </li>
-            <li class="nav-item">
-              <a href="/test-execution">
-                <i class="fas fa-play-circle"></i>
-                <p>Test Çalıştır</p>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="/test-monitoring">
-                <i class="fas fa-desktop"></i>
-                <p>Test İzleme</p>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="/test-results">
-                <i class="fas fa-chart-line"></i>
-                <p>Test Sonuçları</p>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="/scheduled-tests">
-                <i class="fas fa-clock"></i>
-                <p>Zamanlanmış Testler</p>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="/communication-logs">
-                <i class="fas fa-exchange-alt"></i>
-                <p>Haberleşme Logları</p>
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="/reports">
-                <i class="fas fa-file-alt"></i>
-                <p>Raporlar</p>
-              </a>
-            </li>
-            <li class="nav-section">
-              <span class="sidebar-mini-icon">
-                <i class="fa fa-ellipsis-h"></i>
-              </span>
-              <h4 class="text-section">Yönetim</h4>
-            </li>
-            {% if current_user.is_authenticated and current_user.role == 'admin' %}
-            <li class="nav-item">
-              <a data-bs-toggle="collapse" href="#userManagement">
-                <i class="fas fa-users"></i>
-                <p>Kullanıcı Yönetimi</p>
-                <span class="caret"></span>
-              </a>
-              <div class="collapse show" id="userManagement">
-                <ul class="nav nav-collapse">
-                  <li>
-                    <a href="/users">
-                      <span class="sub-item">Kullanıcı Listesi</span>
-                    </a>
-                  </li>
-                  <li>
-                    <a href="/add-user">
-                      <span class="sub-item">Yeni Kullanıcı</span>
-                    </a>
-                  </li>
-                  <li>
-                    <a href="/role-management">
-                      <span class="sub-item">Rol Yönetimi</span>
-                    </a>
-                  </li>
-                </ul>
-              </div>
-            </li>
-            {% endif %}
-            {% if current_user.is_authenticated and current_user.role == 'admin' %}
-            <li class="nav-item">
-              <a data-bs-toggle="collapse" href="#testManagement">
-                <i class="fas fa-cogs"></i>
-                <p>Test Yönetimi</p>
-                <span class="caret"></span>
-              </a>
-              <div class="collapse" id="testManagement">
-                <ul class="nav nav-collapse">
-                  <li>
-                    <a href="/test-types">
-                      <span class="sub-item">Test Tipleri</span>
-                    </a>
-                  </li>
-                  <li>
-                    <a href="/test-scenarios">
-                      <span class="sub-item">Test Senaryoları</span>
-                    </a>
-                  </li>
-                  <li>
-                    <a href="/pcba-models">
-                      <span class="sub-item">PCBA Modelleri</span>
-                    </a>
-                  </li>
-                </ul>
-              </div>
-            </li>
-            {% endif %}
-            <li class="nav-item">
-              <a href="/connections">
-                <i class="fas fa-plug"></i>
-                <p>Bağlantı Yönetimi</p>
-              </a>
-            </li>
-            <li class="nav-section">
-              <span class="sidebar-mini-icon">
-                <i class="fa fa-ellipsis-h"></i>
-              </span>
-              <h4 class="text-section">Ayarlar</h4>
-            </li>
-            <li class="nav-item">
-              <a data-bs-toggle="collapse" href="#submenu">
-                <i class="fas fa-cog"></i>
-                <p>Settings</p>
-                <span class="caret"></span>
-              </a>
-              <div class="collapse" id="submenu">
-                <ul class="nav nav-collapse">
-                  <li>
-                    <a href="/user-settings">
-                      <span class="sub-item">User Settings</span>
-                    </a>
-                  </li>
-                  <li>
-                    <a href="/system-settings">
-                      <span class="sub-item">System Settings</span>
-                    </a>
-                  </li>
-                  <li>
-                    <a href="/test-parameters">
-                      <span class="sub-item">Test Parameters</span>
-                    </a>
-                  </li>
-                  <li>
-                    <a href="/test-configuration">
-                      <span class="sub-item">Test Configuration</span>
-                    </a>
-                  </li>
-                </ul>
-              </div>
-            </li>
-          </ul>
-        </div>
-      </div>
+        {% include 'sidebar_template.html' %}
       </div>
       <!-- End Sidebar -->
 
@@ -235,7 +77,7 @@
             <div class="logo-header" data-background-color="dark">
               <a href="/" class="logo">
                 <img
-                  src="../assets/img/tay.png"
+                  src="{{ url_for('static', filename='img/tay.png') }}"
                   alt="TayTech Logo"
                   class="navbar-brand"
                   height="35"
@@ -287,7 +129,7 @@
                   >
                     <div class="avatar-sm">
                       <img
-                        src="../assets/img/profile2.jpg"
+                        src="{{ url_for('static', filename='img/profile2.jpg') }}"
                         alt="..."
                         class="avatar-img rounded-circle"
                       />
@@ -303,7 +145,7 @@
                         <div class="user-box">
                           <div class="avatar-lg">
                             <img
-                              src="../assets/img/profile2.jpg"
+                              src="{{ url_for('static', filename='img/profile2.jpg') }}"
                               alt="image profile"
                               class="avatar-img rounded"
                             />
@@ -337,7 +179,7 @@
             >
               <div>
                 <h3 class="fw-bold mb-3">Test Senaryosu Düzenle</h3>
-                <h6 class="op-7 mb-2">{{ test_scenario.scenario_name }}</h6>
+                <h6 class="op-7 mb-2">{{ scenario.scenario_name }}</h6>
               </div>
               <div class="ms-md-auto py-2 py-md-0">
                 <a href="/test-scenarios" class="btn btn-secondary btn-round">
@@ -355,7 +197,7 @@
                     </div>
                   </div>
                   <div class="card-body">
-                    <form id="editTestScenarioForm" method="POST" action="/edit-test-scenario/{{ test_scenario.id }}">
+                    <form id="editTestScenarioForm" method="POST" action="/edit-test-scenario/{{ scenario.id }}">
                       <div class="form-group">
                         <label for="scenario_name">Senaryo Adı <span class="text-danger">*</span></label>
                         <input
@@ -363,7 +205,7 @@
                           class="form-control"
                           id="scenario_name"
                           name="scenario_name"
-                          value="{{ test_scenario.scenario_name }}"
+                          value="{{ scenario.scenario_name }}"
                           placeholder="Örn: Standart Gerilim Testi, Yüksek Frekans Analizi"
                           required
                           maxlength="100"
@@ -379,7 +221,7 @@
                           name="description"
                           rows="3"
                           placeholder="Test senaryosu hakkında detaylı açıklama..."
-                        >{{ test_scenario.description or '' }}</textarea>
+                        >{{ scenario.description or '' }}</textarea>
                         <small class="form-text text-muted">İsteğe bağlı - Test senaryosunun ne yaptığını açıklayın</small>
                       </div>
 
@@ -390,7 +232,7 @@
                             type="checkbox"
                             id="is_active"
                             name="is_active"
-                            {% if test_scenario.is_active %}checked{% endif %}
+                            {% if scenario.is_active %}checked{% endif %}
                           />
                           <label class="form-check-label" for="is_active">
                             Test senaryosu aktif olsun
@@ -412,36 +254,28 @@
                               <h6 class="mb-0"><i class="fas fa-bolt text-warning me-2"></i>Gerilim (Voltage) Parametreleri</h6>
                               <div class="form-check form-switch">
                                 <input class="form-check-input" type="checkbox" id="enable_voltage" name="enable_voltage" 
-                                       {% if test_scenario.test_parameters and 'voltage' in test_scenario.test_parameters %}checked{% endif %}>
+                                       {% if scenario.test_parameters and 'voltage_range' in scenario.test_parameters %}checked{% endif %}>
                                 <label class="form-check-label" for="enable_voltage">Etkinleştir</label>
                               </div>
                             </div>
                           </div>
                           <div class="card-body" id="voltageParams" 
-                               {% if not (test_scenario.test_parameters and 'voltage' in test_scenario.test_parameters) %}style="display: none;"{% endif %}>
+                               {% if not (scenario.test_parameters and 'voltage_range' in scenario.test_parameters) %}style="display: none;"{% endif %}>
                             <div class="row">
-                              <div class="col-md-4">
+                              <div class="col-md-6">
                                 <div class="form-group">
                                   <label for="voltage_min">Min. Gerilim (V)</label>
                                   <input type="number" class="form-control" id="voltage_min" name="voltage_min" step="0.1" 
-                                         value="{{ test_scenario.test_parameters.voltage.expected_min if test_scenario.test_parameters and 'voltage' in test_scenario.test_parameters else '' }}" 
+                                         value="{{ scenario.test_parameters.voltage_range.min if scenario.test_parameters and 'voltage_range' in scenario.test_parameters else '' }}" 
                                          placeholder="3.0">
                                 </div>
                               </div>
-                              <div class="col-md-4">
+                              <div class="col-md-6">
                                 <div class="form-group">
                                   <label for="voltage_max">Max. Gerilim (V)</label>
                                   <input type="number" class="form-control" id="voltage_max" name="voltage_max" step="0.1" 
-                                         value="{{ test_scenario.test_parameters.voltage.expected_max if test_scenario.test_parameters and 'voltage' in test_scenario.test_parameters else '' }}" 
+                                         value="{{ scenario.test_parameters.voltage_range.max if scenario.test_parameters and 'voltage_range' in scenario.test_parameters else '' }}" 
                                          placeholder="5.0">
-                                </div>
-                              </div>
-                              <div class="col-md-4">
-                                <div class="form-group">
-                                  <label for="voltage_expected">Beklenen (V)</label>
-                                  <input type="number" class="form-control" id="voltage_expected" name="voltage_expected" step="0.1" 
-                                         value="{{ test_scenario.test_parameters.voltage.expected if test_scenario.test_parameters and 'voltage' in test_scenario.test_parameters else '' }}" 
-                                         placeholder="3.3">
                                 </div>
                               </div>
                             </div>
@@ -455,36 +289,28 @@
                               <h6 class="mb-0"><i class="fas fa-wave-square text-info me-2"></i>Akım (Current) Parametreleri</h6>
                               <div class="form-check form-switch">
                                 <input class="form-check-input" type="checkbox" id="enable_current" name="enable_current"
-                                       {% if test_scenario.test_parameters and 'current' in test_scenario.test_parameters %}checked{% endif %}>
+                                       {% if scenario.test_parameters and 'current_range' in scenario.test_parameters %}checked{% endif %}>
                                 <label class="form-check-label" for="enable_current">Etkinleştir</label>
                               </div>
                             </div>
                           </div>
                           <div class="card-body" id="currentParams" 
-                               {% if not (test_scenario.test_parameters and 'current' in test_scenario.test_parameters) %}style="display: none;"{% endif %}>
+                               {% if not (scenario.test_parameters and 'current_range' in scenario.test_parameters) %}style="display: none;"{% endif %}>
                             <div class="row">
-                              <div class="col-md-4">
+                              <div class="col-md-6">
                                 <div class="form-group">
                                   <label for="current_min">Min. Akım (A)</label>
                                   <input type="number" class="form-control" id="current_min" name="current_min" step="0.001" 
-                                         value="{{ test_scenario.test_parameters.current.expected_min if test_scenario.test_parameters and 'current' in test_scenario.test_parameters else '' }}" 
+                                         value="{{ scenario.test_parameters.current_range.min if scenario.test_parameters and 'current_range' in scenario.test_parameters else '' }}" 
                                          placeholder="0.100">
                                 </div>
                               </div>
-                              <div class="col-md-4">
+                              <div class="col-md-6">
                                 <div class="form-group">
                                   <label for="current_max">Max. Akım (A)</label>
                                   <input type="number" class="form-control" id="current_max" name="current_max" step="0.001" 
-                                         value="{{ test_scenario.test_parameters.current.expected_max if test_scenario.test_parameters and 'current' in test_scenario.test_parameters else '' }}" 
+                                         value="{{ scenario.test_parameters.current_range.max if scenario.test_parameters and 'current_range' in scenario.test_parameters else '' }}" 
                                          placeholder="0.500">
-                                </div>
-                              </div>
-                              <div class="col-md-4">
-                                <div class="form-group">
-                                  <label for="current_expected">Beklenen (A)</label>
-                                  <input type="number" class="form-control" id="current_expected" name="current_expected" step="0.001" 
-                                         value="{{ test_scenario.test_parameters.current.expected if test_scenario.test_parameters and 'current' in test_scenario.test_parameters else '' }}" 
-                                         placeholder="0.250">
                                 </div>
                               </div>
                             </div>
@@ -498,27 +324,27 @@
                               <h6 class="mb-0"><i class="fas fa-broadcast-tower text-success me-2"></i>Frekans (Frequency) Parametreleri</h6>
                               <div class="form-check form-switch">
                                 <input class="form-check-input" type="checkbox" id="enable_frequency" name="enable_frequency"
-                                       {% if test_scenario.test_parameters and 'frequency' in test_scenario.test_parameters %}checked{% endif %}>
+                                       {% if scenario.test_parameters and 'frequency_test' in scenario.test_parameters %}checked{% endif %}>
                                 <label class="form-check-label" for="enable_frequency">Etkinleştir</label>
                               </div>
                             </div>
                           </div>
                           <div class="card-body" id="frequencyParams" 
-                               {% if not (test_scenario.test_parameters and 'frequency' in test_scenario.test_parameters) %}style="display: none;"{% endif %}>
+                               {% if not (scenario.test_parameters and 'frequency_test' in scenario.test_parameters) %}style="display: none;"{% endif %}>
                             <div class="row">
-                              <div class="col-md-4">
+                              <div class="col-md-6">
                                 <div class="form-group">
-                                  <label for="frequency_expected">Beklenen Frekans (Hz)</label>
-                                  <input type="number" class="form-control" id="frequency_expected" name="frequency_expected" step="1" 
-                                         value="{{ test_scenario.test_parameters.frequency.expected if test_scenario.test_parameters and 'frequency' in test_scenario.test_parameters else '' }}" 
+                                  <label for="frequency_target">Hedef Frekans (Hz)</label>
+                                  <input type="number" class="form-control" id="frequency_target" name="frequency_target" step="1" 
+                                         value="{{ scenario.test_parameters.frequency_test.target if scenario.test_parameters and 'frequency_test' in scenario.test_parameters else '' }}" 
                                          placeholder="1000">
                                 </div>
                               </div>
-                              <div class="col-md-4">
+                              <div class="col-md-6">
                                 <div class="form-group">
                                   <label for="frequency_tolerance">Tolerans (Hz)</label>
                                   <input type="number" class="form-control" id="frequency_tolerance" name="frequency_tolerance" step="1" 
-                                         value="{{ test_scenario.test_parameters.frequency.tolerance if test_scenario.test_parameters and 'frequency' in test_scenario.test_parameters else '' }}" 
+                                         value="{{ scenario.test_parameters.frequency_test.tolerance if scenario.test_parameters and 'frequency_test' in scenario.test_parameters else '' }}" 
                                          placeholder="50">
                                 </div>
                               </div>
@@ -554,16 +380,16 @@
                     <table class="table table-sm">
                       <tr>
                         <td><strong>ID:</strong></td>
-                        <td>{{ test_scenario.id }}</td>
+                        <td>{{ scenario.id }}</td>
                       </tr>
                       <tr>
                         <td><strong>Oluşturma:</strong></td>
-                        <td>{{ test_scenario.created_at.strftime('%d.%m.%Y %H:%M') }}</td>
+                        <td>{{ scenario.created_at.strftime('%d.%m.%Y %H:%M') }}</td>
                       </tr>
                       <tr>
                         <td><strong>Durum:</strong></td>
                         <td>
-                          {% if test_scenario.is_active %}
+                          {% if scenario.is_active %}
                             <span class="badge badge-success">Aktif</span>
                           {% else %}
                             <span class="badge badge-secondary">Pasif</span>
@@ -585,7 +411,7 @@
                   </div>
                 </div>
 
-                {% if test_scenario.pcba_models %}
+                {% if scenario.pcba_models %}
                 <div class="card card-secondary">
                   <div class="card-header">
                     <div class="card-title">
@@ -593,14 +419,14 @@
                     </div>
                   </div>
                   <div class="card-body">
-                    {% for model in test_scenario.pcba_models[:5] %}
+                    {% for model in scenario.pcba_models[:5] %}
                       <div class="d-flex justify-content-between align-items-center mb-2">
                         <span class="fw-bold">{{ model.model_name }}</span>
                         <small class="text-muted">{{ model.part_number }}</small>
                       </div>
                     {% endfor %}
-                    {% if test_scenario.pcba_models|length > 5 %}
-                      <small class="text-muted">ve {{ test_scenario.pcba_models|length - 5 }} model daha...</small>
+                    {% if scenario.pcba_models|length > 5 %}
+                      <small class="text-muted">ve {{ scenario.pcba_models|length - 5 }} model daha...</small>
                     {% endif %}
                   </div>
                 </div>
@@ -613,7 +439,7 @@
         <footer class="footer">
           <div class="container-fluid d-flex justify-content-between">
             <div class="copyright">
-              2024, TayTech PCBA Test Sistemi
+              2024, TayTech PCBA Test Sistemi v1.2.0
             </div>
           </div>
         </footer>
@@ -621,90 +447,59 @@
     </div>
 
     <!--   Core JS Files   -->
-    <script src="../assets/js/core/jquery-3.7.1.min.js"></script>
-    <script src="../assets/js/core/popper.min.js"></script>
-    <script src="../assets/js/core/bootstrap.min.js"></script>
+    <script src="{{ url_for('static', filename='js/core/jquery-3.7.1.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/core/popper.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/core/bootstrap.min.js') }}"></script>
 
     <!-- jQuery Scrollbar -->
-    <script src="../assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js"></script>
+    <script src="{{ url_for('static', filename='js/plugin/jquery-scrollbar/jquery.scrollbar.min.js') }}"></script>
+
+    <!-- Chart JS -->
+    <script src="{{ url_for('static', filename='js/plugin/chart.js/chart.min.js') }}"></script>
+
+    <!-- jQuery Sparkline -->
+    <script src="{{ url_for('static', filename='js/plugin/jquery.sparkline/jquery.sparkline.min.js') }}"></script>
+
+    <!-- Chart Circle -->
+    <script src="{{ url_for('static', filename='js/plugin/chart-circle/circles.min.js') }}"></script>
+
+    <!-- Datatables -->
+    <script src="{{ url_for('static', filename='js/plugin/datatables/datatables.min.js') }}"></script>
+
+    <!-- Bootstrap Notify -->
+    <script src="{{ url_for('static', filename='js/plugin/bootstrap-notify/bootstrap-notify.min.js') }}"></script>
+
+    <!-- jQuery Vector Maps -->
+    <script src="{{ url_for('static', filename='js/plugin/jsvectormap/jsvectormap.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/plugin/jsvectormap/world.js') }}"></script>
 
     <!-- Sweet Alert -->
-    <script src="../assets/js/plugin/sweetalert/sweetalert.min.js"></script>
+    <script src="{{ url_for('static', filename='js/plugin/sweetalert/sweetalert.min.js') }}"></script>
 
     <!-- Kaiadmin JS -->
-    <script src="../assets/js/kaiadmin.min.js"></script>
+    <script src="{{ url_for('static', filename='js/kaiadmin.min.js') }}"></script>
 
     <script>
-      $(document).ready(function () {
-        // Parameter toggle handlers
-        $('#enable_voltage').change(function() {
-          if (this.checked) {
-            $('#voltageParams').slideDown();
-          } else {
-            $('#voltageParams').slideUp();
-          }
-        });
+      // Parameter toggle functionality
+      document.getElementById('enable_voltage').addEventListener('change', function() {
+        const voltageParams = document.getElementById('voltageParams');
+        voltageParams.style.display = this.checked ? 'block' : 'none';
+      });
 
-        $('#enable_current').change(function() {
-          if (this.checked) {
-            $('#currentParams').slideDown();
-          } else {
-            $('#currentParams').slideUp();
-          }
-        });
+      document.getElementById('enable_current').addEventListener('change', function() {
+        const currentParams = document.getElementById('currentParams');
+        currentParams.style.display = this.checked ? 'block' : 'none';
+      });
 
-        $('#enable_frequency').change(function() {
-          if (this.checked) {
-            $('#frequencyParams').slideDown();
-          } else {
-            $('#frequencyParams').slideUp();
-          }
-        });
-
-        // Form validation (same as add form)
-        $('#editTestScenarioForm').on('submit', function(e) {
-          const scenarioName = $('#scenario_name').val().trim();
-          
-          if (!scenarioName) {
-            e.preventDefault();
-            swal("Hata!", "Senaryo adı boş olamaz.", "error");
-            $('#scenario_name').focus();
-            return false;
-          }
-
-          // En az bir parametre grubu seçilmiş mi kontrol et
-          const voltageEnabled = $('#enable_voltage').is(':checked');
-          const currentEnabled = $('#enable_current').is(':checked');
-          const frequencyEnabled = $('#enable_frequency').is(':checked');
-
-          if (!voltageEnabled && !currentEnabled && !frequencyEnabled) {
-            e.preventDefault();
-            swal("Hata!", "En az bir parametre grubu etkinleştirilmelidir.", "error");
-            return false;
-          }
-
-          // Aktif parametreler için değer kontrolü (same validation logic as add form)
-          // ... (validation code same as add form)
-        });
-
-        // Flash mesajları göster
-        {% with messages = get_flashed_messages(with_categories=true) %}
-          {% if messages %}
-            {% for category, message in messages %}
-              {% if category == 'success' %}
-                swal("Başarılı!", "{{ message }}", "success");
-              {% elif category == 'error' %}
-                swal("Hata!", "{{ message }}", "error");
-              {% endif %}
-            {% endfor %}
-          {% endif %}
-        {% endwith %}
+      document.getElementById('enable_frequency').addEventListener('change', function() {
+        const frequencyParams = document.getElementById('frequencyParams');
+        frequencyParams.style.display = this.checked ? 'block' : 'none';
       });
 
       function deleteTestScenario() {
         swal({
           title: "Emin misiniz?",
-          text: "{{ test_scenario.scenario_name }} test senaryosu silinecek! Bu işlem geri alınamaz.",
+          text: "{{ scenario.scenario_name }} test senaryosu silinecek! Bu işlem geri alınamaz.",
           type: "warning",
           buttons: {
             cancel: {
@@ -719,7 +514,7 @@
           }
         }).then((willDelete) => {
           if (willDelete) {
-            fetch('/delete-test-scenario/{{ test_scenario.id }}', {
+            fetch('/delete-test-scenario/{{ scenario.id }}', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',

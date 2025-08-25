@@ -1,0 +1,188 @@
+/* Custom CSS fixes for dropdown functionality */
+
+/* Fix header container overflow issues */
+.main-header {
+    overflow: visible !important;
+    z-index: 1030;
+}
+
+.navbar {
+    position: relative;
+    z-index: 1030;
+    overflow: visible !important;
+}
+
+.navbar-header {
+    overflow: visible !important;
+}
+
+.container-fluid {
+    overflow: visible !important;
+}
+
+.navbar-nav {
+    overflow: visible !important;
+}
+
+/* Ensure dropdowns have proper z-index and positioning */
+.dropdown-menu {
+    z-index: 1050 !important;
+    position: absolute !important;
+    display: none;
+}
+
+.dropdown-menu.show {
+    display: block !important;
+}
+
+/* Profile dropdown specific fixes */
+.navbar .navbar-nav .topbar-user .dropdown-menu {
+    position: absolute !important;
+    right: 0 !important;
+    left: auto !important;
+    min-width: 250px;
+    margin-top: 0.5rem;
+    border: 1px solid rgba(0,0,0,.15);
+    border-radius: 0.375rem;
+    background: white;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    max-height: none !important;
+    overflow: visible !important;
+}
+
+/* General topbar dropdown positioning (primarily for profile dropdown) */
+.navbar .navbar-nav .topbar-icon .dropdown-menu,
+.navbar .navbar-nav .topbar-user .dropdown-menu {
+    position: absolute !important;
+    right: 0 !important;
+    left: auto !important;
+    min-width: 200px;
+    margin-top: 0.5rem;
+    border: 1px solid rgba(0,0,0,.15);
+    border-radius: 0.375rem;
+    background: white;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    z-index: 1050 !important;
+}
+
+
+
+
+
+/* Ensure dropdown toggle works */
+.dropdown-toggle {
+    cursor: pointer !important;
+}
+
+.dropdown-toggle:hover {
+    text-decoration: none !important;
+}
+
+/* Fix for hidden-caret class */
+.hidden-caret .dropdown-toggle::after {
+    display: none !important;
+}
+
+/* Animation classes */
+.dropdown-menu.animated.fadeIn {
+    animation-duration: 0.3s;
+    animation-fill-mode: both;
+    animation-name: fadeIn;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Dropdown user specific styles */
+.dropdown-user {
+    min-width: 250px;
+}
+
+.dropdown-user-scroll {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+/* User box styling */
+.user-box {
+    padding: 1rem;
+    border-bottom: 1px solid #eee;
+}
+
+.user-box .avatar-lg {
+    width: 50px;
+    height: 50px;
+    display: inline-block;
+    vertical-align: top;
+    margin-right: 0.75rem;
+}
+
+.user-box .u-text {
+    display: inline-block;
+    vertical-align: top;
+}
+
+.user-box .u-text h4 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.user-box .u-text p {
+    margin: 0.25rem 0 0 0;
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+
+/* Dropdown item styling */
+.dropdown-user .dropdown-item {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    color: #495057;
+}
+
+.dropdown-user .dropdown-item:hover {
+    background-color: #f8f9fa;
+    color: #16181b;
+}
+
+/* Dropdown divider */
+.dropdown-divider {
+    height: 0;
+    margin: 0.5rem 0;
+    overflow: hidden;
+    border-top: 1px solid #e9ecef;
+}
+
+
+
+/* Fix dropdown positioning issues */
+.topbar-nav .nav-item {
+    position: static !important;
+}
+
+.topbar-nav .dropdown {
+    position: static !important;
+}
+
+/* Ensure proper stacking */
+.main-panel {
+    z-index: 1;
+}
+
+.sidebar {
+    z-index: 1020;
+}
+
+/* Fix for content not being clipped */
+.page-inner {
+    overflow: visible !important;
+}

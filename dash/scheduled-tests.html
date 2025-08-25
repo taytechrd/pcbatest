@@ -31,6 +31,9 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/plugins.min.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/kaiadmin.min.css') }}" />
+    
+    <!-- Global Dropdown Fix CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dropdown-fix.css') }}" />
 
     <!-- Custom CSS for Scheduled Tests -->
     <style>
@@ -319,7 +322,7 @@
                                 <a class="dropdown-toggle profile-pic" data-bs-toggle="dropdown" href="#"
                                     aria-expanded="false">
                                     <div class="avatar-sm">
-                                        <img src="{{ url_for('static', filename='img/profile.jpg') }}" alt="..."
+                                        <img src="{{ url_for('static', filename='img/user.png') }}" alt="..."
                                             class="avatar-img rounded-circle" />
                                     </div>
                                     <span class="profile-username">
@@ -332,16 +335,19 @@
                                         <li>
                                             <div class="user-box">
                                                 <div class="avatar-lg">
-                                                    <img src="{{ url_for('static', filename='img/profile.jpg') }}"
+                                                    <img src="{{ url_for('static', filename='img/user.png') }}"
                                                         alt="image profile" class="avatar-img rounded" />
                                                 </div>
                                                 <div class="u-text">
                                                     <h4>{{ current_user.username }}</h4>
                                                     <p class="text-muted">{{ current_user.email }}</p>
+                                                    <p class="text-muted">Rol: {{ current_user.role.title() if current_user.role else 'Operator' }}</p>
                                                 </div>
                                             </div>
                                         </li>
                                         <li>
+                                            <div class="dropdown-divider"></div>
+                                            <a class="dropdown-item" href="/user-settings">Profilim</a>
                                             <div class="dropdown-divider"></div>
                                             <a class="dropdown-item" href="{{ url_for('logout') }}">Çıkış Yap</a>
                                         </li>
@@ -557,6 +563,9 @@
 
     <!-- Kaiadmin JS -->
     <script src="{{ url_for('static', filename='js/kaiadmin.min.js') }}"></script>
+    
+    <!-- Global Dropdown Initialization -->
+    <script src="{{ url_for('static', filename='js/global-dropdown-init.js') }}"></script>
 
     <!-- Custom JS for Scheduled Tests -->
     <script>

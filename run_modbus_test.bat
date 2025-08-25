@@ -1,0 +1,16 @@
+@echo off
+echo Starting Modbus RTU Simulation Test...
+echo.
+
+echo Starting PLC Simulator...
+start "PLC Simulator" python modbus_plc_simulator.py --port COM10
+
+echo Waiting 3 seconds for simulator to start...
+timeout /t 3 /nobreak > nul
+
+echo Starting Test Client...
+python modbus_test_client.py
+
+echo.
+echo Test completed. Press any key to exit...
+pause > nul

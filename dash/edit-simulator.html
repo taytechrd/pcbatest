@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="tr">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>TayTech - Simulatör Düzenle</title>
+    <meta content="width=device-width, initial-scale=1.0, shrink-to-fit=no" name="viewport" />
+    <link rel="icon" href="{{ url_for('static', filename='img/tay.png') }}" type="image/png" />
+
+    <script src="{{ url_for('static', filename='js/plugin/webfont/webfont.min.js') }}"></script>
+    <script>
+      WebFont.load({
+        google: { families: ["Public Sans:300,400,500,600,700"] },
+        custom: {
+          families: ["Font Awesome 5 Solid", "Font Awesome 5 Regular", "Font Awesome 5 Brands", "simple-line-icons"],
+          urls: ["{{ url_for('static', filename='css/fonts.min.css') }}"],
+        },
+        active: function () { sessionStorage.fonts = true; },
+      });
+    </script>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/plugins.min.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/kaiadmin.min.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/demo.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dropdown-fix.css') }}" />
+  </head>
+  <body>
+    <div class="wrapper">
+      <!-- Sidebar -->
+      <div class="sidebar" data-background-color="dark">
+        <div class="sidebar-logo">
+          <div class="logo-header" data-background-color="dark">
+            <a href="/" class="logo">
+              <img src="{{ url_for('static', filename='img/tay.png') }}" alt="TayTech Logo" class="navbar-brand" height="35" />
+            </a>
+            <div class="nav-toggle">
+              <button class="btn btn-toggle toggle-sidebar"><i class="gg-menu-right"></i></button>
+              <button class="btn btn-toggle sidenav-toggler"><i class="gg-menu-left"></i></button>
+            </div>
+            <button class="topbar-toggler more"><i class="gg-more-vertical-alt"></i></button>
+          </div>
+        </div>
+        
+        <div class="sidebar-wrapper scrollbar scrollbar-inner">
+          <div class="sidebar-content">
+            <ul class="nav nav-secondary">
+              <li class="nav-item"><a href="/"><i class="fas fa-home"></i><p>Dashboard</p></a></li>
+              {% if current_user.is_authenticated and current_user.has_permission('manage_simulators') %}
+              <li class="nav-section">
+                <span class="sidebar-mini-icon"><i class="fa fa-code"></i></span>
+                <h4 class="text-section">Developer Tools</h4>
+              </li>
+              <li class="nav-item">
+                <a data-bs-toggle="collapse" href="#simulatorManagement">
+                  <i class="fas fa-microchip"></i><p>Simulatör Yönetimi</p><span class="caret"></span>
+                </a>
+                <div class="collapse show" id="simulatorManagement">
+                  <ul class="nav nav-collapse">
+                    <li><a href="/simulator-management"><span class="sub-item">Simulatör Listesi</span></a></li>
+                    <li><a href="/add-simulator"><span class="sub-item">Yeni Simulatör</span></a></li>
+                    <li><a href="/add-virtual-port"><span class="sub-item">Virtual Port Ekle</span></a></li>
+                  </ul>
+                </div>
+              </li>
+              {% endif %}
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="main-panel">
+        <!-- Header -->
+        <div class="main-header">
+          <nav class="navbar navbar-header navbar-header-transparent navbar-expand-lg border-bottom">
+            <div class="container-fluid">
+              <ul class="navbar-nav topbar-nav ms-md-auto align-items-center">
+                <li class="nav-item topbar-user dropdown hidden-caret">
+                  <a class="dropdown-toggle profile-pic" data-bs-toggle="dropdown" href="#" aria-expanded="false">
+                    <div class="avatar-sm">
+                      <img src="{{ url_for('static', filename='img/user.png') }}" alt="..." class="avatar-img rounded-circle" />
+                    </div>
+                    <span class="profile-username">
+                      <span class="op-7">Merhaba,</span>
+                      <span class="fw-bold">{{ current_user.username if current_user else 'Developer' }}</span>
+                    </span>
+                  </a>
+                  <ul class="dropdown-menu dropdown-user animated fadeIn">
+                    <div class="dropdown-user-scroll scrollbar-outer">
+                      <li>
+                        <div class="user-box">
+                          <div class="avatar-lg">
+                            <img src="{{ url_for('static', filename='img/user.png') }}" alt="image profile" class="avatar-img rounded" />
+                          </div>
+                          <div class="u-text">
+                            <h4>{{ current_user.username if current_user else 'Developer' }}</h4>
+                            <p class="text-muted">{{ current_user.email if current_user else 'dev@pcbatest.local' }}</p>
+                            <p class="text-muted">Rol: Developer</p>
+                          </div>
+                        </div>
+                      </li>
+                      <li>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="/user-settings">Profilim</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="/logout">Çıkış</a>
+                      </li>
+                    </div>
+                  </ul>
+                </li>
+              </ul>
+            </div>
+          </nav>
+        </div>
+
+        <div class="container">
+          <div class="page-inner">
+            <div class="page-header">
+              <h3 class="fw-bold mb-3">Simulatör Düzenle - {{ simulator.name }}</h3>
+              <ul class="breadcrumbs mb-3">
+                <li class="nav-home"><a href="/"><i class="icon-home"></i></a></li>
+                <li class="separator"><i class="icon-arrow-right"></i></li>
+                <li class="nav-item"><a href="#">Developer Tools</a></li>
+                <li class="separator"><i class="icon-arrow-right"></i></li>
+                <li class="nav-item"><a href="/simulator-management">Simulatör Yönetimi</a></li>
+                <li class="separator"><i class="icon-arrow-right"></i></li>
+                <li class="nav-item"><a href="#">Simulatör Düzenle</a></li>
+              </ul>
+            </div>
+
+            <div class="row">
+              <div class="col-md-12">
+                <div class="card">
+                  <div class="card-header">
+                    <div class="card-title">Simulatör Bilgileri</div>
+                  </div>
+                  <div class="card-body">
+                    <form id="simulatorForm" action="/edit-simulator/{{ simulator.id }}" method="POST">
+                      <!-- General Information -->
+                      <div class="row">
+                        <div class="col-md-6">
+                          <div class="form-group">
+                            <label for="name">Simulatör Adı <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="name" name="name" 
+                                   value="{{ simulator.name }}" required />
+                            <small class="form-text text-muted">Benzersiz bir simulatör adı girin</small>
+                          </div>
+                        </div>
+                        <div class="col-md-6">
+                          <div class="form-group">
+                            <label for="description">Açıklama</label>
+                            <input type="text" class="form-control" id="description" name="description" 
+                                   value="{{ simulator.description or '' }}" />
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Simulator Type (Read-only) -->
+                      <div class="row">
+                        <div class="col-md-12">
+                          <div class="form-group">
+                            <label>Simulatör Tipi</label>
+                            <div class="d-flex">
+                              <div class="form-check me-4">
+                                <input class="form-check-input" type="radio" name="simulator_type" 
+                                       id="typeSerial" value="SERIAL" {{ 'checked' if simulator.simulator_type == 'SERIAL' else '' }} disabled />
+                                <label class="form-check-label" for="typeSerial">
+                                  <i class="fas fa-usb me-2"></i>Serial (RTU)
+                                </label>
+                              </div>
+                              <div class="form-check me-4">
+                                <input class="form-check-input" type="radio" name="simulator_type" 
+                                       id="typeTCP" value="TCP" {{ 'checked' if simulator.simulator_type == 'TCP' else '' }} disabled />
+                                <label class="form-check-label" for="typeTCP">
+                                  <i class="fas fa-network-wired me-2"></i>TCP/IP
+                                </label>
+                              </div>
+                              <div class="form-check">
+                                <input class="form-check-input" type="radio" name="simulator_type" 
+                                       id="typeUSB" value="USB" {{ 'checked' if simulator.simulator_type == 'USB' else '' }} disabled />
+                                <label class="form-check-label" for="typeUSB">
+                                  <i class="fas fa-usb me-2"></i>USB
+                                </label>
+                              </div>
+                            </div>
+                            <small class="form-text text-muted">Simulatör tipi değiştirilemez</small>
+                          </div>
+                        </div>
+                      </div>
+
+                      <hr>
+
+                      <!-- Serial Configuration -->
+                      {% if simulator.simulator_type == 'SERIAL' %}
+                      <div id="serialConfig" class="config-section">
+                        <h5 class="mb-3"><i class="fas fa-usb me-2"></i>Serial Port Ayarları</h5>
+                        <div class="row">
+                          <div class="col-md-4">
+                            <div class="form-group">
+                              <label for="serial_port">Seri Port <span class="text-danger">*</span></label>
+                              <select class="form-control" id="serial_port" name="serial_port">
+                                <option value="">Port Seçin</option>
+                                {% for i in range(1, 21) %}
+                                <option value="COM{{ i }}" {{ 'selected' if simulator.serial_port == 'COM' + i|string else '' }}>COM{{ i }}</option>
+                                {% endfor %}
+                              </select>
+                            </div>
+                          </div>
+                          <div class="col-md-4">
+                            <div class="form-group">
+                              <label for="baud_rate">Baud Rate</label>
+                              <select class="form-control" id="baud_rate" name="baud_rate">
+                                <option value="9600" {{ 'selected' if simulator.baud_rate == 9600 else '' }}>9600</option>
+                                <option value="19200" {{ 'selected' if simulator.baud_rate == 19200 else '' }}>19200</option>
+                                <option value="38400" {{ 'selected' if simulator.baud_rate == 38400 else '' }}>38400</option>
+                                <option value="115200" {{ 'selected' if simulator.baud_rate == 115200 else '' }}>115200</option>
+                              </select>
+                            </div>
+                          </div>
+                          <div class="col-md-4">
+                            <div class="form-group">
+                              <label for="modbus_address">Modbus Adresi</label>
+                              <input type="number" class="form-control" id="modbus_address" name="modbus_address" 
+                                     min="1" max="247" value="{{ simulator.modbus_address or 1 }}" />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      {% endif %}
+
+                      <!-- TCP Configuration -->
+                      {% if simulator.simulator_type == 'TCP' %}
+                      <div id="tcpConfig" class="config-section">
+                        <h5 class="mb-3"><i class="fas fa-network-wired me-2"></i>TCP/IP Ayarları</h5>
+                        <div class="row">
+                          <div class="col-md-4">
+                            <div class="form-group">
+                              <label for="ip_address">IP Adresi</label>
+                              <input type="text" class="form-control" id="ip_address" name="ip_address" 
+                                     value="{{ simulator.ip_address or '127.0.0.1' }}" />
+                            </div>
+                          </div>
+                          <div class="col-md-4">
+                            <div class="form-group">
+                              <label for="tcp_port">Port</label>
+                              <input type="number" class="form-control" id="tcp_port" name="tcp_port" 
+                                     min="1" max="65535" value="{{ simulator.tcp_port or 502 }}" />
+                            </div>
+                          </div>
+                          <div class="col-md-4">
+                            <div class="form-group">
+                              <label for="modbus_address">Modbus Adresi</label>
+                              <input type="number" class="form-control" id="modbus_address" name="modbus_address" 
+                                     min="1" max="247" value="{{ simulator.modbus_address or 1 }}" />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      {% endif %}
+
+                      <!-- USB Configuration -->
+                      {% if simulator.simulator_type == 'USB' %}
+                      <div id="usbConfig" class="config-section">
+                        <h5 class="mb-3"><i class="fas fa-usb me-2"></i>USB Ayarları</h5>
+                        <div class="row">
+                          <div class="col-md-4">
+                            <div class="form-group">
+                              <label for="usb_vendor_id">Vendor ID</label>
+                              <input type="text" class="form-control" id="usb_vendor_id" name="usb_vendor_id" 
+                                     value="{{ simulator.usb_vendor_id or '' }}" placeholder="0x1234" />
+                            </div>
+                          </div>
+                          <div class="col-md-4">
+                            <div class="form-group">
+                              <label for="usb_product_id">Product ID</label>
+                              <input type="text" class="form-control" id="usb_product_id" name="usb_product_id" 
+                                     value="{{ simulator.usb_product_id or '' }}" placeholder="0x5678" />
+                            </div>
+                          </div>
+                          <div class="col-md-4">
+                            <div class="form-group">
+                              <label for="modbus_address">Modbus Adresi</label>
+                              <input type="number" class="form-control" id="modbus_address" name="modbus_address" 
+                                     min="1" max="247" value="{{ simulator.modbus_address or 1 }}" />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      {% endif %}
+
+                      <!-- Modbus Functions -->
+                      <hr>
+                      <h5 class="mb-3"><i class="fas fa-cogs me-2"></i>Desteklenen Modbus Fonksiyonları</h5>
+                      <div class="row">
+                        <div class="col-md-3">
+                          <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="supported_functions" value="1" id="func1" {{ 'checked' if simulator.supported_functions and 1 in simulator.supported_functions else '' }}>
+                            <label class="form-check-label" for="func1">01 - Read Coils</label>
+                          </div>
+                          <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="supported_functions" value="2" id="func2" {{ 'checked' if simulator.supported_functions and 2 in simulator.supported_functions else '' }}>
+                            <label class="form-check-label" for="func2">02 - Read Discrete Inputs</label>
+                          </div>
+                        </div>
+                        <div class="col-md-3">
+                          <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="supported_functions" value="3" id="func3" {{ 'checked' if simulator.supported_functions and 3 in simulator.supported_functions else '' }}>
+                            <label class="form-check-label" for="func3">03 - Read Holding Registers</label>
+                          </div>
+                          <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="supported_functions" value="4" id="func4" {{ 'checked' if simulator.supported_functions and 4 in simulator.supported_functions else '' }}>
+                            <label class="form-check-label" for="func4">04 - Read Input Registers</label>
+                          </div>
+                        </div>
+                        <div class="col-md-3">
+                          <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="supported_functions" value="5" id="func5" {{ 'checked' if simulator.supported_functions and 5 in simulator.supported_functions else '' }}>
+                            <label class="form-check-label" for="func5">05 - Write Single Coil</label>
+                          </div>
+                          <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="supported_functions" value="6" id="func6" {{ 'checked' if simulator.supported_functions and 6 in simulator.supported_functions else '' }}>
+                            <label class="form-check-label" for="func6">06 - Write Single Register</label>
+                          </div>
+                        </div>
+                        <div class="col-md-3">
+                          <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="supported_functions" value="15" id="func15" {{ 'checked' if simulator.supported_functions and 15 in simulator.supported_functions else '' }}>
+                            <label class="form-check-label" for="func15">15 - Write Multiple Coils</label>
+                          </div>
+                          <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="supported_functions" value="16" id="func16" {{ 'checked' if simulator.supported_functions and 16 in simulator.supported_functions else '' }}>
+                            <label class="form-check-label" for="func16">16 - Write Multiple Registers</label>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Active Status -->
+                      <hr>
+                      <div class="row">
+                        <div class="col-md-12">
+                          <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="is_active" id="is_active" {{ 'checked' if simulator.is_active else '' }}>
+                            <label class="form-check-label" for="is_active">
+                              Simulatör Aktif
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Form Actions -->
+                      <div class="card-action">
+                        <button type="submit" class="btn btn-primary">
+                          <i class="fa fa-save"></i> Simulatör Güncelle
+                        </button>
+                        <a href="/simulator-management" class="btn btn-danger ms-2">
+                          <i class="fa fa-times"></i> İptal
+                        </a>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <footer class="footer">
+          <div class="container-fluid d-flex justify-content-between">
+            <div class="copyright">2024, TayTech PCBA Test Sistemi - Developer Mode</div>
+          </div>
+        </footer>
+      </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/core/jquery-3.7.1.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/core/popper.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/core/bootstrap.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/plugin/jquery-scrollbar/jquery.scrollbar.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/plugin/sweetalert/sweetalert.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/kaiadmin.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/global-dropdown-init.js') }}"></script>
+
+    <script>
+      $(document).ready(function () {
+        // Form validation
+        $('#simulatorForm').on('submit', function(e) {
+          if (!validateForm()) {
+            e.preventDefault();
+          }
+        });
+      });
+
+      function validateForm() {
+        var name = $('#name').val().trim();
+        
+        if (!name) {
+          swal("Hata!", "Simulatör adı zorunludur!", "error");
+          return false;
+        }
+        
+        return true;
+      }
+    </script>
+  </body>
+</html>

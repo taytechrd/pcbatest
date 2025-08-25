@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dropdown Test</title>
+    
+    <!-- Same CSS and JS files as main dashboard -->
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="assets/css/plugins.min.css" />
+    <link rel="stylesheet" href="assets/css/kaiadmin.min.css" />
+    
+    <style>
+        body { padding: 20px; }
+        .test-section { margin-bottom: 30px; padding: 20px; border: 1px solid #ddd; }
+    </style>
+</head>
+<body>
+    <h1>Bootstrap Dropdown Test</h1>
+    
+    <div class="test-section">
+        <h3>Test 1: Basic Bootstrap 5 Dropdown</h3>
+        <div class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Basic Dropdown
+            </button>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="#">Action</a></li>
+                <li><a class="dropdown-item" href="#">Another action</a></li>
+                <li><a class="dropdown-item" href="#">Something else here</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h3>Test 2: Profile Dropdown (Exact Copy from Dashboard)</h3>
+        <nav class="navbar navbar-expand-lg">
+            <ul class="navbar-nav">
+                <li class="nav-item topbar-user dropdown hidden-caret">
+                    <a class="dropdown-toggle profile-pic" data-bs-toggle="dropdown" href="#" aria-expanded="false">
+                        <div class="avatar-sm">
+                            <img src="assets/img/user.png" alt="..." class="avatar-img rounded-circle" />
+                        </div>
+                        <span class="profile-username">
+                            <span class="op-7">Merhaba,</span>
+                            <span class="fw-bold">Test User</span>
+                        </span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-user animated fadeIn">
+                        <div class="dropdown-user-scroll scrollbar-outer">
+                            <li>
+                                <div class="user-box">
+                                    <div class="avatar-lg">
+                                        <img src="assets/img/user.png" alt="image profile" class="avatar-img rounded" />
+                                    </div>
+                                    <div class="u-text">
+                                        <h4>Test User</h4>
+                                        <p class="text-muted">test@example.com</p>
+                                        <p class="text-muted">Rol: Admin</p>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="#">Profilim</a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="#">Çıkış</a>
+                            </li>
+                        </div>
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    <div class="test-section">
+        <h3>Test 3: JavaScript Console Output</h3>
+        <button id="debugBtn" class="btn btn-info">Check Dropdown Elements</button>
+        <div id="debugOutput" style="margin-top: 10px; padding: 10px; background: #f8f9fa; border: 1px solid #ddd;"></div>
+    </div>
+
+    <!-- Same JavaScript files as main dashboard -->
+    <script src="assets/js/core/jquery-3.7.1.min.js"></script>
+    <script src="assets/js/core/popper.min.js"></script>
+    <script src="assets/js/core/bootstrap.min.js"></script>
+    <script src="assets/js/kaiadmin.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            console.log('Dropdown test page loaded');
+            console.log('jQuery version:', $.fn.jquery);
+            console.log('Bootstrap object:', typeof bootstrap !== 'undefined' ? bootstrap : 'Bootstrap not found');
+            
+            // Test dropdown functionality
+            $('#debugBtn').click(function() {
+                const output = $('#debugOutput');
+                output.html('');
+                
+                // Check if dropdowns exist
+                const dropdowns = $('[data-bs-toggle="dropdown"]');
+                output.append('<strong>Dropdowns found:</strong> ' + dropdowns.length + '<br>');
+                
+                // Check Bootstrap
+                if (typeof bootstrap !== 'undefined') {
+                    output.append('<strong>Bootstrap:</strong> Available<br>');
+                    output.append('<strong>Bootstrap version:</strong> ' + (bootstrap.Tooltip?.VERSION || 'Unknown') + '<br>');
+                } else {
+                    output.append('<strong>Bootstrap:</strong> Not available<br>');
+                }
+                
+                // Check jQuery
+                output.append('<strong>jQuery:</strong> ' + (typeof $ !== 'undefined' ? $.fn.jquery : 'Not available') + '<br>');
+                
+                // Test manual dropdown initialization
+                try {
+                    dropdowns.each(function() {
+                        if (typeof bootstrap !== 'undefined' && bootstrap.Dropdown) {
+                            new bootstrap.Dropdown(this);
+                            output.append('<strong>Dropdown initialized:</strong> Success<br>');
+                        } else {
+                            output.append('<strong>Dropdown initialization:</strong> Failed - Bootstrap.Dropdown not available<br>');
+                        }
+                    });
+                } catch (e) {
+                    output.append('<strong>Dropdown initialization error:</strong> ' + e.message + '<br>');
+                }
+                
+                // Check CSS classes
+                const profileDropdown = $('.profile-pic');
+                output.append('<strong>Profile dropdown found:</strong> ' + (profileDropdown.length > 0 ? 'Yes' : 'No') + '<br>');
+                
+                if (profileDropdown.length > 0) {
+                    output.append('<strong>Profile dropdown classes:</strong> ' + profileDropdown.attr('class') + '<br>');
+                    output.append('<strong>Data-bs-toggle:</strong> ' + profileDropdown.attr('data-bs-toggle') + '<br>');
+                }
+            });
+            
+            // Manual click test
+            $('.profile-pic').on('click', function(e) {
+                console.log('Profile dropdown clicked');
+                console.log('Event:', e);
+                console.log('Target:', e.target);
+                
+                // Manual dropdown toggle
+                const dropdown = $(this).next('.dropdown-menu');
+                if (dropdown.hasClass('show')) {
+                    dropdown.removeClass('show');
+                } else {
+                    dropdown.addClass('show');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

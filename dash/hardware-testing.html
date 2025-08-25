@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Hardware Testing - TayTech PCBA Test System</title>
+  <meta content="width=device-width, initial-scale=1.0, shrink-to-fit=no" name="viewport" />
+  <link rel="icon" href="{{ url_for('static', filename='img/tay.png') }}" type="image/x-icon" />
+
+  <!-- Fonts and icons -->
+  <script src="{{ url_for('static', filename='js/plugin/webfont/webfont.min.js') }}"></script>
+  <script>
+    WebFont.load({
+      google: { families: ["Public Sans:300,400,500,600,700"] },
+      custom: {
+        families: [
+          "Font Awesome 5 Solid",
+          "Font Awesome 5 Regular", 
+          "Font Awesome 5 Brands",
+          "simple-line-icons",
+        ],
+        urls: ["{{ url_for('static', filename='css/fonts.min.css') }}"],
+      },
+      active: function () {
+        sessionStorage.fonts = true;
+      },
+    });
+  </script>
+
+  <!-- CSS Files -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/plugins.min.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/kaiadmin.min.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/overflow-fix.css') }}" />
+</head>
+
+<body>
+  <div class="wrapper">
+    <!-- Sidebar -->
+    <div class="sidebar" data-background-color="dark">
+      <div class="sidebar-logo">
+        <!-- Logo Header -->
+        <div class="logo-header" data-background-color="dark">
+          <a href="{{ url_for('dashboard') }}" class="logo">
+            <img src="{{ url_for('static', filename='img/tay.png') }}" alt="TayTech Logo" class="navbar-brand" height="35" />
+          </a>
+          <div class="nav-toggle">
+            <button class="btn btn-toggle toggle-sidebar">
+              <i class="gg-menu-right"></i>
+            </button>
+            <button class="btn btn-toggle sidenav-toggler">
+              <i class="gg-menu-left"></i>
+            </button>
+          </div>
+          <button class="topbar-toggler more">
+            <i class="gg-more-vertical-alt"></i>
+          </button>
+        </div>
+        <!-- End Logo Header -->
+      </div>
+      <div class="sidebar-wrapper scrollbar scrollbar-inner">
+        <div class="sidebar-content">
+          <ul class="nav nav-secondary">
+            <li class="nav-item">
+              <a href="{{ url_for('dashboard') }}">
+                <i class="fas fa-home"></i>
+                <p>Dashboard</p>
+              </a>
+            </li>
+            <li class="nav-section">
+              <span class="sidebar-mini-icon">
+                <i class="fa fa-ellipsis-h"></i>
+              </span>
+              <h4 class="text-section">Hardware Integration</h4>
+            </li>
+            <li class="nav-item">
+              <a href="{{ url_for('hardware_setup') }}">
+                <i class="fas fa-cogs"></i>
+                <p>Hardware Setup</p>
+              </a>
+            </li>
+            <li class="nav-item active">
+              <a href="{{ url_for('hardware_testing') }}">
+                <i class="fas fa-play-circle"></i>
+                <p>Hardware Testing</p>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <!-- End Sidebar -->
+
+    <div class="main-panel">
+      <div class="main-header">
+        <div class="main-header-logo">
+          <!-- Logo Header -->
+          <div class="logo-header" data-background-color="dark">
+            <a href="{{ url_for('dashboard') }}" class="logo">
+              <img src="{{ url_for('static', filename='img/tay.png') }}" alt="TayTech Logo" class="navbar-brand" height="35" />
+            </a>
+            <div class="nav-toggle">
+              <button class="btn btn-toggle toggle-sidebar">
+                <i class="gg-menu-right"></i>
+              </button>
+              <button class="btn btn-toggle sidenav-toggler">
+                <i class="gg-menu-left"></i>
+              </button>
+            </div>
+            <button class="topbar-toggler more">
+              <i class="gg-more-vertical-alt"></i>
+            </button>
+          </div>
+          <!-- End Logo Header -->
+        </div>
+        <!-- Navbar Header -->
+        <nav class="navbar navbar-header navbar-header-transparent navbar-expand-lg border-bottom">
+          <div class="container-fluid">
+            <nav class="navbar navbar-header-left navbar-expand-lg navbar-form nav-search p-0 d-none d-lg-flex">
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <button type="submit" class="btn btn-search pe-1">
+                    <i class="fa fa-search search-icon"></i>
+                  </button>
+                </div>
+                <input type="text" placeholder="Search..." class="form-control" />
+              </div>
+            </nav>
+
+            <ul class="navbar-nav topbar-nav ms-md-auto align-items-center">
+              <li class="nav-item topbar-user dropdown hidden-caret">
+                <a class="dropdown-toggle profile-pic" data-bs-toggle="dropdown" href="#" aria-expanded="false">
+                  <div class="avatar-sm">
+                    <img src="{{ url_for('static', filename='img/profile.jpg') }}" alt="..." class="avatar-img rounded-circle" />
+                  </div>
+                  <span class="profile-username">
+                    <span class="op-7">Hi,</span>
+                    <span class="fw-bold">{{ current_user.username }}</span>
+                  </span>
+                </a>
+                <ul class="dropdown-menu dropdown-user animated fadeIn">
+                  <div class="dropdown-user-scroll scrollbar-outer">
+                    <li>
+                      <div class="user-box">
+                        <div class="avatar-lg">
+                          <img src="{{ url_for('static', filename='img/profile.jpg') }}" alt="image profile" class="avatar-img rounded" />
+                        </div>
+                        <div class="u-text">
+                          <h4>{{ current_user.username }}</h4>
+                          <p class="text-muted">{{ current_user.email }}</p>
+                        </div>
+                      </div>
+                    </li>
+                    <li>
+                      <div class="dropdown-divider"></div>
+                      <a class="dropdown-item" href="{{ url_for('user_settings') }}">Account Setting</a>
+                      <div class="dropdown-divider"></div>
+                      <a class="dropdown-item" href="{{ url_for('logout') }}">Logout</a>
+                    </li>
+                  </div>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </nav>
+        <!-- End Navbar -->
+      </div>
+
+      <div class="container">
+        <div class="page-inner">
+          <div class="page-header">
+            <h3 class="fw-bold mb-3">Hardware Testing</h3>
+            <ul class="breadcrumbs mb-3">
+              <li class="nav-home">
+                <a href="{{ url_for('dashboard') }}">
+                  <i class="icon-home"></i>
+                </a>
+              </li>
+              <li class="separator">
+                <i class="icon-arrow-right"></i>
+              </li>
+              <li class="nav-item">
+                <a href="#">Hardware Integration</a>
+              </li>
+              <li class="separator">
+                <i class="icon-arrow-right"></i>
+              </li>
+              <li class="nav-item">
+                <a href="#">Hardware Testing</a>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Test Control Panel -->
+          <div class="row">
+            <div class="col-md-8">
+              <div class="card">
+                <div class="card-header">
+                  <h4 class="card-title">Test Configuration</h4>
+                </div>
+                <div class="card-body">
+                  <div class="row">
+                    <!-- Voltage Test Configuration -->
+                    <div class="col-md-6">
+                      <div class="card mb-3">
+                        <div class="card-header">
+                          <h5>Voltage Test</h5>
+                        </div>
+                        <div class="card-body">
+                          <div id="voltageTestPoints">
+                            <div class="voltage-point mb-3">
+                              <div class="row">
+                                <div class="col-4">
+                                  <input type="number" class="form-control" placeholder="Voltage (V)" step="0.1">
+                                </div>
+                                <div class="col-3">
+                                  <input type="number" class="form-control" placeholder="Min" step="0.1">
+                                </div>
+                                <div class="col-3">
+                                  <input type="number" class="form-control" placeholder="Max" step="0.1">
+                                </div>
+                                <div class="col-2">
+                                  <button class="btn btn-danger btn-sm remove-point">
+                                    <i class="fa fa-trash"></i>
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <button class="btn btn-success btn-sm mb-3" id="addVoltagePoint">
+                            <i class="fa fa-plus"></i> Add Point
+                          </button>
+                          <div>
+                            <button class="btn btn-primary" id="startVoltageTest">
+                              <i class="fas fa-bolt"></i> Start Voltage Test
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Current Test Configuration -->
+                    <div class="col-md-6">
+                      <div class="card mb-3">
+                        <div class="card-header">
+                          <h5>Current Test</h5>
+                        </div>
+                        <div class="card-body">
+                          <div id="currentTestPoints">
+                            <div class="current-point mb-3">
+                              <div class="row">
+                                <div class="col-4">
+                                  <input type="number" class="form-control" placeholder="Current (A)" step="0.01">
+                                </div>
+                                <div class="col-3">
+                                  <input type="number" class="form-control" placeholder="Min" step="0.01">
+                                </div>
+                                <div class="col-3">
+                                  <input type="number" class="form-control" placeholder="Max" step="0.01">
+                                </div>
+                                <div class="col-2">
+                                  <button class="btn btn-danger btn-sm remove-point">
+                                    <i class="fa fa-trash"></i>
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <button class="btn btn-success btn-sm mb-3" id="addCurrentPoint">
+                            <i class="fa fa-plus"></i> Add Point
+                          </button>
+                          <div>
+                            <button class="btn btn-primary" id="startCurrentTest">
+                              <i class="fas fa-flash"></i> Start Current Test
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Test Status Panel -->
+            <div class="col-md-4">
+              <div class="card">
+                <div class="card-header">
+                  <h4 class="card-title">Test Status</h4>
+                </div>
+                <div class="card-body">
+                  <div id="testStatusContainer">
+                    <div class="text-center text-muted">
+                      <i class="fas fa-info-circle fa-2x"></i>
+                      <p class="mt-2">No active tests</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Hardware Status Panel -->
+              <div class="card mt-3">
+                <div class="card-header">
+                  <div class="d-flex align-items-center">
+                    <h4 class="card-title">Hardware Status</h4>
+                    <button class="btn btn-sm btn-primary ms-auto" id="refreshHardwareStatus">
+                      <i class="fa fa-refresh"></i>
+                    </button>
+                  </div>
+                </div>
+                <div class="card-body">
+                  <div id="hardwareStatusContainer">
+                    <div class="text-center text-muted">
+                      <i class="fas fa-spinner fa-spin"></i>
+                      <p class="mt-2">Loading...</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Test Results Panel -->
+          <div class="row">
+            <div class="col-12">
+              <div class="card">
+                <div class="card-header">
+                  <h4 class="card-title">Test Results</h4>
+                </div>
+                <div class="card-body">
+                  <div id="testResultsContainer">
+                    <div class="text-center text-muted">
+                      <i class="fas fa-chart-line fa-2x"></i>
+                      <p class="mt-2">Test results will appear here</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <footer class="footer">
+        <div class="container-fluid d-flex justify-content-center">
+          <div class="copyright">
+            2025, made with <i class="fa fa-heart heart text-danger"></i> by
+            <a href="https://taytech.com.tr">Taytech</a>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </div>
+
+  <!-- Core JS Files -->
+  <script src="{{ url_for('static', filename='js/core/jquery-3.7.1.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/core/popper.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/core/bootstrap.min.js') }}"></script>
+
+  <!-- jQuery Scrollbar -->
+  <script src="{{ url_for('static', filename='js/plugin/jquery-scrollbar/jquery.scrollbar.min.js') }}"></script>
+
+  <!-- Kaiadmin JS -->
+  <script src="{{ url_for('static', filename='js/kaiadmin.min.js') }}"></script>
+
+  <!-- Hardware Testing JS -->
+  <script>
+    let activeTestId = null;
+    let statusCheckInterval = null;
+
+    $(document).ready(function() {
+      loadHardwareStatus();
+
+      // Add voltage test point
+      $('#addVoltagePoint').click(function() {
+        const pointHtml = `
+          <div class="voltage-point mb-3">
+            <div class="row">
+              <div class="col-4">
+                <input type="number" class="form-control" placeholder="Voltage (V)" step="0.1">
+              </div>
+              <div class="col-3">
+                <input type="number" class="form-control" placeholder="Min" step="0.1">
+              </div>
+              <div class="col-3">
+                <input type="number" class="form-control" placeholder="Max" step="0.1">
+              </div>
+              <div class="col-2">
+                <button class="btn btn-danger btn-sm remove-point">
+                  <i class="fa fa-trash"></i>
+                </button>
+              </div>
+            </div>
+          </div>`;
+        $('#voltageTestPoints').append(pointHtml);
+      });
+
+      // Add current test point
+      $('#addCurrentPoint').click(function() {
+        const pointHtml = `
+          <div class="current-point mb-3">
+            <div class="row">
+              <div class="col-4">
+                <input type="number" class="form-control" placeholder="Current (A)" step="0.01">
+              </div>
+              <div class="col-3">
+                <input type="number" class="form-control" placeholder="Min" step="0.01">
+              </div>
+              <div class="col-3">
+                <input type="number" class="form-control" placeholder="Max" step="0.01">
+              </div>
+              <div class="col-2">
+                <button class="btn btn-danger btn-sm remove-point">
+                  <i class="fa fa-trash"></i>
+                </button>
+              </div>
+            </div>
+          </div>`;
+        $('#currentTestPoints').append(pointHtml);
+      });
+
+      // Remove test point
+      $(document).on('click', '.remove-point', function() {
+        $(this).closest('.voltage-point, .current-point').remove();
+      });
+
+      // Start voltage test
+      $('#startVoltageTest').click(function() {
+        startVoltageTest();
+      });
+
+      // Start current test
+      $('#startCurrentTest').click(function() {
+        startCurrentTest();
+      });
+
+      // Refresh hardware status
+      $('#refreshHardwareStatus').click(function() {
+        loadHardwareStatus();
+      });
+    });
+
+    function loadHardwareStatus() {
+      $.ajax({
+        url: '/api/hardware/status',
+        method: 'GET',
+        success: function(response) {
+          if (response.success) {
+            displayHardwareStatus(response);
+          } else {
+            $('#hardwareStatusContainer').html('<div class=\"alert alert-warning\">Failed to load hardware status</div>');
+          }
+        },
+        error: function(xhr) {
+          const errorMsg = xhr.responseJSON?.error || 'Hardware not available';
+          $('#hardwareStatusContainer').html(`<div class=\"alert alert-danger\">${errorMsg}</div>`);
+        }
+      });
+    }
+
+    function displayHardwareStatus(data) {
+      let html = '';
+      
+      if (data.connected_equipment && data.connected_equipment.length > 0) {
+        data.connected_equipment.forEach(function(equipment) {
+          const healthStatus = data.health_check?.[equipment];
+          const statusClass = healthStatus ? 'text-success' : 'text-warning';
+          const statusIcon = healthStatus ? 'fa-check-circle' : 'fa-exclamation-triangle';
+          
+          html += `<div class=\"d-flex justify-content-between align-items-center mb-2\">
+                     <span>${equipment}</span>
+                     <span class=\"${statusClass}\">
+                       <i class=\"fas ${statusIcon}\"></i>
+                     </span>
+                   </div>`;
+        });
+      } else {
+        html = '<div class=\"alert alert-info\">No equipment connected</div>';
+      }
+      
+      $('#hardwareStatusContainer').html(html);
+    }
+
+    function startVoltageTest() {
+      const voltagePoints = [];
+      $('#voltageTestPoints .voltage-point').each(function() {
+        const inputs = $(this).find('input');
+        const voltage = parseFloat(inputs.eq(0).val());
+        const minLimit = parseFloat(inputs.eq(1).val());
+        const maxLimit = parseFloat(inputs.eq(2).val());
+        
+        if (!isNaN(voltage)) {
+          const point = { voltage: voltage };
+          if (!isNaN(minLimit)) point.min_limit = minLimit;
+          if (!isNaN(maxLimit)) point.max_limit = maxLimit;
+          voltagePoints.push(point);
+        }
+      });
+
+      if (voltagePoints.length === 0) {
+        alert('Please add at least one voltage test point');
+        return;
+      }
+
+      $.ajax({
+        url: '/api/hardware/test/voltage',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({
+          test_name: 'Hardware Voltage Test',
+          voltage_points: voltagePoints
+        }),
+        success: function(response) {
+          if (response.success) {
+            activeTestId = response.test_id;
+            startTestStatusMonitoring();
+            updateTestStatus('Test started successfully', 'info');
+          } else {
+            alert('Failed to start voltage test');
+          }
+        },
+        error: function(xhr) {
+          const errorMsg = xhr.responseJSON?.error || 'Failed to start voltage test';
+          alert(errorMsg);
+        }
+      });
+    }
+
+    function startCurrentTest() {
+      const currentPoints = [];
+      $('#currentTestPoints .current-point').each(function() {
+        const inputs = $(this).find('input');
+        const currentLimit = parseFloat(inputs.eq(0).val());
+        const minLimit = parseFloat(inputs.eq(1).val());
+        const maxLimit = parseFloat(inputs.eq(2).val());
+        
+        if (!isNaN(currentLimit)) {
+          const point = { current_limit: currentLimit };
+          if (!isNaN(minLimit)) point.min_limit = minLimit;
+          if (!isNaN(maxLimit)) point.max_limit = maxLimit;
+          currentPoints.push(point);
+        }
+      });
+
+      if (currentPoints.length === 0) {
+        alert('Please add at least one current test point');
+        return;
+      }
+
+      $.ajax({
+        url: '/api/hardware/test/current',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({
+          test_name: 'Hardware Current Test',
+          current_points: currentPoints
+        }),
+        success: function(response) {
+          if (response.success) {
+            activeTestId = response.test_id;
+            startTestStatusMonitoring();
+            updateTestStatus('Test started successfully', 'info');
+          } else {
+            alert('Failed to start current test');
+          }
+        },
+        error: function(xhr) {
+          const errorMsg = xhr.responseJSON?.error || 'Failed to start current test';
+          alert(errorMsg);
+        }
+      });
+    }
+
+    function startTestStatusMonitoring() {
+      if (statusCheckInterval) {
+        clearInterval(statusCheckInterval);
+      }
+
+      statusCheckInterval = setInterval(function() {
+        checkTestStatus();
+      }, 2000); // Check every 2 seconds
+    }
+
+    function checkTestStatus() {
+      if (!activeTestId) return;
+
+      $.ajax({
+        url: `/api/hardware/test/status/${activeTestId}`,
+        method: 'GET',
+        success: function(response) {
+          if (response.success) {
+            displayTestStatus(response.test_status);
+            
+            // Check if test is completed
+            if (response.test_status.end_time) {
+              clearInterval(statusCheckInterval);
+              statusCheckInterval = null;
+              activeTestId = null;
+              displayTestResults(response.test_status);
+            }
+          }
+        },
+        error: function(xhr) {
+          console.error('Failed to check test status:', xhr);
+        }
+      });
+    }
+
+    function displayTestStatus(testStatus) {
+      let html = `<div class=\"test-status\">
+                    <h6>${testStatus.name}</h6>
+                    <div class=\"progress mb-2\">
+                      <div class=\"progress-bar\" role=\"progressbar\" style=\"width: ${testStatus.progress}%\" 
+                           aria-valuenow=\"${testStatus.progress}\" aria-valuemin=\"0\" aria-valuemax=\"100\">
+                        ${testStatus.progress}%
+                      </div>
+                    </div>
+                    <p><strong>Status:</strong> ${testStatus.total_steps - testStatus.completed_steps} / ${testStatus.total_steps} steps remaining</p>`;
+      
+      if (testStatus.start_time) {
+        html += `<p><strong>Started:</strong> ${new Date(testStatus.start_time).toLocaleTimeString()}</p>`;
+      }
+      
+      if (testStatus.end_time) {
+        html += `<p><strong>Completed:</strong> ${new Date(testStatus.end_time).toLocaleTimeString()}</p>`;
+      }
+
+      html += '</div>';
+      
+      $('#testStatusContainer').html(html);
+    }
+
+    function displayTestResults(testStatus) {
+      let html = `<div class=\"test-results\">
+                    <h5>Test Completed: ${testStatus.name}</h5>
+                    <div class=\"row\">`;
+
+      testStatus.steps.forEach(function(step) {
+        if (step.measurements && step.measurements.length > 0) {
+          step.measurements.forEach(function(measurement) {
+            const isWithinLimits = (measurement.min_limit === null || measurement.value >= measurement.min_limit) &&
+                                 (measurement.max_limit === null || measurement.value <= measurement.max_limit);
+            const resultClass = isWithinLimits ? 'bg-success' : 'bg-danger';
+            const resultText = isWithinLimits ? 'PASS' : 'FAIL';
+
+            html += `<div class=\"col-md-6 mb-3\">
+                       <div class=\"card\">
+                         <div class=\"card-body\">
+                           <h6>${step.name}</h6>
+                           <p><strong>${measurement.parameter}:</strong> ${measurement.value} ${measurement.unit}</p>`;
+            
+            if (measurement.min_limit !== null || measurement.max_limit !== null) {
+              html += `<p><strong>Limits:</strong> `;
+              if (measurement.min_limit !== null) html += `Min: ${measurement.min_limit} `;
+              if (measurement.max_limit !== null) html += `Max: ${measurement.max_limit}`;
+              html += `</p>`;
+            }
+            
+            html += `<span class=\"badge ${resultClass}\">${resultText}</span>
+                       </div>
+                     </div>
+                   </div>`;
+          });
+        }
+      });
+
+      html += '</div></div>';
+      
+      $('#testResultsContainer').html(html);
+    }
+
+    function updateTestStatus(message, type) {
+      const alertClass = `alert-${type}`;
+      $('#testStatusContainer').html(`<div class=\"alert ${alertClass}\">${message}</div>`);
+    }
+
+    // Stop test on page unload
+    $(window).on('beforeunload', function() {
+      if (activeTestId) {
+        $.ajax({
+          url: `/api/hardware/test/stop/${activeTestId}`,
+          method: 'POST',
+          async: false
+        });
+      }
+    });
+  </script>
+</body>
+
+</html>

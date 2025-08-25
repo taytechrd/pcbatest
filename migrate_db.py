@@ -56,6 +56,11 @@ def create_default_permissions():
         ('test_view', 'Test Görüntüleme', 'Test sonuçlarını görüntüleme'),
         ('report_generate', 'Rapor Oluşturma', 'Rapor oluşturma ve dışa aktarma'),
         ('system_settings', 'Sistem Ayarları', 'Sistem ayarlarını değiştirme'),
+        ('manage_hardware', 'Donanım Yönetimi', 'Test donanımı yapılandırma ve yönetimi'),
+        ('run_hardware_tests', 'Donanım Testleri', 'Gerçek donanım ile test çalıştırma'),
+        ('manage_test_types', 'Test Tipi Yönetimi', 'Test tiplerini ekleme, düzenleme, silme'),
+        ('manage_test_parameters', 'Test Parametre Yönetimi', 'Test parametrelerini yönetme'),
+        ('manage_system_settings', 'Sistem Ayarları Yönetimi', 'Sistem ayarlarını değiştirme yetkisi')
     ]
     
     for perm_name, display_name, description in permissions:

@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Dropdown Test</title>
+    
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="assets/css/plugins.min.css" />
+    <link rel="stylesheet" href="assets/css/kaiadmin.min.css" />
+    
+    <!-- Global Dropdown Fix CSS -->
+    <link rel="stylesheet" href="assets/css/dropdown-fix.css" />
+    
+    <style>
+        body { padding: 2rem; background: #f8f9fa; }
+        .test-section { margin: 2rem 0; padding: 1rem; background: white; border-radius: 0.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .status { padding: 0.5rem; margin: 0.5rem 0; border-radius: 0.25rem; }
+        .status.success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .status.error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .status.info { background-color: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Global Dropdown Solution Test</h1>
+        <p>This page tests whether the global dropdown functionality is working across the system.</p>
+        
+        <div class="test-section">
+            <h3>Test 1: Bootstrap and jQuery Loading</h3>
+            <div id="bootstrap-status" class="status info">Testing...</div>
+            <div id="jquery-status" class="status info">Testing...</div>
+            <div id="global-script-status" class="status info">Testing...</div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Test 2: Profile Dropdown (Simulated)</h3>
+            <nav class="navbar navbar-expand-lg" style="background-color: #007bff;">
+                <ul class="navbar-nav topbar-nav ms-auto">
+                    <li class="nav-item topbar-user dropdown hidden-caret">
+                        <a class="dropdown-toggle profile-pic" data-bs-toggle="dropdown" href="#" aria-expanded="false" style="color: white;">
+                            <div class="avatar-sm">
+                                <img src="assets/img/user.png" alt="..." class="avatar-img rounded-circle" />
+                            </div>
+                            <span class="profile-username">
+                                <span class="op-7">Test,</span>
+                                <span class="fw-bold">User</span>
+                            </span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-user animated fadeIn">
+                            <div class="dropdown-user-scroll scrollbar-outer">
+                                <li>
+                                    <div class="user-box">
+                                        <div class="avatar-lg">
+                                            <img src="assets/img/user.png" alt="image profile" class="avatar-img rounded" />
+                                        </div>
+                                        <div class="u-text">
+                                            <h4>Test User</h4>
+                                            <p class="text-muted">test@example.com</p>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="dropdown-divider"></div>
+                                    <a class="dropdown-item" href="#">Profile</a>
+                                    <a class="dropdown-item" href="#">Settings</a>
+                                    <div class="dropdown-divider"></div>
+                                    <a class="dropdown-item" href="#">Logout</a>
+                                </li>
+                            </div>
+                        </ul>
+                    </li>
+                </ul>
+            </nav>
+            <div id="dropdown-test-status" class="status info">Click the profile dropdown above to test functionality.</div>
+        </div>
+
+        <div class="test-section">
+            <h3>Test 3: Regular Bootstrap Dropdown</h3>
+            <div class="dropdown">
+                <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    Regular Dropdown
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="#">Action</a></li>
+                    <li><a class="dropdown-item" href="#">Another action</a></li>
+                    <li><a class="dropdown-item" href="#">Something else here</a></li>
+                </ul>
+            </div>
+            <div id="regular-dropdown-status" class="status info">Click the regular dropdown above to test.</div>
+        </div>
+
+        <div class="test-section">
+            <h3>Test Results</h3>
+            <div id="overall-status" class="status info">Running tests...</div>
+            <button onclick="runTests()" class="btn btn-primary">Re-run Tests</button>
+        </div>
+    </div>
+
+    <!-- Core JS Files -->
+    <script src="assets/js/core/jquery-3.7.1.min.js"></script>
+    <script src="assets/js/core/popper.min.js"></script>
+    <script src="assets/js/core/bootstrap.min.js"></script>
+    
+    <!-- Kaiadmin JS -->
+    <script src="assets/js/kaiadmin.min.js"></script>
+    
+    <!-- Global Dropdown Initialization -->
+    <script src="assets/js/global-dropdown-init.js"></script>
+
+    <script>
+        function updateStatus(elementId, message, type) {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.className = `status ${type}`;
+        }
+
+        function runTests() {
+            console.log('Running global dropdown tests...');
+            
+            // Test 1: Check if dependencies are loaded
+            if (typeof $ !== 'undefined') {
+                updateStatus('jquery-status', '✓ jQuery is loaded (version: ' + $.fn.jquery + ')', 'success');
+            } else {
+                updateStatus('jquery-status', '✗ jQuery is not loaded', 'error');
+            }
+
+            if (typeof bootstrap !== 'undefined') {
+                updateStatus('bootstrap-status', '✓ Bootstrap is loaded', 'success');
+            } else {
+                updateStatus('bootstrap-status', '✗ Bootstrap is not loaded', 'error');
+            }
+
+            if (typeof window.reinitializeDropdowns !== 'undefined') {
+                updateStatus('global-script-status', '✓ Global dropdown script is loaded', 'success');
+            } else {
+                updateStatus('global-script-status', '✗ Global dropdown script is not loaded', 'error');
+            }
+
+            // Test dropdown functionality
+            const profileDropdown = document.querySelector('.topbar-user .dropdown-menu');
+            if (profileDropdown) {
+                updateStatus('dropdown-test-status', '✓ Profile dropdown element found', 'success');
+            } else {
+                updateStatus('dropdown-test-status', '✗ Profile dropdown element not found', 'error');
+            }
+
+            const regularDropdown = document.querySelector('.dropdown .dropdown-menu');
+            if (regularDropdown) {
+                updateStatus('regular-dropdown-status', '✓ Regular dropdown element found', 'success');
+            } else {
+                updateStatus('regular-dropdown-status', '✗ Regular dropdown element not found', 'error');
+            }
+
+            // Overall status
+            const errors = document.querySelectorAll('.status.error').length;
+            if (errors === 0) {
+                updateStatus('overall-status', '✓ All tests passed! Global dropdown solution is working.', 'success');
+            } else {
+                updateStatus('overall-status', `✗ ${errors} test(s) failed. Please check the issues above.`, 'error');
+            }
+        }
+
+        // Auto-run tests when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(runTests, 500);
+        });
+
+        // Add click event listeners for dropdown testing
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.topbar-user .dropdown-toggle')) {
+                setTimeout(function() {
+                    const isOpen = document.querySelector('.topbar-user .dropdown-menu.show');
+                    if (isOpen) {
+                        updateStatus('dropdown-test-status', '✓ Profile dropdown opened successfully!', 'success');
+                    }
+                }, 100);
+            }
+            
+            if (e.target.closest('.dropdown .dropdown-toggle')) {
+                setTimeout(function() {
+                    const isOpen = document.querySelector('.dropdown .dropdown-menu.show');
+                    if (isOpen) {
+                        updateStatus('regular-dropdown-status', '✓ Regular dropdown opened successfully!', 'success');
+                    }
+                }, 100);
+            }
+        });
+    </script>
+</body>
+</html>

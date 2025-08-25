@@ -491,6 +491,169 @@ class TestConfiguration(db.Model):
         else:
             return self.value
 
+# Simulator Management Models
+class Simulator(db.Model):
+    __tablename__ = 'simulators'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    simulator_type = db.Column(db.String(20), nullable=False)  # 'SERIAL', 'TCP', 'USB'
+    description = db.Column(db.Text, nullable=True)
+    is_active = db.Column(db.Boolean, default=True)
+    is_running = db.Column(db.Boolean, default=False)
+    
+    # Connection configuration
+    connection_config = db.Column(db.JSON, nullable=True)  # Flexible config storage
+    
+    # Serial Port Configuration
+    serial_port = db.Column(db.String(20), nullable=True)  # COM1, COM2, etc.
+    baud_rate = db.Column(db.Integer, default=9600)
+    data_bits = db.Column(db.Integer, default=8)
+    parity = db.Column(db.String(10), default='NONE')  # NONE, EVEN, ODD
+    stop_bits = db.Column(db.Integer, default=1)
+    
+    # TCP Configuration
+    ip_address = db.Column(db.String(15), nullable=True)
+    tcp_port = db.Column(db.Integer, default=502)
+    
+    # USB Configuration
+    usb_vendor_id = db.Column(db.String(10), nullable=True)  # Vendor ID in hex
+    usb_product_id = db.Column(db.String(10), nullable=True)  # Product ID in hex
+    usb_interface = db.Column(db.Integer, default=0)
+    
+    # Modbus Configuration
+    modbus_address = db.Column(db.Integer, default=1)  # Slave address
+    supported_functions = db.Column(db.JSON, nullable=True)  # List of supported function codes
+    register_map = db.Column(db.JSON, nullable=True)  # Register definitions
+    
+    # Runtime Information
+    pid = db.Column(db.Integer, nullable=True)  # Process ID when running
+    start_time = db.Column(db.DateTime, nullable=True)
+    last_activity = db.Column(db.DateTime, nullable=True)
+    error_message = db.Column(db.Text, nullable=True)
+    
+    # Metadata
+    created_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    creator = db.relationship('User', backref='created_simulators')
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'simulator_type': self.simulator_type,
+            'description': self.description,
+            'is_active': self.is_active,
+            'is_running': self.is_running,
+            'connection_config': self.connection_config,
+            'serial_port': self.serial_port,
+            'baud_rate': self.baud_rate,
+            'data_bits': self.data_bits,
+            'parity': self.parity,
+            'stop_bits': self.stop_bits,
+            'ip_address': self.ip_address,
+            'tcp_port': self.tcp_port,
+            'usb_vendor_id': self.usb_vendor_id,
+            'usb_product_id': self.usb_product_id,
+            'usb_interface': self.usb_interface,
+            'modbus_address': self.modbus_address,
+            'supported_functions': self.supported_functions,
+            'register_map': self.register_map,
+            'pid': self.pid,
+            'start_time': self.start_time.isoformat() if self.start_time else None,
+            'last_activity': self.last_activity.isoformat() if self.last_activity else None,
+            'error_message': self.error_message,
+            'created_by': self.created_by,
+            'creator_name': self.creator.username if self.creator else None,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None
+        }
+
+class VirtualPort(db.Model):
+    __tablename__ = 'virtual_ports'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    port_pair = db.Column(db.String(50), nullable=False)  # e.g., "COM10,COM11"
+    description = db.Column(db.Text, nullable=True)
+    is_active = db.Column(db.Boolean, default=True)
+    is_created = db.Column(db.Boolean, default=False)  # Whether virtual port pair exists
+    
+    # Configuration
+    baud_rate = db.Column(db.Integer, default=9600)
+    buffer_size = db.Column(db.Integer, default=4096)
+    
+    # Usage tracking
+    simulator_id = db.Column(db.Integer, db.ForeignKey('simulators.id'), nullable=True)
+    assigned_to = db.Column(db.String(100), nullable=True)  # What is using this port
+    
+    # Metadata
+    created_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    simulator = db.relationship('Simulator', backref='virtual_ports')
+    creator = db.relationship('User', backref='created_virtual_ports')
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'port_pair': self.port_pair,
+            'description': self.description,
+            'is_active': self.is_active,
+            'is_created': self.is_created,
+            'baud_rate': self.baud_rate,
+            'buffer_size': self.buffer_size,
+            'simulator_id': self.simulator_id,
+            'simulator_name': self.simulator.name if self.simulator else None,
+            'assigned_to': self.assigned_to,
+            'created_by': self.created_by,
+            'creator_name': self.creator.username if self.creator else None,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None
+        }
+
+class SimulatorLog(db.Model):
+    __tablename__ = 'simulator_logs'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    simulator_id = db.Column(db.Integer, db.ForeignKey('simulators.id'), nullable=False)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    log_level = db.Column(db.String(10), nullable=False, default='INFO')  # DEBUG, INFO, WARNING, ERROR
+    message = db.Column(db.Text, nullable=False)
+    data = db.Column(db.JSON, nullable=True)  # Additional structured data
+    
+    # Communication tracking
+    direction = db.Column(db.String(10), nullable=True)  # 'IN', 'OUT' for communication logs
+    function_code = db.Column(db.Integer, nullable=True)  # Modbus function code
+    register_address = db.Column(db.Integer, nullable=True)
+    register_count = db.Column(db.Integer, nullable=True)
+    response_time = db.Column(db.Float, nullable=True)  # milliseconds
+    
+    # Relationships
+    simulator = db.relationship('Simulator', backref='logs')
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'simulator_id': self.simulator_id,
+            'simulator_name': self.simulator.name if self.simulator else None,
+            'timestamp': self.timestamp.isoformat() if self.timestamp else None,
+            'log_level': self.log_level,
+            'message': self.message,
+            'data': self.data,
+            'direction': self.direction,
+            'function_code': self.function_code,
+            'register_address': self.register_address,
+            'register_count': self.register_count,
+            'response_time': self.response_time
+        }
+
 # Permission decorator
 def require_permission(permission_name):
     """Decorator to require specific permission for route access"""
@@ -734,7 +897,10 @@ def edit_test_scenario(scenario_id):
         
         return redirect(url_for('test_scenarios'))
     
-    return render_template('edit-test-scenario.html', scenario=scenario)
+    # İlgili model sayısını hesapla
+    related_models_count = len(scenario.pcba_models) if scenario.pcba_models else 0
+    
+    return render_template('edit-test-scenario-simple.html', scenario=scenario, related_models_count=related_models_count)
 
 @app.route('/delete-test-scenario/<int:scenario_id>', methods=['POST'])
 @login_required
@@ -752,6 +918,23 @@ def delete_test_scenario(scenario_id):
     db.session.commit()
     
     return jsonify({'success': True, 'message': 'Test senaryosu başarıyla silindi'})
+
+@app.route('/api/test-scenario-detail/<int:scenario_id>')
+@login_required
+def get_test_scenario_detail(scenario_id):
+    """Test senaryosu detaylarını JSON olarak döndürür"""
+    scenario = TestScenario.query.get_or_404(scenario_id)
+    
+    return jsonify({
+        'id': scenario.id,
+        'scenario_name': scenario.scenario_name,
+        'description': scenario.description,
+        'test_parameters': scenario.test_parameters,
+        'is_active': scenario.is_active,
+        'created_at': scenario.created_at.strftime('%d.%m.%Y %H:%M'),
+        'model_count': len(scenario.pcba_models),
+        'pcba_models': [{'model_name': model.model_name} for model in scenario.pcba_models]
+    })
 
 # PCBA Model Management Routes
 @app.route('/pcba-models')
@@ -860,21 +1043,32 @@ def add_user():
         email = request.form['email']
         password = request.form['password']
         role = request.form['role']
+        role_id = request.form.get('role_id')  # Get role_id from form
         
         # Kullanıcı adı benzersizlik kontrolü
         if User.query.filter_by(username=username).first():
-            return render_template('add-user.html', error='Bu kullanıcı adı zaten kullanılıyor')
+            roles = Role.query.filter_by(is_active=True).all()
+            return render_template('add-user.html', roles=roles, error='Bu kullanıcı adı zaten kullanılıyor')
         
         # E-posta benzersizlik kontrolü
         if User.query.filter_by(email=email).first():
-            return render_template('add-user.html', error='Bu e-posta adresi zaten kullanılıyor')
+            roles = Role.query.filter_by(is_active=True).all()
+            return render_template('add-user.html', roles=roles, error='Bu e-posta adresi zaten kullanılıyor')
         
         # Yeni kullanıcı oluştur
         new_user = User(
             username=username,
             email=email,
-            role=role
+            role=role  # Keep legacy role for backward compatibility
         )
+        
+        # Set role_id if provided
+        if role_id:
+            selected_role = Role.query.get(role_id)
+            if selected_role:
+                new_user.role_id = selected_role.id
+                new_user.role = selected_role.name  # Update legacy field to match
+        
         new_user.set_password(password)
         
         db.session.add(new_user)
@@ -882,7 +1076,9 @@ def add_user():
         
         return redirect(url_for('users'))
     
-    return render_template('add-user.html')
+    # Fetch all active roles for the dropdown
+    roles = Role.query.filter_by(is_active=True).all()
+    return render_template('add-user.html', roles=roles)
 
 @app.route('/edit-user/<int:user_id>', methods=['GET', 'POST'])
 @require_permission('manage_users')
@@ -893,15 +1089,26 @@ def edit_user(user_id):
     if request.method == 'POST':
         email = request.form['email']
         role = request.form['role']
+        role_id = request.form.get('role_id')  # Get role_id from form
         is_active = 'is_active' in request.form
         
         # E-posta benzersizlik kontrolü (kendisi hariç)
         existing_user = User.query.filter(User.email == email, User.id != user_id).first()
         if existing_user:
-            return render_template('edit-user.html', user=user, error='Bu e-posta adresi zaten kullanılıyor')
+            # Fetch roles for template in case of error
+            roles = Role.query.filter_by(is_active=True).all()
+            return render_template('edit-user.html', user=user, roles=roles, error='Bu e-posta adresi zaten kullanılıyor')
         
         user.email = email
-        user.role = role
+        user.role = role  # Keep legacy role field for backward compatibility
+        
+        # Set role_id if provided
+        if role_id:
+            selected_role = Role.query.get(role_id)
+            if selected_role:
+                user.role_id = selected_role.id
+                user.role = selected_role.name  # Update legacy field to match
+        
         user.is_active = is_active
         
         # Şifre değiştirilmek isteniyorsa
@@ -912,7 +1119,9 @@ def edit_user(user_id):
         
         return redirect(url_for('users'))
     
-    return render_template('edit-user.html', user=user)
+    # Fetch all active roles for the dropdown
+    roles = Role.query.filter_by(is_active=True).all()
+    return render_template('edit-user.html', user=user, roles=roles)
 
 @app.route('/delete-user/<int:user_id>', methods=['POST'])
 @require_permission('manage_users')
@@ -5189,6 +5398,754 @@ class TestScheduler:
 test_executor_service = TestExecutorService()
 test_scheduler = TestScheduler()
 
+# Hardware integration - Test Manager instance
+try:
+    from test_manager import TestManager
+    hardware_test_manager = TestManager()
+    print("✓ Hardware Test Manager initialized")
+except ImportError as e:
+    hardware_test_manager = None
+    print(f"⚠ Hardware Test Manager not available: {e}")
+
+# ================================
+# HARDWARE INTEGRATION API ENDPOINTS
+# ================================
+
+@app.route('/api/hardware/status', methods=['GET'])
+@login_required
+def api_hardware_status():
+    """Get status of all connected hardware"""
+    if not hardware_test_manager:
+        return jsonify({'error': 'Hardware manager not available'}), 503
+    
+    try:
+        connected_equipment = hardware_test_manager.get_connected_equipment()
+        health_check = hardware_test_manager.perform_equipment_health_check()
+        
+        return jsonify({
+            'success': True,
+            'connected_equipment': connected_equipment,
+            'health_check': health_check,
+            'timestamp': datetime.utcnow().isoformat()
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/hardware/setup', methods=['POST'])
+@login_required
+@require_permission('manage_hardware')
+def api_hardware_setup():
+    """Setup hardware equipment from configuration"""
+    if not hardware_test_manager:
+        return jsonify({'error': 'Hardware manager not available'}), 503
+    
+    try:
+        config_data = request.get_json()
+        if not config_data or 'equipment_configs' not in config_data:
+            return jsonify({'error': 'Equipment configurations required'}), 400
+        
+        # Setup hardware
+        setup_results = hardware_test_manager.setup_hardware(config_data['equipment_configs'])
+        
+        # Connect to all hardware
+        connection_results = hardware_test_manager.connect_all_hardware()
+        
+        return jsonify({
+            'success': True,
+            'setup_results': setup_results,
+            'connection_results': connection_results,
+            'timestamp': datetime.utcnow().isoformat()
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/hardware/connect', methods=['POST'])
+@login_required
+@require_permission('manage_hardware')
+def api_hardware_connect():
+    """Connect to all configured hardware"""
+    if not hardware_test_manager:
+        return jsonify({'error': 'Hardware manager not available'}), 503
+    
+    try:
+        results = hardware_test_manager.connect_all_hardware()
+        return jsonify({
+            'success': True,
+            'connection_results': results,
+            'timestamp': datetime.utcnow().isoformat()
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/hardware/disconnect', methods=['POST'])
+@login_required
+@require_permission('manage_hardware')
+def api_hardware_disconnect():
+    """Disconnect from all hardware"""
+    if not hardware_test_manager:
+        return jsonify({'error': 'Hardware manager not available'}), 503
+    
+    try:
+        results = hardware_test_manager.disconnect_all_hardware()
+        return jsonify({
+            'success': True,
+            'disconnection_results': results,
+            'timestamp': datetime.utcnow().isoformat()
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/hardware/test/voltage', methods=['POST'])
+@login_required
+@require_permission('run_hardware_tests')
+def api_hardware_test_voltage():
+    """Run voltage test sequence"""
+    if not hardware_test_manager:
+        return jsonify({'error': 'Hardware manager not available'}), 503
+    
+    try:
+        data = request.get_json()
+        voltage_points = data.get('voltage_points', [])
+        test_name = data.get('test_name', 'Voltage Test')
+        
+        if not voltage_points:
+            return jsonify({'error': 'Voltage points required'}), 400
+        
+        # Create voltage test sequence
+        sequence = hardware_test_manager.create_voltage_test_sequence(test_name, voltage_points)
+        
+        # Generate unique test ID
+        test_id = f"hw_voltage_{int(datetime.utcnow().timestamp())}"
+        
+        # Start test execution
+        success = hardware_test_manager.execute_test(sequence, test_id)
+        
+        if success:
+            return jsonify({
+                'success': True,
+                'test_id': test_id,
+                'message': 'Voltage test started successfully',
+                'timestamp': datetime.utcnow().isoformat()
+            })
+        else:
+            return jsonify({'error': 'Failed to start voltage test'}), 500
+            
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/hardware/test/current', methods=['POST'])
+@login_required
+@require_permission('run_hardware_tests')
+def api_hardware_test_current():
+    """Run current test sequence"""
+    if not hardware_test_manager:
+        return jsonify({'error': 'Hardware manager not available'}), 503
+    
+    try:
+        data = request.get_json()
+        current_points = data.get('current_points', [])
+        test_name = data.get('test_name', 'Current Test')
+        
+        if not current_points:
+            return jsonify({'error': 'Current points required'}), 400
+        
+        # Create current test sequence
+        sequence = hardware_test_manager.create_current_test_sequence(test_name, current_points)
+        
+        # Generate unique test ID
+        test_id = f"hw_current_{int(datetime.utcnow().timestamp())}"
+        
+        # Start test execution
+        success = hardware_test_manager.execute_test(sequence, test_id)
+        
+        if success:
+            return jsonify({
+                'success': True,
+                'test_id': test_id,
+                'message': 'Current test started successfully',
+                'timestamp': datetime.utcnow().isoformat()
+            })
+        else:
+            return jsonify({'error': 'Failed to start current test'}), 500
+            
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/hardware/test/status/<test_id>', methods=['GET'])
+@login_required
+def api_hardware_test_status(test_id):
+    """Get status of hardware test"""
+    if not hardware_test_manager:
+        return jsonify({'error': 'Hardware manager not available'}), 503
+    
+    try:
+        status = hardware_test_manager.get_test_status(test_id)
+        
+        if status:
+            return jsonify({
+                'success': True,
+                'test_status': status,
+                'timestamp': datetime.utcnow().isoformat()
+            })
+        else:
+            return jsonify({'error': 'Test not found'}), 404
+            
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/hardware/test/stop/<test_id>', methods=['POST'])
+@login_required
+@require_permission('run_hardware_tests')
+def api_hardware_test_stop(test_id):
+    """Stop hardware test"""
+    if not hardware_test_manager:
+        return jsonify({'error': 'Hardware manager not available'}), 503
+    
+    try:
+        success = hardware_test_manager.stop_test(test_id)
+        
+        if success:
+            return jsonify({
+                'success': True,
+                'message': 'Test stop requested',
+                'timestamp': datetime.utcnow().isoformat()
+            })
+        else:
+            return jsonify({'error': 'Test not found or already stopped'}), 404
+            
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# ================================
+# HARDWARE MANAGEMENT UI PAGES
+# ================================
+
+@app.route('/hardware-setup')
+@login_required
+@require_permission('manage_hardware')
+def hardware_setup():
+    """Hardware setup and configuration page"""
+    return render_template('hardware-setup.html')
+
+@app.route('/hardware-testing')
+@login_required
+@require_permission('run_hardware_tests')
+def hardware_testing():
+    """Hardware testing interface page"""
+    return render_template('hardware-testing.html')
+
+# ============================================================================
+# SIMULATION MANAGEMENT ROUTES (Developer Only)
+# ============================================================================
+
+@app.route('/simulator-management')
+@login_required
+@require_permission('manage_simulators')
+def simulator_management():
+    """Main simulator management page - Developer only"""
+    try:
+        # Get all simulators
+        simulators = Simulator.query.filter_by(is_active=True).all()
+        
+        # Get statistics
+        total_simulators = len(simulators)
+        running_simulators = len([s for s in simulators if s.is_running])
+        serial_simulators = len([s for s in simulators if s.simulator_type == 'SERIAL'])
+        tcp_simulators = len([s for s in simulators if s.simulator_type == 'TCP'])
+        usb_simulators = len([s for s in simulators if s.simulator_type == 'USB'])
+        
+        # Get virtual ports
+        virtual_ports = VirtualPort.query.filter_by(is_active=True).all()
+        active_ports = len([vp for vp in virtual_ports if vp.is_created])
+        
+        stats = {
+            'total_simulators': total_simulators,
+            'running_simulators': running_simulators,
+            'serial_simulators': serial_simulators,
+            'tcp_simulators': tcp_simulators,
+            'usb_simulators': usb_simulators,
+            'virtual_ports': len(virtual_ports),
+            'active_ports': active_ports
+        }
+        
+        return render_template('simulator-management.html', 
+                             simulators=simulators, 
+                             virtual_ports=virtual_ports,
+                             stats=stats)
+                             
+    except Exception as e:
+        flash(f'Simulator listesi alınırken hata oluştu: {str(e)}', 'error')
+        return redirect(url_for('dashboard'))
+
+@app.route('/add-simulator', methods=['GET', 'POST'])
+@login_required
+@require_permission('create_simulators')
+def add_simulator():
+    """Add new simulator - Developer only"""
+    if request.method == 'POST':
+        try:
+            name = request.form['name']
+            simulator_type = request.form['simulator_type']
+            description = request.form.get('description', '')
+            
+            # Create new simulator
+            simulator = Simulator(
+                name=name,
+                simulator_type=simulator_type,
+                description=description,
+                created_by=current_user.id
+            )
+            
+            # Type-specific configuration
+            if simulator_type == 'SERIAL':
+                simulator.serial_port = request.form.get('serial_port')
+                simulator.baud_rate = int(request.form.get('baud_rate', 9600))
+                simulator.data_bits = int(request.form.get('data_bits', 8))
+                simulator.parity = request.form.get('parity', 'NONE')
+                simulator.stop_bits = int(request.form.get('stop_bits', 1))
+                simulator.modbus_address = int(request.form.get('modbus_address', 1))
+                
+            elif simulator_type == 'TCP':
+                simulator.ip_address = request.form.get('ip_address', '127.0.0.1')
+                simulator.tcp_port = int(request.form.get('tcp_port', 502))
+                simulator.modbus_address = int(request.form.get('modbus_address', 1))
+                
+            elif simulator_type == 'USB':
+                simulator.usb_vendor_id = request.form.get('usb_vendor_id')
+                simulator.usb_product_id = request.form.get('usb_product_id')
+                simulator.usb_interface = int(request.form.get('usb_interface', 0))
+                simulator.modbus_address = int(request.form.get('modbus_address', 1))
+            
+            # Supported functions and register map
+            supported_functions = request.form.getlist('supported_functions')
+            if supported_functions:
+                simulator.supported_functions = [int(f) for f in supported_functions]
+            
+            db.session.add(simulator)
+            db.session.commit()
+            
+            flash(f'Simulator "{name}" başarıyla oluşturuldu.', 'success')
+            return redirect(url_for('simulator_management'))
+            
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Simulator oluşturulurken hata oluştu: {str(e)}', 'error')
+    
+    # Get available virtual ports for Serial simulators
+    virtual_ports = VirtualPort.query.filter_by(is_active=True, simulator_id=None).all()
+    
+    return render_template('add-simulator.html', virtual_ports=virtual_ports)
+
+@app.route('/edit-simulator/<int:simulator_id>', methods=['GET', 'POST'])
+@login_required
+@require_permission('manage_simulators')
+def edit_simulator(simulator_id):
+    """Edit existing simulator - Developer only"""
+    simulator = Simulator.query.get_or_404(simulator_id)
+    
+    if request.method == 'POST':
+        try:
+            simulator.name = request.form['name']
+            simulator.description = request.form.get('description', '')
+            simulator.is_active = 'is_active' in request.form
+            
+            # Type-specific configuration updates
+            if simulator.simulator_type == 'SERIAL':
+                simulator.serial_port = request.form.get('serial_port')
+                simulator.baud_rate = int(request.form.get('baud_rate', 9600))
+                simulator.data_bits = int(request.form.get('data_bits', 8))
+                simulator.parity = request.form.get('parity', 'NONE')
+                simulator.stop_bits = int(request.form.get('stop_bits', 1))
+                simulator.modbus_address = int(request.form.get('modbus_address', 1))
+                
+            elif simulator.simulator_type == 'TCP':
+                simulator.ip_address = request.form.get('ip_address', '127.0.0.1')
+                simulator.tcp_port = int(request.form.get('tcp_port', 502))
+                simulator.modbus_address = int(request.form.get('modbus_address', 1))
+                
+            elif simulator.simulator_type == 'USB':
+                simulator.usb_vendor_id = request.form.get('usb_vendor_id')
+                simulator.usb_product_id = request.form.get('usb_product_id')
+                simulator.usb_interface = int(request.form.get('usb_interface', 0))
+                simulator.modbus_address = int(request.form.get('modbus_address', 1))
+            
+            # Update supported functions
+            supported_functions = request.form.getlist('supported_functions')
+            if supported_functions:
+                simulator.supported_functions = [int(f) for f in supported_functions]
+            
+            simulator.updated_at = datetime.utcnow()
+            db.session.commit()
+            
+            flash(f'Simulator "{simulator.name}" başarıyla güncellendi.', 'success')
+            return redirect(url_for('simulator_management'))
+            
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Simulator güncellenirken hata oluştu: {str(e)}', 'error')
+    
+    # Get available virtual ports
+    virtual_ports = VirtualPort.query.filter(
+        db.or_(VirtualPort.simulator_id == None, VirtualPort.simulator_id == simulator_id)
+    ).filter_by(is_active=True).all()
+    
+    return render_template('edit-simulator.html', simulator=simulator, virtual_ports=virtual_ports)
+
+@app.route('/delete-simulator/<int:simulator_id>', methods=['POST'])
+@login_required
+@require_permission('manage_simulators')
+def delete_simulator(simulator_id):
+    """Delete simulator - Developer only"""
+    try:
+        simulator = Simulator.query.get_or_404(simulator_id)
+        
+        # Stop simulator if running
+        if simulator.is_running:
+            stop_simulator_process(simulator)
+        
+        # Mark as inactive instead of deleting
+        simulator.is_active = False
+        simulator.updated_at = datetime.utcnow()
+        
+        # Free up any assigned virtual ports
+        VirtualPort.query.filter_by(simulator_id=simulator_id).update({'simulator_id': None, 'assigned_to': None})
+        
+        db.session.commit()
+        
+        return jsonify({'success': True, 'message': f'Simulator "{simulator.name}" başarıyla silindi.'})
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': f'Simulator silinirken hata oluştu: {str(e)}'})
+
+# Virtual Port Management
+@app.route('/add-virtual-port', methods=['GET', 'POST'])
+@login_required
+@require_permission('create_virtual_ports')
+def add_virtual_port():
+    """Add virtual port pair - Developer only"""
+    if request.method == 'POST':
+        try:
+            name = request.form['name']
+            port_pair = request.form['port_pair']  # e.g., "COM10,COM11"
+            description = request.form.get('description', '')
+            baud_rate = int(request.form.get('baud_rate', 9600))
+            buffer_size = int(request.form.get('buffer_size', 4096))
+            
+            # Validate port pair format
+            if ',' not in port_pair or len(port_pair.split(',')) != 2:
+                flash('Port çifti "COM10,COM11" formatında olmalıdır.', 'error')
+                return render_template('add-virtual-port.html')
+            
+            # Check if port pair already exists
+            existing_port = VirtualPort.query.filter_by(port_pair=port_pair).first()
+            if existing_port:
+                flash('Bu port çifti zaten tanımlanmış.', 'error')
+                return render_template('add-virtual-port.html')
+            
+            virtual_port = VirtualPort(
+                name=name,
+                port_pair=port_pair,
+                description=description,
+                baud_rate=baud_rate,
+                buffer_size=buffer_size,
+                created_by=current_user.id
+            )
+            
+            db.session.add(virtual_port)
+            db.session.commit()
+            
+            flash(f'Virtual port "{name}" başarıyla oluşturuldu.', 'success')
+            return redirect(url_for('simulator_management'))
+            
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Virtual port oluşturulurken hata oluştu: {str(e)}', 'error')
+    
+    return render_template('add-virtual-port.html')
+
+# Simulator Control API Endpoints
+@app.route('/api/simulator/<int:simulator_id>/start', methods=['POST'])
+@login_required
+@require_permission('control_simulators')
+def api_start_simulator(simulator_id):
+    """Start simulator process - Developer only"""
+    try:
+        simulator = Simulator.query.get_or_404(simulator_id)
+        
+        if simulator.is_running:
+            return jsonify({'success': False, 'message': 'Simulator zaten çalışıyor.'})
+        
+        # Start simulator process
+        success, message = start_simulator_process(simulator)
+        
+        if success:
+            simulator.is_running = True
+            simulator.start_time = datetime.utcnow()
+            simulator.error_message = None
+            db.session.commit()
+            
+            # Log the start event
+            log = SimulatorLog(
+                simulator_id=simulator_id,
+                log_level='INFO',
+                message='Simulator started successfully'
+            )
+            db.session.add(log)
+            db.session.commit()
+            
+            return jsonify({'success': True, 'message': message})
+        else:
+            simulator.error_message = message
+            db.session.commit()
+            return jsonify({'success': False, 'message': message})
+            
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Simulator başlatılırken hata oluştu: {str(e)}'})
+
+@app.route('/api/simulator/<int:simulator_id>/stop', methods=['POST'])
+@login_required
+@require_permission('control_simulators')
+def api_stop_simulator(simulator_id):
+    """Stop simulator process - Developer only"""
+    try:
+        simulator = Simulator.query.get_or_404(simulator_id)
+        
+        if not simulator.is_running:
+            return jsonify({'success': False, 'message': 'Simulator zaten durmuş.'})
+        
+        # Stop simulator process
+        success, message = stop_simulator_process(simulator)
+        
+        if success:
+            simulator.is_running = False
+            simulator.pid = None
+            simulator.start_time = None
+            simulator.error_message = None
+            db.session.commit()
+            
+            # Log the stop event
+            log = SimulatorLog(
+                simulator_id=simulator_id,
+                log_level='INFO',
+                message='Simulator stopped successfully'
+            )
+            db.session.add(log)
+            db.session.commit()
+            
+            return jsonify({'success': True, 'message': message})
+        else:
+            return jsonify({'success': False, 'message': message})
+            
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Simulator durdurulurken hata oluştu: {str(e)}'})
+
+@app.route('/api/simulator/<int:simulator_id>/status', methods=['GET'])
+@login_required
+@require_permission('debug_simulators')
+def api_simulator_status(simulator_id):
+    """Get simulator status - Developer only"""
+    try:
+        simulator = Simulator.query.get_or_404(simulator_id)
+        
+        # Get recent logs
+        recent_logs = SimulatorLog.query.filter_by(simulator_id=simulator_id)\
+            .order_by(SimulatorLog.timestamp.desc()).limit(10).all()
+        
+        status = simulator.to_dict()
+        status['recent_logs'] = [log.to_dict() for log in recent_logs]
+        
+        return jsonify({'success': True, 'status': status})
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Simulator durumu alınırken hata oluştu: {str(e)}'})
+
+@app.route('/api/virtual-port/<int:port_id>/create', methods=['POST'])
+@login_required
+@require_permission('manage_virtual_ports')
+def api_create_virtual_port(port_id):
+    """Create virtual port pair - Developer only"""
+    try:
+        virtual_port = VirtualPort.query.get_or_404(port_id)
+        
+        if virtual_port.is_created:
+            return jsonify({'success': False, 'message': 'Virtual port çifti zaten oluşturulmuş.'})
+        
+        # Create virtual port pair using external tool or library
+        success, message = create_virtual_port_pair(virtual_port.port_pair)
+        
+        if success:
+            virtual_port.is_created = True
+            virtual_port.updated_at = datetime.utcnow()
+            db.session.commit()
+            
+            return jsonify({'success': True, 'message': message})
+        else:
+            return jsonify({'success': False, 'message': message})
+            
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Virtual port oluşturulurken hata oluştu: {str(e)}'})
+
+@app.route('/api/virtual-port/<int:port_id>/delete', methods=['POST'])
+@login_required
+@require_permission('manage_virtual_ports')
+def api_delete_virtual_port(port_id):
+    """Delete virtual port pair - Developer only"""
+    try:
+        virtual_port = VirtualPort.query.get_or_404(port_id)
+        
+        # Stop any simulator using this port
+        if virtual_port.simulator and virtual_port.simulator.is_running:
+            stop_simulator_process(virtual_port.simulator)
+            virtual_port.simulator.is_running = False
+            virtual_port.simulator.pid = None
+        
+        # Delete virtual port pair
+        if virtual_port.is_created:
+            success, message = delete_virtual_port_pair(virtual_port.port_pair)
+            if not success:
+                return jsonify({'success': False, 'message': message})
+        
+        # Mark as inactive
+        virtual_port.is_active = False
+        virtual_port.updated_at = datetime.utcnow()
+        db.session.commit()
+        
+        return jsonify({'success': True, 'message': f'Virtual port "{virtual_port.name}" başarıyla silindi.'})
+        
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Virtual port silinirken hata oluştu: {str(e)}'})
+
+# ============================================================================
+# SIMULATOR PROCESS MANAGEMENT FUNCTIONS
+# ============================================================================
+
+def start_simulator_process(simulator):
+    """Start a simulator process based on its configuration"""
+    try:
+        import subprocess
+        import os
+        
+        # Determine the simulator script based on type
+        script_path = None
+        args = []
+        
+        if simulator.simulator_type == 'SERIAL':
+            script_path = 'simulators/modbus_serial_simulator.py'
+            args = [
+                '--port', simulator.serial_port or 'COM1',
+                '--baud', str(simulator.baud_rate or 9600),
+                '--address', str(simulator.modbus_address or 1),
+                '--name', simulator.name
+            ]
+            
+        elif simulator.simulator_type == 'TCP':
+            script_path = 'simulators/modbus_tcp_simulator.py'
+            args = [
+                '--host', simulator.ip_address or '127.0.0.1',
+                '--port', str(simulator.tcp_port or 502),
+                '--address', str(simulator.modbus_address or 1),
+                '--name', simulator.name
+            ]
+            
+        elif simulator.simulator_type == 'USB':
+            script_path = 'simulators/modbus_usb_simulator.py'
+            args = [
+                '--vendor-id', simulator.usb_vendor_id or '0x1234',
+                '--product-id', simulator.usb_product_id or '0x5678',
+                '--interface', str(simulator.usb_interface or 0),
+                '--address', str(simulator.modbus_address or 1),
+                '--name', simulator.name
+            ]
+        
+        if not script_path or not os.path.exists(script_path):
+            return False, f'Simulator script not found: {script_path}'
+        
+        # Start the process
+        cmd = ['python', script_path] + args
+        process = subprocess.Popen(cmd, 
+                                 stdout=subprocess.PIPE, 
+                                 stderr=subprocess.PIPE,
+                                 cwd=os.getcwd())
+        
+        # Store PID
+        simulator.pid = process.pid
+        
+        return True, f'Simulator başarıyla başlatıldı (PID: {process.pid})'
+        
+    except Exception as e:
+        return False, f'Simulator başlatılamadı: {str(e)}'
+
+def stop_simulator_process(simulator):
+    """Stop a running simulator process"""
+    try:
+        if not simulator.pid:
+            return False, 'Simulator PID bulunamadı'
+        
+        import psutil
+        
+        # Try to find and terminate the process
+        try:
+            process = psutil.Process(simulator.pid)
+            process.terminate()
+            
+            # Wait for graceful shutdown
+            process.wait(timeout=5)
+            
+            return True, 'Simulator başarıyla durduruldu'
+            
+        except psutil.NoSuchProcess:
+            return True, 'Simulator zaten durdurulmuş'
+        except psutil.TimeoutExpired:
+            # Force kill if graceful shutdown failed
+            process.kill()
+            return True, 'Simulator zorla durduruldu'
+            
+    except Exception as e:
+        return False, f'Simulator durdurulamadı: {str(e)}'
+
+def create_virtual_port_pair(port_pair):
+    """Create a virtual serial port pair"""
+    try:
+        # This would typically use a tool like com0com on Windows
+        # or socat on Linux to create virtual serial port pairs
+        
+        ports = port_pair.split(',')
+        if len(ports) != 2:
+            return False, 'Geçersiz port çifti formatı'
+        
+        port1, port2 = [p.strip() for p in ports]
+        
+        # Placeholder implementation - would need actual virtual port creation
+        # On Windows: use com0com or similar
+        # On Linux: use socat or pts
+        
+        import platform
+        if platform.system() == 'Windows':
+            # Windows virtual port creation logic
+            return True, f'Virtual port çifti oluşturuldu: {port1} <-> {port2}'
+        else:
+            # Linux virtual port creation logic
+            return True, f'Virtual port çifti oluşturuldu: {port1} <-> {port2}'
+            
+    except Exception as e:
+        return False, f'Virtual port oluşturulamadı: {str(e)}'
+
+def delete_virtual_port_pair(port_pair):
+    """Delete a virtual serial port pair"""
+    try:
+        ports = port_pair.split(',')
+        if len(ports) != 2:
+            return False, 'Geçersiz port çifti formatı'
+        
+        port1, port2 = [p.strip() for p in ports]
+        
+        # Placeholder implementation - would need actual virtual port deletion
+        return True, f'Virtual port çifti silindi: {port1} <-> {port2}'
+        
+    except Exception as e:
+        return False, f'Virtual port silinemedi: {str(e)}'
+
 if __name__ == '__main__':
     init_db()
     print("Flask uygulaması başlatılıyor...")
@@ -5204,7 +6161,7 @@ if __name__ == '__main__':
     # Debug: Route'ları listele
     print("Yüklenen route'lar:")
     for rule in app.url_map.iter_rules():
-        if 'communication' in rule.rule:
+        if 'simulator' in rule.rule or 'communication' in rule.rule:
             print(f"  {rule.rule} -> {rule.endpoint}")
     
     port = int(os.environ.get('FLASK_PORT', '9002'))
